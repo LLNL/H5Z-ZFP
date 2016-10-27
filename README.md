@@ -5,6 +5,7 @@ For information about ZFP compression and the BSD-Licensed ZFP
 library, see...
 
    http://computation.llnl.gov/projects/floating-point-compression
+
    https://github.com/LLNL/zfp
 
 For information about HDF5 filter plugins, see...
