@@ -1,0 +1,147 @@
+        This is H5Z-ZFP, a highly flexible floating point
+   compression plugin for the HDF5 library using ZFP compression.
+
+For information about ZFP compression and the BSD-Licensed ZFP
+library, see...
+
+   http://computation.llnl.gov/projects/floating-point-compression
+   https://github.com/LLNL/zfp
+
+For information about HDF5 filter plugins, see...
+
+    https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
+
+This H5Z-ZFP plugin was originally written for ZFP version 0.5.0.
+
+The version number of this HDF5 plugin is 0.3.0.
+
+The HDF5 filter plugin code here is part of the Silo library. However,
+we have made an effort to also support it as a stand-alone package due
+to the likely broad appeal and utility of the ZFP compression library.
+
+Note  that  to use  this  HDF5  plugin with  the  ZFP  library, it  is
+necessary to ensure you have compiled the ZFP library with the CPPFLAG
+-DBIT_STREAM_WORD_TYPE=uint8. If you attempt to use this filter with a
+ZFP  library compiled  differently from  this, the  filter's can_apply
+method will always return false. This will result in silently ignoring
+an HDF5 client's  request to compress  data with  ZFP. Also,  see note
+about endian-swapping issues below.
+
+There are potentially other implementations of HDF5 compression filter
+plugins  based on  the ZFP  compression library.  Because there  are a
+variety  of ways ZFP  compression metadata  can be  handled, different
+implementations, if they exist, are in all likelihood incompatible.
+For reference, this plugin uses the *registered* HDF5 filter ID...
+
+    #define H5Z_FILTER_ZFP 32013
+
+For efficiency's  sake, this plugin *does*not* embed  any ZFP metadata
+*within* the  compressed stream  of any HDF5  chunk. All  relevant ZFP
+control  parameters are encoded  once, for all chunks, in cd_values as
+part  of the  HDF5 dataset   header.  The  same  set   of   parameters
+are  used   to compress/decompress *all* chunks of a given dataset.
+
+This  ZFP filter  will work  on any  dimension dataset  of  integer or
+floating  point   data  of  either  4  or   8  bytes  (floats/doubles,
+int32_t/int64_t). Although the  ZFP library works for only  1, 2 and 3
+dimensional data, as  long as the dataset chunking  is such that there
+are  1-3 non-unity  dimensions, this  filter will  work. The filter is
+also designed to integrate well with HDF5's error reporting.
+
+Presently, the main  interface for HDF5 clients to  control the filter
+is via  HDF5's "cd_values" array in  the call to  H5Pset_filter. We do
+provide some convenience macros to set up the cd_values array for this
+call via...
+
+    * H5Pset_zfp_rate_cdata()
+    * H5Pset_zfp_precision_cdata()
+    * H5Pset_zfp_accuracy_cdata()
+    * H5Pset_zfp_expert_cdata()
+
+defined in the H5Zzfp.h header  file. You can find examples of writing
+HDF5   data    using   these   macros   and   the    ZFP   filter   in
+test_write.c. However, these macros are only a convenience. You do not
+*need* the  H5Zzfp.h header file if  you want to avoid  using it. But,
+you are then responsible for  setting up the cd_values array correctly
+for the filter. For reference, the cd_values array for this ZFP filter
+is defined like so...
+
+            |                     cd_values index
+------------|--------------------------------------------------------
+ZFP mode    |     0       1        2         3         4         5    
+------------|--------------------------------------------------------
+rate:       |     1    unused    rateA     rateB     unused    unused
+precision:  |     2    unused    prec      unused    unused    unused
+accuracy:   |     3    unused    accA      accB      unused    unused
+expert:     |     4    unused    minbits   maxbits   maxprec   minexp
+------------|--------------------------------------------------------
+                     A/B are high/low 32-bit words of a double.
+
+Note that  the cd_values  used in the  interface to  H5Pset_filter are
+*not*the*same* cd_values ultimately stored  to the HDF5 dataset header
+for a compressed dataset. The  values are transformed in the set_local
+method to use ZFP's internal  routines for 'meta' and 'mode' data. So,
+don't make the mistake of examining  the values you find in a file and
+think you can use those same  values, for example, in an invokation of
+h5repack. You can  use the test_write example to  generate a cd_values
+array for h5repack using a command like
+
+    test_write zfpmode=2 prec=11 --help
+
+This  will cause  test_write  to print  the  cd_values to  be used  in
+H5Pset_filter call and then exit.
+
+The test_write.c example writes  both a compressed and UNcompressed 1D
+array of samples of a single  cycle of a sinuoisal curve with optional
+random noise. The test_read.c example  is a simple test to re-read the
+HDF5 data and confirm the compressed data behaves as expected relative
+to the uncompressed data. The command
+
+    test_write --help
+
+prints  a help  message  describing all  command-line arguments.  They
+allow you to  control size of dataset, amount  of noise, HDF5 chunking
+and ZFP filter mode and parameters. For example, the command
+
+    test_write zfp_mode=3 acc=0.001 noise=0.1 amp=1 npoints=5000
+
+will generate  1D array  of 5000 points  of a single  sinuoisdal cycle
+with amplitude  1 and random noise  +-0.05 and then  compress it using
+ZFP's accuracy mode with accuracy tolerance of 0.001.
+
+There  are a  number  of tests  performed  in the  Makefile for  rate,
+precision, accuracy  and expert mode of  the filter. As  a final test,
+the filter  is used  in an h5repack  scenario where a  file containing
+integer and floating point data of 1,2,3 and 4 dimensions is re-packed
+using an accuracy  mode with tolerance 0.001. This  should result in >
+2:1  compression.  However,  this  h5repack test  fails  with  current
+versions of  HDF5 due  to a bug  in h5repack.  A patch is  required to
+h5repack_parse.c. That patch is included  here if you wish to apply it
+and re-build the HDF5 repack tool you are using.
+
+The Makefile uses  GNU Make syntax and is designed to  work on OSX and
+Linux. The command,
+
+    make CC=<C-compiler> HDF5_HOME=<hdf5-dir> ZFP_HOME=<zfp-dir> all"
+
+where hdf5-dir is  a dir containing HDF5 include,  lib and bin subdirs
+and zfp-dir is a dir containing  inc and lib subdirs, should build and
+test everything. The command 'make help' will print useful information
+about various make targets and variables.
+
+The filter has been tested on gcc, clang, xlc, icc and pgcc  compilers
+and checked with valgrind.
+
+When  reading  ZFP compressed  data  on  a  machine with  a  different
+endian-ness    than   the   writer,    there   is    an   unnavoidable
+inefficiency. ZFP  writes an endian-independent format so upon reading
+it  back,  it  produces  the  correct endian-ness result regardless of
+reader  and  writer  endian-ness  incompatability.  However,  the HDF5
+library is expecting to read  from the file (even if through a filter)
+the  endian-ness  of  the  writer  and  expects to byte-swap it before
+returning  to the caller. So, in the H5Z-ZFP plugin, we wind up having
+to  byte-swap  a result read in a cross-endian context. That way, when
+HDF5  gets it,  it will byte-swap  again producing the correct result.
+There is  an endian-ness  test in  the Makefile and two ZFP compressed
+example  datasets for  big-endian  and little-endian machines to test.
+cross-endian reads/writes work correctly.
