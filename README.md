@@ -29,3 +29,6 @@ datasets of 32 and 64 bit  integer data and  single and double precision
 floating point data.  It can be applied to  HDF5 datasets of more than 3
 dimensions as  long as no more than 3  dimensions of the chunking are of
 size greater than 1.
+
+This code has been  tested with gcc, clang,  xlc and icc current versions
+as of October, 2016.
