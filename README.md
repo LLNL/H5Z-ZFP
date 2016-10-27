@@ -26,6 +26,6 @@ compression library.
 This plugin supports all 4 modes of the ZFP compression library, *rate*,
 *accuracy*, *precision* and *expert*. It supports 1, 2 and 3 dimensional
 datasets of 32 and 64 bit  integer data and  single and double precision
-floating point data. It can be applied to HDF5 datasets of more than 3
-dimensions as long as no more than 3 dimensions of the chunking are more
-than 1.
+floating point data.  It can be applied to  HDF5 datasets of more than 3
+dimensions as  long as no more than 3  dimensions of the chunking are of
+size greater than 1.
