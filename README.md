@@ -22,3 +22,10 @@ The  HDF5  filter  plugin  code here is also part of the Silo library.
 However, we have made an  effort to also support  it as a  stand-alone
 package  due  to  the  likely  broad  appeal  and  utility  of the ZFP
 compression library.
+
+This plugin supports all 4 modes of the ZFP compression library, *rate*,
+*accuracy*, *precision* and *expert*. It supports 1, 2 and 3 dimensional
+datasets of 32 and 64 bit  integer data and  single and double precision
+floating point data. It can be applied to HDF5 datasets of more than 3
+dimensions as long as no more than 3 dimensions of the chunking are more
+than 1.
