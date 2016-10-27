@@ -1,5 +1,5 @@
-        This is H5Z-ZFP, a highly flexible floating point
-   compression plugin for the HDF5 library using ZFP compression.
+This is H5Z-ZFP, a highly flexible floating point
+compression plugin for the HDF5 library using ZFP compression.
 
 For information about ZFP compression and the BSD-Licensed ZFP
 library, see...
@@ -9,7 +9,7 @@ library, see...
 
 For information about HDF5 filter plugins, see...
 
-    https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
+   https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
 
 This H5Z-ZFP plugin was originally written for ZFP version 0.5.0.
 
