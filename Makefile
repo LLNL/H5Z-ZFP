@@ -48,6 +48,7 @@ help:
 	@echo "    test-h5repack - run ZFP using HDF5's h5repack (requires patch to h5repack)"
 	@echo "    all - build everything and run all tests"
 	@echo "    clean - clean everything"
+	@echo "    dist - create distribution tarball"
 
 all: check
 
@@ -152,5 +153,15 @@ test-endian:
 check: test_read test-rate test-precision test-accuracy test-endian test-h5repack
 
 clean:
+	@versinfo=$$(grep '#define H5Z_FILTER_ZFP_VERSION_[MP]' H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3); \
+	rm -vf H5Z-ZFP-$$versinfo.tar.gz
 	rm -rf plugin
 	rm -f $(TEST_OBJ) $(PLUGIN_OBJ) test_zfp.h5 mesh_repack.h5 test_write test_read
+
+dist:	clean
+	@versinfo=$$(grep '#define H5Z_FILTER_ZFP_VERSION_[MP]' H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3); \
+	rm -rf H5Z-ZFP-$$versinfo H5Z-ZFP-$$versinfo.tar.gz; \
+	mkdir H5Z-ZFP-$$versinfo; \
+	tar cf - --exclude ".git*" --exclude H5Z-ZFP-$$versinfo . | tar xf - -C H5Z-ZFP-$$versinfo; \
+	tar cvf - H5Z-ZFP-$$versinfo | gzip --best > H5Z-ZFP-$$versinfo.tar.gz; \
+	rm -rf H5Z-ZFP-$$versinfo;
