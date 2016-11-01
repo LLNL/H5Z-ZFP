@@ -5,15 +5,22 @@ ZFP_HOME ?= ../zfp-0.5.0
 PROCESSOR := $(shell uname -p | tr '[:upper:]' '[:lower:]')
 OSNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 OSTYPE := $(shell env | grep OSTYPE | cut -d'=' -f2- | tr '[:upper:]' '[:lower:]')
+# LLNL specific enviornment variable
 SYS_TYPE := $(shell env | grep SYS_TYPE | cut -d'=' -f2- | tr '[:upper:]' '[:lower:]')
 
-# Common compilers
+# Common C compilers
 HAS_GCC := $(shell basename $$(which gcc 2>/dev/null) 2>/dev/null)
 HAS_CLANG := $(shell basename $(which clang 2>/dev/null) 2>/dev/null)
 HAS_ICC := $(shell basename $$(which icc 2>/dev/null) 2>/dev/null)
 HAS_PGCC := $(shell basename $$(which pgcc 2>/dev/null) 2>/dev/null)
 HAS_XLCR := $(shell basename $$(which xlc_r 2>/dev/null) 2>/dev/null)
 HAS_BGXLCR := $(shell basename $$(which bgxlc_r 2>/dev/null) 2>/dev/null)
+
+# Common Fortran compilers
+HAS_GFORTRAN := $(shell basename $$(which gfortran 2>/dev/null) 2>/dev/null)
+HAS_IFORT := $(shell basename $$(which ifort 2>/dev/null) 2>/dev/null)
+HAS_XLFR := $(shell basename $$(which xlf_r 2>/dev/null) 2>/dev/null)
+HAS_BGXLFR := $(shell basename $$(which bgxlf_r 2>/dev/null) 2>/dev/null)
 
 # If compiler isn't set, lets try to pick it
 ifeq ($(CC),)
