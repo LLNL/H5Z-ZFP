@@ -143,5 +143,5 @@ returning  to the caller. So, in the H5Z-ZFP plugin, we wind up having
 to  byte-swap  a result read in a cross-endian context. That way, when
 HDF5  gets it,  it will byte-swap  again producing the correct result.
 There is  an endian-ness  test in  the Makefile and two ZFP compressed
-example  datasets for  big-endian  and little-endian machines to test.
-cross-endian reads/writes work correctly.
+example  datasets for  big-endian  and little-endian machines to  test
+that cross-endian reads/writes work correctly.

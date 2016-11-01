@@ -527,8 +527,10 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         if (!status)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTFILTER, 0, "decompression failed");
 
-	/* ZFP will byte-swap for endian-ness changes. We need to undue that
-           here because HDF5 is expecting to do it. We use HDF5's built-in
+	/* ZFP is an endian-independent format. It will produce correct endian-ness
+           during decompress regardless of endian-ness differences between reader 
+           and writer. However, the HDF5 library will not be expecting that. So,
+           we need to undue the correct endian-ness here. We use HDF5's built-in
            byte-swapping here. Because we know we need only to endian-swap,
            we treat the data as unsigned. */
         if (swap != H5T_ORDER_NONE)
