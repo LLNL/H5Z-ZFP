@@ -295,8 +295,8 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     switch (ndims_used)
     {
         case 1: dummy_field = Z zfp_field_1d(0, zt, dims_used[0]); break;
-        case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[0], dims_used[1]); break;
-        case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[0], dims_used[1], dims_used[2]); break;
+        case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[1], dims_used[0]); break;
+        case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[2], dims_used[1], dims_used[0]); break;
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
                      "requires chunks w/1,2 or 3 non-unity dims");
     }
