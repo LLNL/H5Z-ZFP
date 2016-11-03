@@ -33,3 +33,5 @@ test-write.c client.
 
 This code has been  tested with gcc, clang,  xlc and icc current versions
 as of October, 2016.
+
+For more detailed information, please see [README_MORE](./README_MORE)
