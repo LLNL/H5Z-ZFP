@@ -176,3 +176,10 @@ HDF5  gets it,  it will byte-swap  again producing the correct result.
 There is  an endian-ness  test in  the Makefile and two ZFP compressed
 example  datasets for  big-endian  and little-endian machines to  test
 that cross-endian reads/writes work correctly.
+
+Finally, endian-targetting,  that is setting the file  datatype for an
+endian-ness that is possibly  different than the native endian-ness of
+the  writer,  is  currently  dis-allowed  with  H5Z-ZFP.  Under  these
+conditions, the can_apply method will return 0. This constraint can be
+relaxed,  at the  expense of  an additional  endian-UN-swap  pass just
+prior to compression, at a future date if it becomes too onerous.
