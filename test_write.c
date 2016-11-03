@@ -189,7 +189,7 @@ int main(int argc, char **argv)
     if (ifile[0] == '\0')
         gen_data((size_t)npoints, noise, amp, &buf);
 
-    /* setup zfp filter cd_values */
+    /* setup zfp filter via cd_values */
     if (zfpmode == H5Z_ZFP_MODE_RATE)
         H5Pset_zfp_rate_cdata(rate, cd_nelmts, cd_values);
     else if (zfpmode == H5Z_ZFP_MODE_PRECISION)
@@ -237,6 +237,20 @@ int main(int argc, char **argv)
     if (0 > H5Premove_filter(cpid, H5Z_FILTER_ZFP)) ERROR(H5Premove_filter);
     if (0 > H5Pset_filter(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, 0, 0)) ERROR(H5Pset_filter);
     if (0 > (dsid = H5Dcreate(fid, "default", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
+    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+
+    /* write the data using properties */
+    if (0 > H5Premove_filter(cpid, H5Z_FILTER_ZFP)) ERROR(H5Premove_filter);
+    if (zfpmode == H5Z_ZFP_MODE_RATE)
+        H5Pset_zfp_rate(cpid, rate);
+    else if (zfpmode == H5Z_ZFP_MODE_PRECISION)
+        H5Pset_zfp_precision(cpid, prec);
+    else if (zfpmode == H5Z_ZFP_MODE_ACCURACY)
+        H5Pset_zfp_accuracy(cpid, acc);
+    else if (zfpmode == H5Z_ZFP_MODE_EXPERT)
+        H5Pset_zfp_expert(cpid, minbits, maxbits, maxprec, minexp);
+    if (0 > (dsid = H5Dcreate(fid, "using_props", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
     if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
     if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
 

@@ -62,8 +62,6 @@ LLC,  and shall  not be  used for  advertising or  product endorsement
 purposes.
 */
 
-#ifdef H5_HAVE_FILTER_ZFP /* { */
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -257,6 +255,8 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     zfp_field *dummy_field = 0;
     bitstream *dummy_bstr = 0;
     zfp_stream *dummy_zstr = 0;
+    int have_zfp_controls = 0;
+    h5z_zfp_controls_t ctrls;
 
     H5Z_zfp_init();
 
@@ -304,13 +304,24 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_field_Xd() failed");
 
     /* get current cd_values and re-map to new cd_value set */
-    H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_ZFP, &flags, &mem_cd_nelmts, mem_cd_values, 0, NULL, NULL);
+    if (0 > H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_ZFP, &flags, &mem_cd_nelmts, mem_cd_values, 0, NULL, NULL))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "unable to get current ZFP cd_values");
 
     /* Handle default case when no cd_values are passed by using ZFP library defaults. */
     if (mem_cd_nelmts == 0)
     {
-        mem_cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM;
-        H5Pset_zfp_expert_cdata(ZFP_MIN_BITS, ZFP_MAX_BITS, ZFP_MAX_PREC, ZFP_MIN_EXP, mem_cd_nelmts, mem_cd_values);
+        /* check for filter controls in the properites */
+        if (0 < H5Pexist(dcpl_id, "zfp_controls"))
+        {
+            if (0 > H5Pget(dcpl_id, "zfp_controls", &ctrls))
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "unable to get ZFP controls");
+            have_zfp_controls = 1;
+        }
+        else // just use ZFP library defaults
+        {
+            mem_cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM;
+            H5Pset_zfp_expert_cdata(ZFP_MIN_BITS, ZFP_MAX_BITS, ZFP_MAX_PREC, ZFP_MIN_EXP, mem_cd_nelmts, mem_cd_values);
+        }
     }
         
     /* Into hdr_cd_values, we encode ZFP library and H5Z-ZFP plugin version info at
@@ -323,23 +334,48 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_stream_open() failed");
 
     /* Set the ZFP stream basic mode from mem_cd_values[0] */
-    switch (mem_cd_values[0])
+    if (have_zfp_controls)
     {
-        case H5Z_ZFP_MODE_RATE:
-            Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
-            break;
-        case H5Z_ZFP_MODE_PRECISION:
-            Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
-            break;
-        case H5Z_ZFP_MODE_ACCURACY:
-            Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
-            break;
-        case H5Z_ZFP_MODE_EXPERT:
-            Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
-                mem_cd_values[4], (int) mem_cd_values[5]);
-            break;
-        default:
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
+        switch (ctrls.mode)
+        {
+            case H5Z_ZFP_MODE_RATE:
+                Z zfp_stream_set_rate(dummy_zstr, ctrls.details.rate, zt, ndims, 0);
+                break;
+            case H5Z_ZFP_MODE_PRECISION:
+                Z zfp_stream_set_precision(dummy_zstr, ctrls.details.prec, zt);
+                break;
+            case H5Z_ZFP_MODE_ACCURACY:
+                Z zfp_stream_set_accuracy(dummy_zstr, ctrls.details.acc, zt);
+                break;
+            case H5Z_ZFP_MODE_EXPERT:
+                Z zfp_stream_set_params(dummy_zstr, ctrls.details.expert.minbits,
+                    ctrls.details.expert.maxbits, ctrls.details.expert.maxprec,
+                    ctrls.details.expert.minexp);
+                break;
+            default:
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
+        }
+    }
+    else
+    {
+        switch (mem_cd_values[0])
+        {
+            case H5Z_ZFP_MODE_RATE:
+                Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
+                break;
+            case H5Z_ZFP_MODE_PRECISION:
+                Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
+                break;
+            case H5Z_ZFP_MODE_ACCURACY:
+                Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
+                break;
+            case H5Z_ZFP_MODE_EXPERT:
+                Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
+                    mem_cd_values[4], (int) mem_cd_values[5]);
+                break;
+            default:
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
+        }
     }
 
     /* Use ZFP's write_header method to write the ZFP header into hdr_cd_values array */
@@ -611,5 +647,3 @@ done:
 
 #undef Z
 #undef B
-
-#endif /* } H5_HAVE_FILTER_ZFP */

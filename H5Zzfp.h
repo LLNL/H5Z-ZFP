@@ -64,6 +64,8 @@ purposes.
 #ifndef H5Z_ZFP_H
 #define H5Z_ZFP_H
 
+#include "hdf5.h"
+
 /* Filter ID number registered with The HDF Group */
 #define H5Z_FILTER_ZFP 32013
 
@@ -148,6 +150,34 @@ do {                                                    \
 #ifdef AS_SILO_BUILTIN
 extern void H5Z_zfp_register(void);
 extern void H5Z_zfp_finalize(void);
+#endif
+
+typedef struct _h5z_zfp_controls_t {
+    unsigned int mode;
+    union {
+        double rate;
+        double acc;
+        unsigned int prec;
+        struct expert_ {
+            unsigned int minbits;
+            unsigned int maxbits;
+            unsigned int maxprec;
+            int minexp;
+        } expert;
+    } details;
+} h5z_zfp_controls_t;
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern herr_t H5Pset_zfp_rate(hid_t plist, double rate); 
+extern herr_t H5Pset_zfp_precision(hid_t plist, unsigned int prec); 
+extern herr_t H5Pset_zfp_accuracy(hid_t plist, double acc); 
+extern herr_t H5Pset_zfp_expert(hid_t plist, unsigned int minbits, unsigned int maxbits,
+    unsigned int maxprec, int minexp); 
+#ifdef __cplusplus
+}
 #endif
 
 #endif

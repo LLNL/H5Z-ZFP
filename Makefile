@@ -22,8 +22,11 @@ TEST_OBJ = $(TEST_SRC:.c=.o)
 PLUGIN_SRC = H5Zzfp.c
 PLUGIN_OBJ = $(PLUGIN_SRC:.c=.o)
 
+PROP_SRC = H5Zzfp_props.c
+PROP_OBJ = $(PROP_SRC:.c=.o)
+
 .c.o:
-	$(CC) $< -o $@ -c $(CFLAGS) -DH5_HAVE_FILTER_ZFP -I$(ZFP_INC) -I$(HDF5_INC)
+	$(CC) $< -o $@ -c $(CFLAGS) -I$(ZFP_INC) -I$(HDF5_INC)
 
 help:
 	@versinfo=$$(grep '#define H5Z_FILTER_ZFP_VERSION_[MP]' H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3); \
@@ -58,8 +61,8 @@ plugin: $(PLUGIN_OBJ)
 	$(CC) H5Zzfp.o $(SHFLAG) -o plugin/libh5zzfp.$(SOEXT) \
 	    $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(ZFP_LIB) -L$(HDF5_LIB) $(LDFLAGS) -lzfp
 
-test_write: test_write.o
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) -L$(HDF5_LIB) $(LDFLAGS)
+test_write: test_write.o H5Zzfp_props.o
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) H5Zzfp_props.o -L$(HDF5_LIB) $(LDFLAGS)
 
 test_read: test_read.o
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) -L$(HDF5_LIB) $(LDFLAGS)
