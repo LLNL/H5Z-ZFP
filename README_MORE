@@ -13,8 +13,6 @@ For information about HDF5 filter plugins, see...
 
 This H5Z-ZFP plugin was originally written for ZFP version 0.5.0.
 
-The version number of this HDF5 plugin is 0.3.0.
-
 The HDF5 filter plugin code here is part of the Silo library. However,
 we have made an effort to also support it as a stand-alone package due
 to the likely broad appeal and utility of the ZFP compression library.
