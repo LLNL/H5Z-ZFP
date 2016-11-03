@@ -191,6 +191,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     htri_t retval = 0;
     hsize_t dims[H5S_MAX_RANK];
     H5T_class_t dclass;
+    hid_t native_type_id;
 
     H5Z_zfp_init();
 
@@ -229,6 +230,12 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     if (ndims_used == 0 || ndims_used > 3)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
             "chunk must have only 1-3 non-unity dimensions");
+
+    /* if caller is doing "endian targetting", disallow that */
+    native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
+    if (H5Tget_order(type_id) != H5Tget_order(native_type_id))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0,
+            "endian targetting non-sensical in conjunction with ZFP filter");
 
     retval = 1;
 
@@ -488,7 +495,7 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
 
     H5Z_zfp_init();
 
-    if (0x0030 == h5z_zfp_version_no || 0x0020 == h5z_zfp_version_no)
+    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0040)
         return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
 
     H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,

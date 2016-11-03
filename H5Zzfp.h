@@ -70,7 +70,7 @@ purposes.
 #define H5Z_FILTER_ZFP 32013
 
 #define H5Z_FILTER_ZFP_VERSION_MAJOR 0
-#define H5Z_FILTER_ZFP_VERSION_MINOR 3
+#define H5Z_FILTER_ZFP_VERSION_MINOR 4
 #define H5Z_FILTER_ZFP_VERSION_PATCH 0
 
 /* Convenient CPP logic to capture H5Z_ZFP Filter version numbers as string and hex number */

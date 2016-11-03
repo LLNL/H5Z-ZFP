@@ -159,7 +159,7 @@ clean:
 	@versinfo=$$(grep '#define H5Z_FILTER_ZFP_VERSION_[MP]' H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3); \
 	rm -vf H5Z-ZFP-$$versinfo.tar.gz
 	rm -rf plugin
-	rm -f $(TEST_OBJ) $(PLUGIN_OBJ) test_zfp.h5 mesh_repack.h5 test_write test_read
+	rm -f $(TEST_OBJ) $(PLUGIN_OBJ) $(PROP_OBJ) test_zfp.h5 mesh_repack.h5 test_write test_read
 
 dist:	clean
 	@versinfo=$$(grep '#define H5Z_FILTER_ZFP_VERSION_[MP]' H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3); \
