@@ -1,5 +1,26 @@
-HDF5_HOME ?= /Users/miller86/visit/tpl_build/hdf5-1.8.14/build/install
-ZFP_HOME ?= ../zfp-0.5.0
+ifeq ($(HDF5_HOME),)
+    $(warning WARNING: HDF5_HOME not specified)
+endif
+
+ifeq ($(ZFP_HOME),)
+    $(warning WARNING: ZFP_HOME not specified)
+endif
+
+# Construct version variable depending on what dir we're in
+PWD_BASE = $(shell basename $$(pwd))
+ifeq ($(PWD_BASE),src)
+    H5Z_ZFP_BASE := ./plugin
+else ifeq ($(PWD_BASE),plugin)
+    H5Z_ZFP_BASE := .
+else ifeq ($(PWD_BASE),props)
+    H5Z_ZFP_BASE := ../plugin
+else ifeq ($(PWD_BASE),test)
+    H5Z_ZFP_BASE := ../src/plugin
+else ifeq ($(PWD_BASE),H5Z-ZFP)
+    H5Z_ZFP_BASE := ./src/plugin
+endif
+H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/lib
+H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
 
 # Detect system type
 PROCESSOR := $(shell uname -p | tr '[:upper:]' '[:lower:]')
@@ -10,7 +31,7 @@ SYS_TYPE := $(shell env | grep SYS_TYPE | cut -d'=' -f2- | tr '[:upper:]' '[:low
 
 # Common C compilers
 HAS_GCC := $(shell basename $$(which gcc 2>/dev/null) 2>/dev/null)
-HAS_CLANG := $(shell basename $(which clang 2>/dev/null) 2>/dev/null)
+HAS_CLANG := $(shell basename $$(which clang 2>/dev/null) 2>/dev/null)
 HAS_ICC := $(shell basename $$(which icc 2>/dev/null) 2>/dev/null)
 HAS_PGCC := $(shell basename $$(which pgcc 2>/dev/null) 2>/dev/null)
 HAS_XLCR := $(shell basename $$(which xlc_r 2>/dev/null) 2>/dev/null)
@@ -87,3 +108,15 @@ else ifeq ($(CC),bgxlc_r)
     SHFLAG ?= -qmkshrobj
     PREPATH = -Wl,-R, 
 endif
+
+ZFP_INC = $(ZFP_HOME)/inc
+ZFP_LIB = $(ZFP_HOME)/lib
+
+HDF5_INC = $(HDF5_HOME)/include
+HDF5_LIB = $(HDF5_HOME)/lib
+HDF5_BIN = $(HDF5_HOME)/bin
+
+LDFLAGS += -lhdf5
+
+.c.o:
+	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
