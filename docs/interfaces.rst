@@ -8,18 +8,12 @@ uses HDF5  unregistered properties. You  can find examples  of writing
 HDF5 data using both of these interfaces in test_write.c.
 
 For the ``cd_values``  interface, the following CPP macros  are defined in
-H5Zzfp.h header file::
+``H5Zzfp.h`` header file::
 
-    H5Pset_zfp_rate_cdata(double rate,
-          size_t cd_nelmts, unsigned int *cd_vals);
-    H5Pset_zfp_precision_cdata(unsigned int prec,
-          size_t cd_nelmts, unsigned int *cd_vals);
-    H5Pset_zfp_accuracy_cdata(double acc,
-          size_t cd_nelmts, unsigned int *cd_vals);
-    H5Pset_zfp_expert_cdata(
-          unsigned int minbits, unsigned int maxbits,
-          unsitned int maxprec, int minexp,
-          size_t cd_nelmts, unsigned int *cd_vals);
+    H5Pset_zfp_rate_cdata(double rate, size_t cd_nelmts, unsigned int *cd_vals);
+    H5Pset_zfp_precision_cdata(unsigned int prec, size_t cd_nelmts, unsigned int *cd_vals);
+    H5Pset_zfp_accuracy_cdata(double acc, size_t cd_nelmts, unsigned int *cd_vals);
+    H5Pset_zfp_expert_cdata( unsigned int minbits, unsigned int maxbits, unsitned int maxprec, int minexp, size_t cd_nelmts, unsigned int *cd_vals);
 
 These  macros  simply  store   the  relevant  ZFP  parameters  into  a
 sufficiently large array (>=6) of ``unsigned int cd_values``. It is up to
@@ -31,9 +25,7 @@ For the properties interface, the following functions are defined::
     herr_t H5Pset_zfp_rate(hid_t dcpl_id, double rate);
     herr_t H5Pset_zfp_precision(hid_t dcpl_id, unsigned int prec);
     herr_t H5Pset_zfp_accuracy(hid_t dcpl_id, double acc);
-    herr_t H5Pset_zfp_expert(hid_t dcpl_id,
-          unsigned int minbits, unsigned int maxbits, 
-          unsigned int maxprec, int minexp);
+    herr_t H5Pset_zfp_expert(hid_t dcpl_id, unsigned int minbits, unsigned int maxbits, unsigned int maxprec, int minexp);
 
 These  functions create  temporary (e.g.  UNregistered)  HDF5 property
 list entries  to control the  ZFP filter and also  take responsibility
