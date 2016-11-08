@@ -8,7 +8,7 @@ uses HDF5  unregistered properties. You  can find examples  of writing
 HDF5 data using both of these interfaces in test_write.c.
 
 For the cd_values  interface, the following CPP macros  are defined in
-H5Zzfp.h header file...
+H5Zzfp.h header file::
 
     H5Pset_zfp_rate_cdata(double rate,
           size_t cd_nelmts, unsigned int \*cd_vals);
@@ -26,7 +26,7 @@ sufficiently large array (>=6) of  unsigned int cd_values. It is up to
 the  caller to  then call  H5Pset_filter with  the array  of cd_values
 constructed by these macros.
 
-For the properties interface, the following functions are defined...
+For the properties interface, the following functions are defined::
 
     herr_t H5Pset_zfp_rate(hid_t dcpl_id, double rate);
     herr_t H5Pset_zfp_precision(hid_t dcpl_id, unsigned int prec);
@@ -51,15 +51,16 @@ responsible  for setting  up  the cd_values  array  correctly for  the
 filter.  For reference,  the cd_values  array for  this ZFP  filter is
 defined like so...
 
-            |                     cd_values index
-------------|--------------------------------------------------------
-ZFP mode    |     0       1        2         3         4         5    
-------------|--------------------------------------------------------
-rate:       |     1    unused    rateA     rateB     unused    unused
-precision:  |     2    unused    prec      unused    unused    unused
-accuracy:   |     3    unused    accA      accB      unused    unused
-expert:     |     4    unused    minbits   maxbits   maxprec   minexp
-------------|--------------------------------------------------------
++-----------+---------------------------------------------------------+
+|           |                     cd_values index                     |
++-----------+---------------------------------------------------------+
+| ZFP mode  |     0       1        2         3         4         5    | 
++-----------+---------------------------------------------------------+
+| rate:     |     1    unused    rateA     rateB     unused    unused |
+| precision:|     2    unused    prec      unused    unused    unused |
+| accuracy: |     3    unused    accA      accB      unused    unused |
+| expert:   |     4    unused    minbits   maxbits   maxprec   minexp |
++-----------+---------------------------------------------------------+
                      A/B are high/low 32-bit words of a double.
 
 Note that  the cd_values  used in the  interface to  H5Pset_filter are

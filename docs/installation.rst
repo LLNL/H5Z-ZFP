@@ -4,8 +4,7 @@ Installation
 
 Prerequisites
 
-* Get the `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_
-or from `Github <https://github.com/LLNL/zfp>`_
+* Get the `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ or from `Github <https://github.com/LLNL/zfp>`_
 
     * The ZFP library **must** be compiled with the ``CPPFLAG -DBIT_STREAM_WORD_TYPE=uint8``.
       If you attempt to use this filter with a ZFP  library compiled  differently from
