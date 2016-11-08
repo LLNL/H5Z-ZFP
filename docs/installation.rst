@@ -2,7 +2,9 @@
 Installation
 ============
 
+----
 Prerequisites
+----
 
 * Get the `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ or from `Github <https://github.com/LLNL/zfp>`_
 
@@ -31,6 +33,10 @@ about various make targets and variables.
 The filter has been tested on gcc, clang, xlc, icc and pgcc  compilers
 and checked with valgrind.
 
+----
+Source Code Organization
+----
+
 The source code is in three separate directories
 
     * ``src/plugin`` includes the ZFP filter plugin and header file, ``H5Zzfp.h``
@@ -48,3 +54,15 @@ The source code is in three separate directories
       and to link to ``H5Zzfp_props.o``.
     * ``test`` includes various tests. In particular ``test_write.c`` includes examples
       of using both the :ref:`generic-interface` and :ref:`properties-interface`.
+
+----
+Silo Integration
+----
+
+This plugin is also part of the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
+In particular, the ZFP library
+itself is also embedded in Silo but is protected from appearing in Silo's
+global namespace through a struct of function pointers.
+If you happen to examine the source code, you will see some logic there
+that is specific to using this plugin within Silo and dealing with this
+struct of function pointers wrapper. Just ignore this.

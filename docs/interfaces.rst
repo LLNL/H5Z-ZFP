@@ -8,6 +8,8 @@ in `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Proper
 uses HDF5 unregistered properties. You  can find examples  of writing
 HDF5 data using both of these interfaces in ``test_write.c``.
 
+The plugin is designed to respond correctly when either interface is used.
+
 .. _generic-interface:
 
 -----------------
@@ -28,12 +30,12 @@ These  macros  utilize *type punning* to store the relevant ZFP parameters  into
 sufficiently large array (>=6) of ``unsigned int cd_values``. It is up to
 the  caller to  then call
 `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_
-with  the array  of cd_values constructed by these macros.
+with  the array  of cd_values constructed by one of these macros.
 
 However, these  macros are only a  convenience. You do  not **need** the
 ``H5Zzfp.h`` header file if you want  to avoid using it. But, you are then
-responsible  for setting  up  the cd_values  array  correctly for  the
-filter.  For reference,  the cd_values  array for  this ZFP  filter is
+responsible  for setting  up  the ``cd_values``  array  correctly for  the
+filter.  For reference,  the ``cd_values``  array for  this ZFP  filter is
 defined like so...
 
 +-----------+---------------------------------------------------------+
@@ -59,7 +61,7 @@ don't make the mistake of examining  the values you find in a file and
 think you can use those same  values, for example, in an invokation of
 h5repack.
 
-Because of the type punning involved, the *generic* interface is not
+Because of the type punning involved, the generic interface is not
 suitable for Fortran callers.
 
 .. _properties-interface:
@@ -74,8 +76,9 @@ the ``H5Zzfp.h`` header file::
     herr_t H5Pset_zfp_rate(hid_t dcpl_id, double rate);
     herr_t H5Pset_zfp_precision(hid_t dcpl_id, unsigned int prec);
     herr_t H5Pset_zfp_accuracy(hid_t dcpl_id, double acc);
-    herr_t H5Pset_zfp_expert(hid_t dcpl_id, unsigned int minbits, unsigned int maxbits,
-                                            unsigned int maxprec, int minexp);
+    herr_t H5Pset_zfp_expert(hid_t dcpl_id,
+        unsigned int minbits, unsigned int maxbits,
+        unsigned int maxprec, int minexp);
 
 These  functions create  temporary (e.g.  UNregistered)  HDF5 property
 list entries  to control the  ZFP filter and also  take responsibility
@@ -84,7 +87,7 @@ for adding the filter to the pipeline.
 The properties interface  is more type-safe. However, there  is no way
 for the implementation of these properties to reside within the filter
 plugin itself. The properties  interface requires that the caller link
-with  an   additional  object  file, ``H5Zzfp_props.o``.  The  cd_values
+with  an   additional  object  file, ``H5Zzfp_props.o``.  The generic 
 interface does not require this.
 
 Fortran wrappers for the property interface will be developed in an

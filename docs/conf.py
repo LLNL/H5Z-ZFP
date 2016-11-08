@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'H5Z-ZFP'
-copyright = u'2016, LLNL-COD-707197'
+copyright = u'2016, LLNL-CODE-707197'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
