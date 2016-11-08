@@ -49,8 +49,11 @@ defined like so...
 | ZFP mode  |     0  |    1   |    2    |    3    |    4    |    5    | 
 +-----------+--------+--------+---------+---------+---------+---------+
 | rate      |     1  | unused |  rateA  |  rateB  |  unused |  unused |
++-----------+--------+--------+---------+---------+---------+---------+
 | precision |     2  | unused |  prec   |  unused |  unused |  unused |
++-----------+--------+--------+---------+---------+---------+---------+
 | accuracy  |     3  | unused |  accA   |  accB   |  unused |  unused |
++-----------+--------+--------+---------+---------+---------+---------+
 | expert    |     4  | unused |  minbits|  maxbits|  maxprec|  minexp |
 +-----------+--------+--------+---------+---------+---------+---------+
                    A/B are high/low 32-bit words of a double.
