@@ -62,7 +62,7 @@ Silo Integration
 This plugin is also part of the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
 In particular, the ZFP library
 itself is also embedded in Silo but is protected from appearing in Silo's
-global namespace through a struct of function pointers.
-If you happen to examine the source code, you will see some logic there
+global namespace through a struct of function pointers (see `Namespaces in C <https://visitbugs.ornl.gov/projects/silo/wiki/Using_C_structs_as_a_kind_of_namespace_mechanism_to_reduce_global_symbol_bloat>`_.
+If you happen to examine the source code for H5Z-ZFP, you will see some logic there
 that is specific to using this plugin within Silo and dealing with this
 struct of function pointers wrapper. Just ignore this.
