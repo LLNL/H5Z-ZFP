@@ -1,3 +1,5 @@
+.. _endian-issues:
+
 =============
 Endian Issues
 =============
