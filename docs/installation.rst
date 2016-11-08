@@ -30,3 +30,21 @@ about various make targets and variables.
 
 The filter has been tested on gcc, clang, xlc, icc and pgcc  compilers
 and checked with valgrind.
+
+The source code is in three separate directories
+
+    * ``src/plugin`` includes the ZFP filter plugin and header file, ``H5Zzfp.h``
+    
+        * The header file defines the symbolic filter id, ``H5Z_FILTER_ZFP``,
+          as well as a set of macros for the :ref:`generic-interface`. Any
+          application wanting to use the :ref:`generic-interface` will have to
+          ``#include "H5Zzfp.h"``.
+        * ``src/plugin/lib`` is where the compiled plugin gets installed. It is
+          this path that should be set in the ``HDF5_PLUGIN_DIR`` enviornment
+          variable so that you can use the plugin with any HDF5 client.
+
+    * ``src/props`` includes the implementation of the :ref:`properties-interface` to the plugin.
+      To use it, your HDF5 application needs to include the header file ``#include "H5Zzfp.h``
+      and to link to ``H5Zzfp_props.o``.
+    * ``test`` includes various tests. In particular ``test_write.c`` includes examples
+      of using both the :ref:`generic-interface` and :ref:`properties-interface`.
