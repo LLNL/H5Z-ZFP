@@ -10,6 +10,7 @@ Contents:
    installation
    interfaces
    endian_issues
+   tests
 
 Indices and tables
 ==================
