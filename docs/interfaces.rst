@@ -52,7 +52,7 @@ defined like so...
                    A/B are high/low 32-bit words of a double.
 
 Note that  the cd_values  used in the  interface to  ``H5Pset_filter()`` are
-**not** **the** **same** cd_values ultimately stored  to the HDF5 dataset header
+**not the same** cd_values ultimately stored  to the HDF5 dataset header
 for a compressed dataset. The  values are transformed in the set_local
 method to use ZFP's internal  routines for 'meta' and 'mode' data. So,
 don't make the mistake of examining  the values you find in a file and

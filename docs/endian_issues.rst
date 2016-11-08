@@ -12,10 +12,10 @@ inefficiency. Upon reading data back,  it  produces  the  correct endian-nessu
 result regardless of
 reader  and  writer  endian-ness  incompatability.  However,  the HDF5
 library is expecting to read  from the file (even if through a filter)
-the  endian-ness  of the data as it was stored to tye file (typically
+the  endian-ness  of the data as it was stored to to file (typically
 that of  the  writer machine)  and  expects to byte-swap it before returning
 to the caller. So, in the H5Z-ZFP plugin, we wind up having
-to  byte-swap  a result read in a cross-endian context. That way, when
+to  byte-swap an already result read in a cross-endian context. That way, when
 HDF5  gets the data and byte-swaps it, it will produce the correct result.
 There is  an endian-ness  test in  the Makefile and two ZFP compressed
 example  datasets for  big-endian  and little-endian machines to  test
