@@ -390,7 +390,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, 0, "unable to write header");
 
     /* Flush the ZFP stream */
-    zfp_stream_flush(dummy_zstr);
+    Z zfp_stream_flush(dummy_zstr);
 
     /* compute necessary hdr_cd_values size */
     hdr_bytes     = 1 + ((hdr_bits  - 1) / 8);
