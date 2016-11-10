@@ -10,3 +10,8 @@ before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y libhdf5-serial-dev
 
+install: true
+
+script:
+- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/usr/local all
+
