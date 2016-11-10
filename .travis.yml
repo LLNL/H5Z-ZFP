@@ -12,6 +12,7 @@ before_install:
 - wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.14/src/hdf5-1.8.14.tar.gz
 - tar -xzf hdf5-1.8.14.tar.gz
 - pushd hdf5-1.8.14
+- patch ./tools/h5repack/h5repack_parse.c /home/travis/build/LLNL/H5Z-ZFP/test/h5repack_parse.patch
 - ./configure --prefix=`pwd`/my_install
 - make -j4 install
 - popd
