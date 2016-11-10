@@ -21,11 +21,11 @@ help:
 all: plugin props
 
 plugin:
-	pushd plugin; $(MAKE) $(MAKEFLAGS) $@
+	cd plugin; $(MAKE) $(MAKEFLAGS) $@
 
 props:
-	pushd props; $(MAKE) $(MAKEFLAGS) $@
+	cd props; $(MAKE) $(MAKEFLAGS) $@
 
 clean:
-	pushd plugin; $(MAKE) $(MAKEFLAGS) $@
-	pushd props; $(MAKE) $(MAKEFLAGS) $@
+	cd plugin; $(MAKE) $(MAKEFLAGS) $@
+	cd props; $(MAKE) $(MAKEFLAGS) $@

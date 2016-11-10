@@ -39,10 +39,10 @@ patch:
 	@echo "Make sure you have patched HDF5's repack tool"
 
 plugin:
-	pushd ../src/plugin; $(MAKE) $(MAKEFLAGS) plugin
+	cd ../src/plugin; $(MAKE) $(MAKEFLAGS) plugin
 
 props:
-	pushd ../src/props; $(MAKE) $(MAKEFLAGS) props
+	cd ../src/props; $(MAKE) $(MAKEFLAGS) props
 
 test_write: test_write.o props
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) ../src/props/H5Zzfp_props.o -L$(HDF5_LIB) $(LDFLAGS)

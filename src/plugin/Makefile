@@ -12,9 +12,6 @@ PLUGIN_OBJ = $(PLUGIN_SRC:.c=.o)
 
 all: plugin
 
-foo:
-	echo "Got here"
-
 plugin: $(PLUGIN_OBJ)
 	rm -rf lib
 	mkdir lib
