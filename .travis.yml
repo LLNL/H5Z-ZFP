@@ -8,6 +8,5 @@ before_install:
 - make FLAGS='-I../inc -DBIT_STREAM_WORD_TYPE=uint8'
 - popd
 - sudo apt-get -qq update
-- sudo apt-cache pkgnames hdf5
-- sudo apt-get install -y hdf5
+- sudo apt-get install -y libhdf5-serial-dev
 
