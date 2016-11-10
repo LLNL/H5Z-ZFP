@@ -9,12 +9,16 @@ before_install:
 - pushd zfp-0.5.0
 - make FLAGS='-I../inc -DBIT_STREAM_WORD_TYPE=uint8'
 - popd
+- wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.14/src/hdf5-1.8.14.tar.gz
+- tar -xzf hdf5-1.8.14.tar.gz
+- pushd hdf5-1.8.14
+- ./configure --prefix=`pwd`/my_install
+- make -j4 install
 - popd
-- sudo apt-get -qq update
-- sudo apt-get install -y libhdf5-serial-dev
+- popd
 
 install: true
 
 script:
-- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/usr all
+- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.15/my_install all
 
