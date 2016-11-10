@@ -19,13 +19,13 @@ help:
 	@echo "    dist - create distribution tarfile"
 
 all:
-	cd src; $(MAKE) $(MAKEFLAGS) $@
-	cd test; $(MAKE) $(MAKEFLAGS) $@
+	cd src; $(MAKE) $(MAKEVARS) $@
+	cd test; $(MAKE) $(MAKEVARS) $@
 
 clean:
 	rm -f H5Z-ZFP-$(H5Z_ZFP_VERSINFO).tar.gz
-	cd src; $(MAKE) $(MAKEFLAGS) $@
-	cd test; $(MAKE) $(MAKEFLAGS) $@
+	cd src; $(MAKE) $(MAKEVARS) $@
+	cd test; $(MAKE) $(MAKEVARS) $@
 
 dist:	clean
 	rm -rf H5Z-ZFP-$(H5Z_ZFP_VERSINFO) H5Z-ZFP-$(H5Z_ZFP_VERSINFO).tar.gz; \

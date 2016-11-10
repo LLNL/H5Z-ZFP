@@ -6,6 +6,9 @@ ifeq ($(ZFP_HOME),)
     $(warning WARNING: ZFP_HOME not specified)
 endif
 
+#MAKEVARS = ZFP_HOME=$(ZFP_HOME) HDF5_HOME=$(HDF5_HOME)
+MAKEVARS =
+
 # Construct version variable depending on what dir we're in
 PWD_BASE = $(shell basename $$(pwd))
 ifeq ($(PWD_BASE),src)
