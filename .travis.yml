@@ -20,5 +20,5 @@ before_install:
 install: true
 
 script:
-- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.15/my_install all
+- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.14/my_install all
 
