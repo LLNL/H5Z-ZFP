@@ -18,5 +18,5 @@ install: true
 script:
 - ls -Rl /usr
 - pushd src
-- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/usr/local all
+- make CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/usr all
 
