@@ -1,7 +1,7 @@
 language: C
 
 before_install:
-- wget http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz /tmp/zfp-0.5.0.tar.gz
+- pushd /tmp && wget http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz && popd
 - tar -xzf /tmp/zfp-0.5.0.tar.gz
 - pushd /tmp/zfp-0.5.0 && make FLAGS=-DBIT_STREAM_WORD_TYPE=uint8 && popd
 - sudo apt-get -qq update
