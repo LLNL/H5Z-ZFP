@@ -1,6 +1,8 @@
 language: C
 
 before_install:
+- pwd
+- ls
 - pushd /tmp
 - wget http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz
 - tar -xzf zfp-0.5.0.tar.gz
