@@ -1,4 +1,4 @@
-export SHELL = /bin/sh
+export SHELL = /bin/bash
 
 ifeq ($(HDF5_HOME),)
     $(warning WARNING: HDF5_HOME not specified)
