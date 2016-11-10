@@ -7,7 +7,7 @@ before_install:
 - wget http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz
 - tar -xzf zfp-0.5.0.tar.gz
 - pushd zfp-0.5.0
-- make FLAGS='-I../inc -DBIT_STREAM_WORD_TYPE=uint8'
+- make DEFS=-DBIT_STREAM_WORD_TYPE=uint8
 - popd
 - wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.14/src/hdf5-1.8.14.tar.gz
 - tar -xzf hdf5-1.8.14.tar.gz
