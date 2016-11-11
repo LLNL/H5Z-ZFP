@@ -136,7 +136,7 @@ test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
 	fi; \
 	echo "Endian test Passed"
 
-check: test_write test_read test-rate test-precision test-accuracy test-endian test-h5repack
+check: test_write test_read test-rate test-precision test-accuracy test-endian
 
 clean:
 	@versinfo=$$(grep '#define H5Z_FILTER_ZFP_VERSION_[MP]' H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3); \
