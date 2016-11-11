@@ -1,18 +1,20 @@
-This is H5Z-ZFP, a highly flexible floating point
+# H5Z-ZFP
+
+A highly flexible floating point
 compression plugin for the HDF5 library using ZFP compression.
 
 [![Build Status](https://travis-ci.org/LLNL/H5Z-ZFP.svg?branch=master)](https://travis-ci.org/LLNL/H5Z-ZFP)
+[![Documentation Status](https://readthedocs.org/projects/h5z-zfp/badge/?version=latest)](http://h5z-zfp.readthedocs.io)
 
 For information about ZFP compression and the BSD-Licensed ZFP
 library, see...
 
-   http://computation.llnl.gov/projects/floating-point-compression
-
-   https://github.com/LLNL/zfp
+- https://computation.llnl.gov/projects/floating-point-compression
+- https://github.com/LLNL/zfp
 
 For information about HDF5 filter plugins, see...
 
-   https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
+- https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
 
 This H5Z-ZFP plugin was originally written for ZFP version 0.5.0.
 
