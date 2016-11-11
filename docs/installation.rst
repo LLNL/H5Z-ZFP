@@ -66,3 +66,30 @@ global namespace through a struct of function pointers (see `Namespaces in C <ht
 If you happen to examine the source code for H5Z-ZFP, you will see some logic there
 that is specific to using this plugin within Silo and dealing with this
 struct of function pointers wrapper. Just ignore this.
+
+----
+Plugin vs. Non-Plugin Operation
+----
+
+By default, the filter is designed to be used as an HDF5 *plugin*.
+When it is used as a plugin, all HDF5 applications are *required*
+to *find* the plugin in a directory specified by the enviornment
+variable, ``HDF5_PLUGIN_DIR``. Currently, the HDF5 library offers
+no mechanism for applications themselves to specify pre-programmed
+directory(s) in which to search for the plugin. Applications are
+then always vulnerable to an incorrectly or unspecified ``HDF5_PLUGIN_DIR``
+environment variable.
+
+However, when used *within* the Silo library, this filter is **not**
+used as a *plugin* and is instead programmed directly into the Silo
+library as a *builtin* filter.
+
+Other applications are also free to use the filter in this way. To
+do so, the filter must be compiled with the additional ``CPPFLAG``,
+``-DAS_SILO_BUILTIN``. When this flag is defined, an additional
+function is defined in the ``H5Zzfp.h`` header file::
+
+   void H5Z_zfp_register(void);
+   
+ Applications must then link directly to the compiled plugin and
+ call this function to make the filter available in the executable.
