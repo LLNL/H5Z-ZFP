@@ -91,5 +91,5 @@ function is defined in the ``H5Zzfp.h`` header file::
 
    void H5Z_zfp_register(void);
    
- Applications must then link directly to the compiled plugin and
- call this function to make the filter available in the executable.
+Applications must then link directly to the compiled plugin and
+call this function to make the filter available in the executable.
