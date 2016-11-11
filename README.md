@@ -1,6 +1,8 @@
 This is H5Z-ZFP, a highly flexible floating point
 compression plugin for the HDF5 library using ZFP compression.
 
+[![Build Status](https://travis-ci.org/LLNL/H5Z-ZFP.svg?branch=master)](https://travis-ci.org/LLNL/H5Z-ZFP)
+
 For information about ZFP compression and the BSD-Licensed ZFP
 library, see...
 
