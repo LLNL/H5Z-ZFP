@@ -71,18 +71,19 @@ struct of function pointers wrapper. Just ignore this.
 Plugin vs. Non-Plugin Operation
 ----
 
-By default, the filter is designed to be used as an HDF5 *plugin*.
+By default, the filter is designed to be compiled for use as an HDF5 *plugin*.
 When it is used as a plugin, all HDF5 applications are *required*
-to *find* the plugin in a directory specified by the enviornment
+to *find* the plugin shared library (named ``libh5*.{so,dylib}``)
+in a directory specified by the enviornment
 variable, ``HDF5_PLUGIN_DIR``. Currently, the HDF5 library offers
-no mechanism for applications themselves to specify pre-programmed
-directory(s) in which to search for the plugin. Applications are
-then always vulnerable to an incorrectly or unspecified ``HDF5_PLUGIN_DIR``
+no mechanism for applications themselves to have pre-programmed
+in the directory(s) in which to search for a plugin. Applications are
+then always vulnerable to an incorrectly specified or unspecified ``HDF5_PLUGIN_DIR``
 environment variable.
 
 However, when used *within* the Silo library, this filter is **not**
-used as a *plugin* and is instead programmed directly into the Silo
-library as a *builtin* filter.
+compiled to be used as a *plugin* and is instead can be compiled for use
+as a library as a *builtin* filter.
 
 Other applications are also free to use the filter in this way. To
 do so, the filter must be compiled with the additional ``CPPFLAG``,
