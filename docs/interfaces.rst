@@ -5,7 +5,7 @@ Interfaces
 There  are two  interfaces  to  control the  filter.  One uses  HDF5's
 *generic* interface via  an array of ``unsigned int cd_values`` as is used
 in `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_. The other
-uses HDF5 unregistered properties. You  can find examples  of writing
+uses HDF5 *unregistered* properties. You  can find examples  of writing
 HDF5 data using both of these interfaces in ``test_write.c``.
 
 The plugin is designed to respond correctly when either interface is used.
@@ -80,9 +80,12 @@ the ``H5Zzfp.h`` header file::
         unsigned int minbits, unsigned int maxbits,
         unsigned int maxprec, int minexp);
 
-These  functions create  temporary (e.g.  UNregistered)  HDF5 property
-list entries  to control the  ZFP filter and also  take responsibility
-for adding the filter to the pipeline.
+These  functions take a dataset creation property list, ``hid_t dcp_lid`` and
+create  temporary (e.g.  UNregistered)  HDF5 property
+list entries  to control the  ZFP filter. Calling any of these functions
+removes the effects of any previous call to any one of these functions.
+In addition, calling any one of these functions also has the effect of
+adding the filter to the pipeline.
 
 The properties interface  is more type-safe. However, there  is no way
 for the implementation of these properties to reside within the filter
