@@ -110,7 +110,7 @@ else ifeq ($(CC),bgxlc_r)
     CFLAGS += -qpic
     SOEXT ?= so
     SHFLAG ?= -qmkshrobj
-    PREPATH = -Wl,-R, 
+    PREPATH = -Wl,-R,
 endif
 
 ifeq ($(FC),gfortran)
@@ -123,6 +123,9 @@ else ifeq ($(FC),xlf_r)
     FCFLAGS += -qpic
 else ifeq ($(FC),bgxlf_r)
     FCFLAGS += -qpic
+else ifeq ($(FC),f77)
+# some makefile versions set FC=f77 if FC no value given
+    FC =
 endif
 
 ZFP_INC = $(ZFP_HOME)/inc
