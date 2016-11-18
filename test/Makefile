@@ -118,7 +118,7 @@ endif
 test-rate: plugin test_write
 	@for r in 32 16 8 4; do\
 	    expected_ratio=$$(expr 64 \/ $$r); \
-	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write zfpmode=1 rate=$$r write_only 2>&1 1>/dev/null; \
+	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write zfpmode=1 rate=$$r 2>&1 1>/dev/null; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
 	        echo "ZFP rate test failed for rate=$$r"; \
