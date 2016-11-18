@@ -113,6 +113,18 @@ else ifeq ($(CC),bgxlc_r)
     PREPATH = -Wl,-R, 
 endif
 
+ifeq ($(FC),gfortran)
+    FCFLAGS += -fPIC
+else ifeq ($(FC),ifort)
+    FCFLAGS += -fpic
+else ifeq ($(FC),pgf90)
+    FCFLAGS += -fpic
+else ifeq ($(FC),xlf_r)
+    FCFLAGS += -qpic
+else ifeq ($(FC),bgxlf_r)
+    FCFLAGS += -qpic
+endif
+
 ZFP_INC = $(ZFP_HOME)/inc
 ZFP_LIB = $(ZFP_HOME)/lib
 
@@ -124,3 +136,4 @@ LDFLAGS += -lhdf5
 
 .c.o:
 	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+

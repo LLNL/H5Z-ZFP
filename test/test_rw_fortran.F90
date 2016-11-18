@@ -18,8 +18,7 @@ PROGRAM main
 
   ! sinusoid data generation variables 
   INTEGER(hsize_t) :: npoints
-    
-  ! compression parameters
+
   ! compression parameters (defaults taken from ZFP header)
   integer(C_INT) :: zfpmode = 3 !1=rate, 2=prec, 3=acc, 4=expert
   REAL(dp) :: rate = 4_c_double
