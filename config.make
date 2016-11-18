@@ -124,7 +124,7 @@ else ifeq ($(FC),xlf_r)
 else ifeq ($(FC),bgxlf_r)
     FCFLAGS += -qpic
 else ifeq ($(FC),f77)
-# some makefile versions set FC=f77 if FC no value given
+# some makefile versions set FC=f77 if FC is not set
     FC =
 endif
 
