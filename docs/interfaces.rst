@@ -93,5 +93,12 @@ plugin itself. The properties  interface requires that the caller link
 with  an   additional  object  file, ``H5Zzfp_props.o``.  The generic 
 interface does not require this.
 
-Fortran wrappers for the property interface will be developed in an
-upcoming release.
+----
+Fortran Interface
+----
+
+A Fortran interface based on the properties interface, described above,
+has been added by Scot Breitenfeld of the HDF5 group. Currently, the
+code that implements the Fortran interface is in the file ``H5Zzfc.F90``
+in the ``tests`` directory. We will restructure this soon to include
+the Fortran interface as ``module`` during a ``make install``.
