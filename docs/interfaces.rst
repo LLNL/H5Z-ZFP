@@ -101,4 +101,4 @@ A Fortran interface based on the properties interface, described above,
 has been added by Scot Breitenfeld of the HDF5 group. Currently, the
 code that implements the Fortran interface is in the file ``H5Zzfc.F90``
 in the ``tests`` directory. We will restructure this soon to include
-the Fortran interface as ``module`` during a ``make install``.
+the Fortran interface as an instaled ``module`` during a ``make install``.
