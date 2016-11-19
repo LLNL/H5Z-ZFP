@@ -12,6 +12,7 @@ help:
 	@echo ""
 	@echo "where 'path' is a dir whose children are inc/lib/bin subdirs."
 	@echo "Other variables (e.g. CFLAGS, LD, etc.) can be set as usual."
+	@echo "Optionally, add FC=<fortran-compiler> to include Fortran tests."
 	@echo ""
 	@echo "Available make targets are..."
 	@echo "    plugin - build the plugin"
