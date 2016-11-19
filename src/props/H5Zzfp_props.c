@@ -166,10 +166,8 @@ done:
 
     if (ctrls_p)
         free(ctrls_p);
-    va_end(ap);
 
     return retval;
-
 }
 
 herr_t H5Pset_zfp_rate(hid_t plist, double rate)

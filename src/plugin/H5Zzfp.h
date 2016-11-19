@@ -167,7 +167,6 @@ typedef struct _h5z_zfp_controls_t {
     } details;
 } h5z_zfp_controls_t;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
