@@ -8,8 +8,6 @@ ifeq ($(ZFP_HOME),)
     $(warning WARNING: ZFP_HOME not specified)
 endif
 
-MAKEVARS = ZFP_HOME=$(ZFP_HOME) HDF5_HOME=$(HDF5_HOME)
-
 # Construct version variable depending on what dir we're in
 PWD_BASE = $(shell basename $$(pwd))
 ifeq ($(PWD_BASE),src)
@@ -135,8 +133,23 @@ HDF5_INC = $(HDF5_HOME)/include
 HDF5_LIB = $(HDF5_HOME)/lib
 HDF5_BIN = $(HDF5_HOME)/bin
 
-LDFLAGS += -lhdf5
+LDFLAGS += -lhdf5 -lzfp
+
+ifeq ($(PREFIX),)
+    PREFIX := $(shell pwd)/install
+endif
+INSTALL ?= install
+
+MAKEVARS = ZFP_HOME=$(ZFP_HOME) HDF5_HOME=$(HDF5_HOME) PREFIX=$(PREFIX)
+
+.SUFFIXES:
+.SUFFIXES: .c .F90 .h .o .mod
 
 .c.o:
 	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
+.F90.mod:
+	$(FC) -c $< $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+
+.F90.o:
+	$(FC) $< -o $@ -c $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)

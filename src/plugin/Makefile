@@ -18,6 +18,10 @@ plugin: $(PLUGIN_OBJ)
 	$(CC) H5Zzfp.o $(SHFLAG) -o lib/libh5zzfp.$(SOEXT) \
 	    $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(ZFP_LIB) -L$(HDF5_LIB) $(LDFLAGS) -lzfp
 
+install: plugin
+	$(INSTALL) -d $(PREFIX)/lib/plugin
+	$(INSTALL) -b $(PLUGIN_OBJ) $(PREFIX)/lib/plugin
+
 clean:
 	rm -rf lib
 	rm -f $(PLUGIN_OBJ)

@@ -57,15 +57,15 @@ props:
 	cd ../src/props; $(MAKE) $(MAKEVARS) props
 
 test_write: test_write.o props
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) ../src/props/H5Zzfp_props.o -L$(HDF5_LIB) $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) ../src/props/H5Zzfp_props.o -L$(HDF5_LIB) -L$(ZFP_LIB) $(LDFLAGS)
 
 test_read: test_read.o plugin
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) -L$(HDF5_LIB) $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) $(LDFLAGS)
 
 ifneq ($(FC),)
 
 test_rw_fortran: H5Zzfc.o test_rw_fortran.o
-	$(FC) $(FCFLAGS) -o $@ $^ $(PREPATH)$(HDF5_LIB) ../src/props/H5Zzfp_props.o -L$(HDF5_LIB) $(LDFLAGS) -lhdf5_fortran
+	$(FC) $(FCFLAGS) -o $@ $^ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) ../src/props/H5Zzfp_props.o -L$(HDF5_LIB) -L$(ZFP_LIB) $(LDFLAGS) -lhdf5_fortran
 	env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_rw_fortran
 
 %.o:%.F90

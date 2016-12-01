@@ -1,6 +1,6 @@
 include ../config.make
 
-.PHONY: help clean plugin props
+.PHONY: help clean plugin props install
 
 help:
 	@echo "               This is H5Z-ZFP version $(H5Z_ZFP_VERSINFO)."
@@ -25,6 +25,10 @@ plugin:
 	cd plugin; $(MAKE) $(MAKEVARS) $@
 
 props:
+	cd props; $(MAKE) $(MAKEVARS) $@
+
+install:
+	cd plugin; $(MAKE) $(MAKEVARS) $@
 	cd props; $(MAKE) $(MAKEVARS) $@
 
 clean:

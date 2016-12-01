@@ -1,4 +1,4 @@
-MODULE H5Zzfc
+MODULE H5Zzfp_props_f
 
   USE ISO_C_BINDING
   USE HDF5
@@ -53,4 +53,4 @@ MODULE H5Zzfc
     
   END INTERFACE
 
-END MODULE H5Zzfc
+END MODULE H5Zzfp_props_f

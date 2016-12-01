@@ -1,6 +1,6 @@
 include config.make
 
-.PHONY: help all clean dist
+.PHONY: help all clean dist install
 
 help:
 	@echo "               This is H5Z-ZFP version $(H5Z_ZFP_VERSINFO)."
@@ -22,6 +22,9 @@ help:
 all:
 	cd src; $(MAKE) $(MAKEVARS) $@
 	cd test; $(MAKE) $(MAKEVARS) $@
+
+install:
+	cd src; $(MAKE) $(MAKEVARS) $@
 
 clean:
 	rm -f H5Z-ZFP-$(H5Z_ZFP_VERSINFO).tar.gz
