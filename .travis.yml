@@ -1,6 +1,8 @@
 language: C
 
 before_install:
+- sudo apt-get -qq update
+- sudo opt-get install -y gfortran
 - pwd
 - ls
 - pushd /tmp
