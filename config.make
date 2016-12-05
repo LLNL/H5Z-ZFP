@@ -11,18 +11,15 @@ endif
 # Construct version variable depending on what dir we're in
 PWD_BASE = $(shell basename $$(pwd))
 ifeq ($(PWD_BASE),src)
-    H5Z_ZFP_BASE := ./plugin
-else ifeq ($(PWD_BASE),plugin)
     H5Z_ZFP_BASE := .
-else ifeq ($(PWD_BASE),props)
-    H5Z_ZFP_BASE := ../plugin
 else ifeq ($(PWD_BASE),test)
-    H5Z_ZFP_BASE := ../src/plugin
+    H5Z_ZFP_BASE := ../src
 else ifeq ($(PWD_BASE),H5Z-ZFP)
-    H5Z_ZFP_BASE := ./src/plugin
+    H5Z_ZFP_BASE := ./src
 endif
-H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/lib
-H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
+H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
+H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_plugin.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
+$(warning WARNING: $(H5Z_ZFP_VERSINFO))
 
 # Detect system type
 PROCESSOR := $(shell uname -p | tr '[:upper:]' '[:lower:]')
@@ -142,14 +139,11 @@ INSTALL ?= install
 
 MAKEVARS = ZFP_HOME=$(ZFP_HOME) HDF5_HOME=$(HDF5_HOME) PREFIX=$(PREFIX)
 
-.SUFFIXES:
-.SUFFIXES: .c .F90 .h .o .mod
+#.SUFFIXES:
+#.SUFFIXES: .c .F90 .h .o .mod
 
-.c.o:
-	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+#%.o : %.c
+#	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
-.F90.mod:
-	$(FC) -c $< $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
-
-.F90.o:
-	$(FC) $< -o $@ -c $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+#%.o %.mod : %.F90
+#	$(FC) $< -o $@ -c $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)

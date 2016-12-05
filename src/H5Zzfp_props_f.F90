@@ -19,6 +19,16 @@ MODULE H5Zzfp_props_f
   INTEGER, PARAMETER :: H5Z_ZFP_MODE_EXPERT    = 4
 
   INTERFACE
+     INTEGER(C_INT) FUNCTION H5Z_zfp_initialize() BIND(C, NAME='H5Z_zfp_initialize')
+       IMPORT :: C_INT
+       IMPLICIT NONE
+     END FUNCTION H5Z_zfp_initialize
+
+     INTEGER(C_INT) FUNCTION H5Z_zfp_finalize() BIND(C, NAME='H5Z_zfp_finalize')
+       IMPORT :: C_INT
+       IMPLICIT NONE
+     END FUNCTION H5Z_zfp_finalize
+
      INTEGER(C_INT) FUNCTION H5Pset_zfp_rate(plist, rate) BIND(C, NAME='H5Pset_zfp_rate')
        IMPORT :: C_INT, C_DOUBLE, HID_T
        IMPLICIT NONE

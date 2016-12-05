@@ -1,67 +1,3 @@
-/*
-    Copyright (c) 2016, Lawrence Livermore National Security, LLC.
-        Produced at the Lawrence Livermore National Laboratory
-           Written by Mark C. Miller, miller86@llnl.gov
-               LLNL-CODE-707197 All rights reserved.
-
-This file  is part  of H5Z-ZFP.  For details, see
-https://github.com/LLNL/H5Z-ZFP.  Please  also  read  the   Additional
-BSD Notice.
-
-Redistribution and  use in  source and binary  forms, with  or without
-modification, are permitted provided that the following conditions are
-met:
-
-* Redistributions  of  source code  must  retain  the above  copyright
-  notice, this list of conditions and the disclaimer below.
-
-* Redistributions in  binary form  must reproduce the  above copyright
-  notice, this list of conditions  and the disclaimer (as noted below)
-  in  the  documentation  and/or  other materials  provided  with  the
-  distribution.
-
-* Neither the name of the  LLNS/LLNL nor the names of its contributors
-  may  be  used to  endorse  or  promote  products derived  from  this
-  software without specific prior written permission.
-
-THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
-"AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
-LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
-LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
-CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
-PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
-NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Additional BSD Notice
-
-1. This notice is required to  be provided under our contract with the
-U.S. Department  of Energy (DOE).  This work was produced  at Lawrence
-Livermore  National Laboratory  under  Contract No.  DE-AC52-07NA27344
-with the DOE.
-
-2.  Neither  the  United  States  Government  nor  Lawrence  Livermore
-National Security, LLC nor any of their employees, makes any warranty,
-express or implied, or assumes any liability or responsibility for the
-accuracy, completeness,  or usefulness of  any information, apparatus,
-product, or  process disclosed, or  represents that its use  would not
-infringe privately-owned rights.
-
-3.  Also,  reference  herein  to  any  specific  commercial  products,
-process,  or  services  by  trade  name,  trademark,  manufacturer  or
-otherwise does  not necessarily  constitute or imply  its endorsement,
-recommendation,  or  favoring  by  the  United  States  Government  or
-Lawrence Livermore  National Security, LLC. The views  and opinions of
-authors expressed herein do not  necessarily state or reflect those of
-the United States Government  or Lawrence Livermore National Security,
-LLC,  and shall  not be  used for  advertising or  product endorsement
-purposes.
-*/
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -102,7 +38,8 @@ purposes.
 #define B 
 #endif /* ] AS_SILO_BUILTIN */
 
-#include "H5Zzfp.h"
+#include "H5Zzfp_plugin.h"
+#include "H5Zzfp_props_private.h"
 
 /* Convenient CPP logic to capture Z version numbers as compile time string and hex number */
 #define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
@@ -112,6 +49,18 @@ purposes.
 #define ZFP_VERSION_NO__(Maj,Min,Rel)  (0x0 ## Maj ## Min ## Rel)
 #define ZFP_VERSION_NO_(Maj,Min,Rel)   ZFP_VERSION_NO__(Maj,Min,Rel)
 #define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
+
+/* Convenient CPP logic to capture H5Z_ZFP Filter version numbers as string and hex number */
+#define H5Z_FILTER_ZFP_VERSION_STR__(Maj,Min,Pat) #Maj "." #Min "." #Pat
+#define H5Z_FILTER_ZFP_VERSION_STR_(Maj,Min,Pat)  H5Z_FILTER_ZFP_VERSION_STR__(Maj,Min,Pat)
+#define H5Z_FILTER_ZFP_VERSION_STR                H5Z_FILTER_ZFP_VERSION_STR_(H5Z_FILTER_ZFP_VERSION_MAJOR,H5Z_FILTER_ZFP_VERSION_MINOR,H5Z_FILTER_ZFP_VERSION_PATCH)
+
+#define H5Z_FILTER_ZFP_VERSION_NO__(Maj,Min,Pat)  (0x0 ## Maj ## Min ## Pat)
+#define H5Z_FILTER_ZFP_VERSION_NO_(Maj,Min,Pat)   H5Z_FILTER_ZFP_VERSION_NO__(Maj,Min,Pat)
+#define H5Z_FILTER_ZFP_VERSION_NO                 H5Z_FILTER_ZFP_VERSION_NO_(H5Z_FILTER_ZFP_VERSION_MAJOR,H5Z_FILTER_ZFP_VERSION_MINOR,H5Z_FILTER_ZFP_VERSION_PATCH)
+
+#define H5Z_ZFP_CD_NELMTS_MEM ((size_t) 6) /* used in public API to filter */
+#define H5Z_ZFP_CD_NELMTS_MAX ((size_t) 6) /* max, over all versions, used in dataset header */
 
 #define H5Z_ZFP_PUSH_AND_GOTO(MAJ, MIN, RET, MSG)     \
 do                                                    \
@@ -136,29 +85,33 @@ const H5Z_class2_t H5Z_ZFP[1] = {{
     "H5Z-ZFP"               /* Filter name for debugging    */
     "-" H5Z_FILTER_ZFP_VERSION_STR
     " (ZFP-" ZFP_VERSION_STR ") "
-    "github.com/LLNL/H5Z-ZFP; ",
+    "github.com/LLNL/H5Z-ZFP",
     H5Z_zfp_can_apply,      /* The "can apply" callback     */
     H5Z_zfp_set_local,      /* The "set local" callback     */
     H5Z_filter_zfp,         /* The actual filter function   */
 
 }};
 
-#ifdef AS_SILO_BUILTIN
-void        H5Z_zfp_register(void) { H5Zregister(H5Z_ZFP); }
+#ifdef H5Z_ZFP_AS_LIB
+int         H5Z_zfp_initialize(void) { herr_t ret = H5Zregister(H5Z_ZFP); return ret<0?-1:1;}
 #else
 H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
 const void *H5PLget_plugin_info(void) {return H5Z_ZFP;}
 #endif
 
 static hid_t H5Z_ZFP_ERRCLASS = -1;
-#ifndef AS_SILO_BUILTIN
+#ifndef H5Z_ZFP_AS_LIB
 static
 #endif
-void H5Z_zfp_finalize(void)
+int H5Z_zfp_finalize(void)
 {
+    herr_t ret1, ret2;
     if (H5Z_ZFP_ERRCLASS != -1 && H5Z_ZFP_ERRCLASS != H5E_ERR_CLS_g)
-        H5Eunregister_class(H5Z_ZFP_ERRCLASS);
+        ret1 = H5Eunregister_class(H5Z_ZFP_ERRCLASS);
     H5Z_ZFP_ERRCLASS = -1;
+    ret2 = H5Zunregister(H5Z_FILTER_ZFP);
+    if (ret1 < 0 || ret2 < 0) return -1;
+    return 1;
 }
 
 static void H5Z_zfp_init(void)
@@ -170,8 +123,8 @@ static void H5Z_zfp_init(void)
         {
             H5Z_ZFP_ERRCLASS = H5Eregister_class("H5Z-ZFP", "ZFP-" ZFP_VERSION_STR,
                                                  "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
-#if !defined(AS_SILO_BUILTIN) && !defined(NDEBUG)
-        /* helps to eliminate resource leak for memory analysis */
+#if !defined(H5Z_ZFP_AS_LIB) && !defined(NDEBUG)
+            /* helps to eliminate resource leak for memory analysis */
             atexit(H5Z_zfp_finalize);
 #endif
         }

@@ -90,15 +90,19 @@ adding the filter to the pipeline.
 The properties interface  is more type-safe. However, there  is no way
 for the implementation of these properties to reside within the filter
 plugin itself. The properties  interface requires that the caller link
-with  an   additional  object  file, ``H5Zzfp_props.o``.  The generic 
+with  with the filter *library*, ``libh5zzfp.a``.  The generic 
 interface does not require this.
+
+Note that the properties and generic interfaces can be used when the
+filter is used either as a plugin or as a library. The difference
+is whether the application calls ``H5Z_zfp_initialize()`` or not.
 
 ----
 Fortran Interface
 ----
 
 A Fortran interface based on the properties interface, described above,
-has been added by Scot Breitenfeld of the HDF5 group. Currently, the
-code that implements the Fortran interface is in the file ``H5Zzfc.F90``
-in the ``tests`` directory. We will restructure this soon to include
-the Fortran interface as an installed ``module`` during a ``make install``.
+has been added by Scot Breitenfeld of the HDF5 group. The code that
+implements the Fortran interface is in the file ``H5Zzfp_props_f.F90``.
+An example of its use is in ``test/test_rw_fortran.F90``. The properties
+interface is the only interface available for Fortran callers.

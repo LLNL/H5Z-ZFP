@@ -105,17 +105,10 @@ int main(int argc, char **argv)
 
     /* filename variables */
     char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
-    char *ids   = (char *) calloc(NAME_LEN,sizeof(char));
-    char *ofile = (char *) calloc(NAME_LEN,sizeof(char));
-    char *zfile = (char *) calloc(NAME_LEN,sizeof(char));
 
     /* HDF5 dataset info */
     hid_t fid, dsid, dcpl_id, space_id;
     hsize_t npoints;
-
-    /* generated data params */
-    double noise = 0.001;
-    double amp = 17.7;
 
     /* compressed/uncompressed difference stat variables */
     double max_absdiff = 0;
@@ -124,20 +117,18 @@ int main(int argc, char **argv)
     
     /* file arguments */
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
-    HANDLE_ARG(ids,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input datast name);
-    HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
-    HANDLE_ARG(zfile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set compressed filename);
-
-    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in generated dataset);
-    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in generated dataset);
 
     /* exit if help is requested */
     for (i = 1; i < argc; i++)
         if (strcasestr(argv[i],"help")!=0) return 0;
 
-    /* setup output filename if not already specified */
+    /* setup input filename if not already specified */
     if (ifile[0] == '\0')
         strncpy(ifile, "test_zfp.h5", NAME_LEN);
+
+#ifndef H5Z_ZFP_USE_PLUGIN
+    H5Z_zfp_initialize();
+#endif
 
     /* open the HDF5 file */
     if (0 > (fid = H5Fopen(ifile, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
@@ -162,7 +153,7 @@ int main(int argc, char **argv)
     if (0 > H5Pclose(dcpl_id)) ERROR(H5Pclose);
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
-    /* compare to generated data */
+    /* compare original to compressed */
     for (i = 0; i < npoints; i++)
     {
         double absdiff = obuf[i] - cbuf[i];
@@ -183,9 +174,6 @@ int main(int argc, char **argv)
     free(obuf);
     free(cbuf);
     free(ifile);
-    free(ids);
-    free(ofile);
-    free(zfile);
 
     return 0;
 }

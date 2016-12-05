@@ -2,7 +2,7 @@ PROGRAM main
 
   USE ISO_C_BINDING
   USE HDF5
-  USE H5Zzfc
+  USE h5zzfp_props_f
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: dp = C_DOUBLE
@@ -46,7 +46,7 @@ PROGRAM main
   INTEGER(hsize_t), DIMENSION(1:2) ::  dims = (/DIM0, DIM1/)
   INTEGER(hsize_t), DIMENSION(1:2) ::  chunk2 = (/CHUNK0, CHUNK1/)
   REAL(dp), DIMENSION(:), ALLOCATABLE, TARGET :: obuf, cbuf
-  CHARACTER(LEN=180) :: ofile="test_zfp.h5"
+  CHARACTER(LEN=180) :: ofile="test_zfp_fortran.h5"
 
   INTEGER :: status
   TYPE(C_PTR) :: f_ptr
@@ -126,6 +126,10 @@ PROGRAM main
   CALL h5open_f(status)
   CALL check("h5open_f", status, nerr)
 
+  ! initialize the ZFP filter
+  status = H5Z_zfp_initialize()
+  CALL check("H5Z_zfp_initialize", status, nerr)
+
   ! create HDF5 file 
   CALL h5fcreate_f(ofile, H5F_ACC_TRUNC_F, fid, status)
   CALL check("h5fcreate_f", status, nerr)
@@ -178,7 +182,7 @@ PROGRAM main
   CALL check("h5dclose_f", status, nerr)
 
   ! write data using default parameters
-  CALL h5dcreate_f(fid, "compressed default", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
+  CALL h5dcreate_f(fid, "compressed_default", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
   CALL check("h5dcreate_f", status, nerr)
   f_ptr = C_LOC(wdata(1,1))
   CALL h5dwrite_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
@@ -241,7 +245,7 @@ PROGRAM main
   CALL check("H5Dclose_f", status, nerr)
 
   ! read the compressed dataset 
-  CALL h5dopen_f (fid, "compressed default", dsid, status)
+  CALL h5dopen_f (fid, "compressed_default", dsid, status)
   CALL check("", status, nerr)
   CALL H5Dget_create_plist_f(dsid, dcpl_id, status )
   CALL check("", status, nerr)
@@ -286,6 +290,10 @@ PROGRAM main
    ENDIF
 
    DEALLOCATE(obuf, cbuf)
+
+   ! initialize the ZFP filter
+   status = H5Z_zfp_finalize()
+   CALL check("H5Z_zfp_finalize", status, nerr)
 
    CALL H5close_f(status)
 
