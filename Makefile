@@ -4,11 +4,12 @@ include config.make
 
 help:
 	@echo "               This is H5Z-ZFP version $(H5Z_ZFP_VERSINFO)."
-	@echo "           See README file for detailed information."
+	@echo "See http://h5z-zfp.readthedocs.io/en/latest/ file for detailed information."
 	@echo ""
 	@echo "Typical make command is..."
 	@echo ""
-	@echo "    make CC=<c-compiler> HDF5_HOME=<path> ZFP_HOME=<path> plugin"
+	@echo "    make [FC=<Fortran-compiler>] CC=<C-compiler> HDF5_HOME=<path> \\"
+	@echo "    ZFP_HOME=<path> PREFIX=<path> all"
 	@echo ""
 	@echo "where 'path' is a dir whose children are inc/lib/bin subdirs."
 	@echo "Other variables (e.g. CFLAGS, LD, etc.) can be set as usual."
@@ -16,6 +17,7 @@ help:
 	@echo ""
 	@echo "Available make targets are..."
 	@echo "    all - build everything and run tests"
+	@echo "    install - install compiled components"
 	@echo "    clean - clean away all derived targets"
 	@echo "    dist - create distribution tarfile"
 

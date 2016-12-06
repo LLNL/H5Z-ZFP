@@ -114,6 +114,11 @@ int H5Z_zfp_finalize(void)
     return 1;
 }
 
+static void H5Z_zfp_final(void)
+{
+    H5Z_zfp_finalize();
+}
+
 static void H5Z_zfp_init(void)
 {
     /* Register the error class */
@@ -125,7 +130,7 @@ static void H5Z_zfp_init(void)
                                                  "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
 #if !defined(H5Z_ZFP_AS_LIB) && !defined(NDEBUG)
             /* helps to eliminate resource leak for memory analysis */
-            atexit(H5Z_zfp_finalize);
+            atexit(H5Z_zfp_final);
 #endif
         }
         else
