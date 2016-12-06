@@ -17,7 +17,7 @@ Generic Interface
 -----------------
 
 For the generic interface, the following CPP macros  are defined in
-the ``H5Zzfp.h`` header file::
+the ``H5Zzfp_plugin.h`` header file::
 
     H5Pset_zfp_rate_cdata(double rate, size_t cd_nelmts, unsigned int *cd_vals);
     H5Pset_zfp_precision_cdata(unsigned int prec, size_t cd_nelmts, unsigned int *cd_vals);
@@ -33,7 +33,7 @@ the  caller to  then call
 with  the array  of cd_values constructed by one of these macros.
 
 However, these  macros are only a  convenience. You do  not **need** the
-``H5Zzfp.h`` header file if you want  to avoid using it. But, you are then
+``H5Zzfp_plugin.h`` header file if you want  to avoid using it. But, you are then
 responsible  for setting  up  the ``cd_values``  array  correctly for  the
 filter.  For reference,  the ``cd_values``  array for  this ZFP  filter is
 defined like so...
@@ -71,7 +71,7 @@ Properties Interface
 ----------
 
 For the properties interface, the following functions are defined in
-the ``H5Zzfp.h`` header file::
+the ``H5Zzfp_props.h`` header file::
 
     herr_t H5Pset_zfp_rate(hid_t dcpl_id, double rate);
     herr_t H5Pset_zfp_precision(hid_t dcpl_id, unsigned int prec);
@@ -132,6 +132,7 @@ Instead two initialization and finalization routines are defined::
     int H5Z_zfp_initialize(void);
     int H5Z_zfp_finalize(void);
 
+These functions are defined in the ``H5Zzfp_lib.h`` header file.
 Any applications that wish to use the filter as a *library* are required to call
 the initialization routine, ``H5Z_zfp_initialize()`` before the filter can be
 referenced. In addition, to free up resources used by the filter, applications may
