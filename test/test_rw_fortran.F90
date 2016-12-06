@@ -176,7 +176,7 @@ PROGRAM main
   CALL h5dcreate_f(fid, "original", H5T_NATIVE_DOUBLE, sid, dsid, status)
   CALL check("h5dcreate_f", status, nerr)
   f_ptr = C_LOC(wdata(1,1))
-  CALL h5dwrite_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, dims, status)
+  CALL h5dwrite_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
   CALL check("h5dwrite_f", status, nerr)
   CALL h5dclose_f(dsid,status)
   CALL check("h5dclose_f", status, nerr)
