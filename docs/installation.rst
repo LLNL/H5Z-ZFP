@@ -19,7 +19,7 @@ Compiling ZFP
 * An important flag you **will** need to adjust in order to use the ZFP library with this HDF5 filter is
   the ``BIT_STREAM_WORD_TYPE`` CPP flag. To use ZFP with H5Z-ZFP, the ZFP library **must** be compiled
   with ``BIT_STREAM_WORD_TYPE`` of ``uint8``. Typically, this is achieved by including a line in ``Config``
-   of the form ``DEFS += -DBIT_STREAM_WORD_TYPE=uint8``. If you attempt to use this filter with a ZFP
+  of the form ``DEFS += -DBIT_STREAM_WORD_TYPE=uint8``. If you attempt to use this filter with a ZFP
   library compiled  differently from this, the  filter's ``can_apply`` method will always return
   false. This will result in silently ignoring an HDF5 client's  request to compress data with
   ZFP. Also, be sure to see :ref:`endian-issues`.
@@ -44,9 +44,9 @@ H5Z-ZFP is designed to be compiled both as a standalone HDF5 *plugin* and as a s
 
 Once you have installed the prerequisites, you can compile H5Z-ZFP using a command-line...
 
-| make [FC=<Fortran-compiler>] CC=<C-compiler> \
-|     ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5> \
-|     PREFIX=<path-to-install>``
+| make [FC=<Fortran-compiler>] CC=<C-compiler>
+|     ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5>
+|     PREFIX=<path-to-install>
 
 where ``<path-to-zfp>`` is a directory containing ZFP ``inc`` and ``lib`` dirs and
 ``<path-to-hdf5>`` is a directory containing HDF5 ``include`` and ``lib`` dirs.
