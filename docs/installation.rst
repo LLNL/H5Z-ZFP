@@ -6,7 +6,7 @@ Installation
 Prerequisites
 ----
 
-* Get the ZFP Library `here <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ or on `Github <https://github.com/LLNL/zfp>`_
+* `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
 * `HDF5 Library <https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz>`_
 
 ^^^^
@@ -16,13 +16,13 @@ Compiling ZFP
 * There is a ``Config`` file in top-level directory of the ZFP distribution that holds ``make`` variables
   the ZFP Makefiles use. By default, this file is setup for a vanilla GNU compiler. If this is not the
   appropriate compiler, edit ``Config`` as necessary to adjust the compiler and compilation flags.
-* An important flag you **will** need to adjust in order to use the ZFP library as an HDF5 filter is
-  the ``BIT_STREAM_WORD_TYPE`` flag. To use ZFP with H5Z-ZFP, ZFP **must** be compiled with ``BIT_STREAM_WORD_TYPE``
-  of ``uint8``. Typically, this is achieved by including a line in ``Config`` of the form
-  ``DEFS += -DBIT_STREAM_WORD_TYPE=uint8``. If you attempt to use this filter with a ZFP
-  library compiled  differently from this, the  filter's can_apply method will always return
+* An important flag you **will** need to adjust in order to use the ZFP library with this HDF5 filter is
+  the ``BIT_STREAM_WORD_TYPE`` CPP flag. To use ZFP with H5Z-ZFP, the ZFP library **must** be compiled
+  with ``BIT_STREAM_WORD_TYPE`` of ``uint8``. Typically, this is achieved by including a line in ``Config``
+   of the form ``DEFS += -DBIT_STREAM_WORD_TYPE=uint8``. If you attempt to use this filter with a ZFP
+  library compiled  differently from this, the  filter's ``can_apply`` method will always return
   false. This will result in silently ignoring an HDF5 client's  request to compress data with
-  ZFP. Also, see :ref:`endian-issues`
+  ZFP. Also, be sure to see :ref:`endian-issues`.
 * After you have setup ``Config``, simply run ``make`` and it will build the ZFP library placing
   the library in a ``lib`` sub-directory and the necessary include files in ``inc`` sub-directory.
 
@@ -39,18 +39,20 @@ Compiling HDF5
 Compiling H5Z-ZFP
 ----
 
-H5Z-ZFP is designed to be compiled as both a standalone HDF5 *plugin* and as a separate
-an application can explicitly link to *library*.
+H5Z-ZFP is designed to be compiled both as a standalone HDF5 *plugin* and as a separate
+*library* an application can explicitly link. See :ref:`plugin-vs-library`.
 
-Once you have installed the prerequisites, you can compile H5Z-ZFP using a command-line
+Once you have installed the prerequisites, you can compile H5Z-ZFP using a command-line...
 
-``make [FC=<Fortran-compiler>] CC=<C-compiler> ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5> PREFIX=<path-to-install>``
+| make [FC=<Fortran-compiler>] CC=<C-compiler> \
+|     ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5> \
+|     PREFIX=<path-to-install>``
 
 where ``<path-to-zfp>`` is a directory containing ZFP ``inc`` and ``lib`` dirs and
 ``<path-to-hdf5>`` is a directory containing HDF5 ``include`` and ``lib`` dirs.
-If you don't specify a C compiler, it will try to guess one to use. Fortran compilation
-is optional. If you do not specify a Fortran compiler, it will not attempt to build
-the Fortran interface.
+If you don't specify a C compiler, it will try to guess one from your path. Fortran
+compilation is optional. If you do not specify a Fortran compiler, it will not attempt
+to build the Fortran interface.
 
 The Makefile uses  GNU Make syntax and is designed to  work on OSX and
 Linux. The filter has been tested on gcc, clang, xlc, icc and pgcc  compilers
@@ -69,7 +71,7 @@ filter will look like...
 
 where ``$(PREFIX)`` resolves to whatever the full path of the installation is.
 
-To use the installed plugin with HDF5, you would specify, for example,
+To use the installed filter as an HDF5 *plugin*, you would specify, for example,
 ``setenv HDF5_PLUGIN_PATH $(PREFIX)/plugin``
 
 ----
@@ -79,9 +81,10 @@ H5Z-ZFP Source Code Organization
 The source code is in two separate directories
 
     * ``src`` includes the ZFP filter and a few header files
+
         * ``H5Zzfp_plugin.h`` is an optional header file applications *may* wish
           to include because it contains several convenient macros for easily
-          controlling the various compression modes of the ZFP library (*rate*,
+          controlling various compression modes of the ZFP library (*rate*,
           *precision*, *accuracy*, *expert*) via the :ref:`generic-interface`. 
         * ``H5Zzfp_props.h`` is a header file that contains functions to control the
           filter using *temporary* :ref:`properties-interface`. Fortran callers are
@@ -90,32 +93,10 @@ The source code is in two separate directories
           explicitly as a library rather than a plugin.
         * ``H5Zzfp.h`` is an *all-of-the-above* header file for applications that don't
           care too much about separating out the above functionalities.
+
     * ``test`` includes various tests. In particular ``test_write.c`` includes examples
       of using both the :ref:`generic-interface` and :ref:`properties-interface`. In 
       addition, there is an example of how to use the filter from Fortran in ``test_rw_fortran.F90``.
-
-----
-Plugin vs. Library Operation
-----
-
-The filter is designed to be compiled for use as both a standalone HDF5 *plugin*
-and as an explicitly linked *library*.
-When it is used as a plugin, all HDF5 applications are *required*
-to *find* the plugin shared library (named ``lib*.{so,dylib}``)
-in a directory specified by the enviornment
-variable, ``HDF5_PLUGIN_PATH``. Currently, the HDF5 library offers
-no mechanism for applications themselves to have pre-programmed
-in the directory(s) in which to search for a plugin. Applications are
-then always vulnerable to an incorrectly specified or unspecified ``HDF5_PLUGIN_PATH``
-environment variable.
-
-However, the plugin can also be used explicitly as a *library*. In this case,
-**do** **not** specify the ``HDF5_PLUGIN_PATH`` enviornment variable and instead
-have the application link to ``libH5Zzfp.a`` in the ``lib`` dir of the installation.
-Also, any such applications are then required to call an initialization routine,
-``H5Z_zfp_initialize()`` before the filter can be referenced. In addition,
-to free up resources used by the filter, applications may call ``H5Z_zfp_finalize()``
-when they are done using the filter.
 
 ----
 Silo Integration
@@ -126,6 +107,5 @@ In particular, the ZFP library
 itself is also embedded in Silo but is protected from appearing in Silo's
 global namespace through a struct of function pointers (see `Namespaces in C <https://visitbugs.ornl.gov/projects/silo/wiki/Using_C_structs_as_a_kind_of_namespace_mechanism_to_reduce_global_symbol_bloat>`_.
 If you happen to examine the source code for H5Z-ZFP, you will see some logic there
-that is specific to using this plugin within Silo and dealing with this
-struct of function pointers wrapper. Just ignore this.
-
+that is specific to using this plugin within Silo and dealing with ZFP as an embedded
+library using this struct of function pointers wrapper. Just ignore this.

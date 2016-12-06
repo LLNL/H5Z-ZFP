@@ -106,3 +106,33 @@ has been added by Scot Breitenfeld of the HDF5 group. The code that
 implements the Fortran interface is in the file ``H5Zzfp_props_f.F90``.
 An example of its use is in ``test/test_rw_fortran.F90``. The properties
 interface is the only interface available for Fortran callers.
+
+.. _plugin-vs-library:
+
+----
+Plugin vs. Library Operation
+----
+
+The filter is designed to be compiled for use as both a standalone HDF5 *plugin*
+and as an explicitly linked *library*.
+When it is used as a plugin, all HDF5 applications are *required*
+to *find* the plugin dynamic library (named ``lib*.{so,dylib}``)
+in a directory specified by the enviornment
+variable, ``HDF5_PLUGIN_PATH``. Currently, the HDF5 library offers
+no mechanism for applications themselves to have pre-programmed
+paths in which to search for a plugin. Applications are
+then always vulnerable to an incorrectly specified or unspecified ``HDF5_PLUGIN_PATH``
+environment variable.
+
+However, the plugin can also be used explicitly as a *library*. In this case,
+**do** **not** specify the ``HDF5_PLUGIN_PATH`` enviornment variable and instead
+have the application link to ``libH5Zzfp.a`` in the ``lib`` dir of the installation.
+Instead two initialization and finalization routines are defined::
+
+    int H5Z_zfp_initialize(void);
+    int H5Z_zfp_finalize(void);
+
+Any applications that wish to use the filter as a *library* are required to call
+the initialization routine, ``H5Z_zfp_initialize()`` before the filter can be
+referenced. In addition, to free up resources used by the filter, applications may
+call ``H5Z_zfp_finalize()`` when they are done using the filter.
