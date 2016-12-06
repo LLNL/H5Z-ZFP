@@ -129,8 +129,6 @@ HDF5_INC = $(HDF5_HOME)/include
 HDF5_LIB = $(HDF5_HOME)/lib
 HDF5_BIN = $(HDF5_HOME)/bin
 
-LDFLAGS += -lhdf5 -lzfp
-
 ifeq ($(PREFIX),)
     PREFIX := $(shell pwd)/install
 endif

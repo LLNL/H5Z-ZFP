@@ -40,7 +40,7 @@ test_read_lib: test_read_lib.o lib
 ifneq ($(FC),)
 
 test_rw_fortran: test_rw_fortran.o lib
-	$(FC) $(FCFLAGS) -o $@ $< $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) $(LDFLAGS) -lh5zzfp -lhdf5_fortran
+	$(FC) $(FCFLAGS) -o $@ $< $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5_fortran -lhdf5 -lzfp $(LDFLAGS)
 	./test_rw_fortran
 
 %.o:%.F90
