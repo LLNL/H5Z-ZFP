@@ -453,7 +453,7 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
 
     H5Z_zfp_init();
 
-    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0040)
+    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0060)
         return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
 
     H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,
