@@ -10,6 +10,11 @@ HDF5 data using both of these interfaces in ``test_write.c``.
 
 The plugin is designed to respond correctly when either interface is used.
 
+The filter supports all of the standard ZFP controls for affecting compression
+including *rate*, *precision*, *accuracy*, and *expert* modes. For more information
+and details about these modes of controlling ZFP compression, please see the
+`ZFP README <https://github.com/LLNL/zfp/blob/master/README.md>`_.
+
 .. _generic-interface:
 
 -----------------

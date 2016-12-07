@@ -25,6 +25,7 @@ Compiling ZFP
   ZFP. Also, be sure to see :ref:`endian-issues`.
 * After you have setup ``Config``, simply run ``make`` and it will build the ZFP library placing
   the library in a ``lib`` sub-directory and the necessary include files in ``inc`` sub-directory.
+* For more information and details, please see the `ZFP README <https://github.com/LLNL/zfp/blob/master/README.md>`_.
 
 ^^^^
 Compiling HDF5
