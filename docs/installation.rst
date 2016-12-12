@@ -33,8 +33,10 @@ Compiling HDF5
 
 * If you want to be able to run the fortran tests for this filter, HDF5 must be
   configured with *both* the ``--enable-fortran`` and ``--enable-fortran2003``
-  configuration switches. The Fortran interface to this filter *requires* Fortran 2003
-  because it uses ``ISO_C_BINDING``.
+  configuration switches. Otherwise, any vanilla installation of HDF5 is acceptable.
+  
+* The Fortran interface to this filter *requires* a Fortran 2003 compiler
+  because it uses ``ISO_C_BINDING`` to define the Fortran interface.
 
 ----
 Compiling H5Z-ZFP
