@@ -13,8 +13,8 @@ stream with ZFP, the correct endian-ness is returned in the result from
 ZFP before the buffer is handed back to HDF5 from the decompression
 filter. This happens regardless of
 reader  and  writer  endian-ness  incompatability.  However,  the HDF5
-library is expecting to get from the decompression filter the endieness
-the  endian-ness  of the data as it was stored to to file (typically
+library is expecting to get from the decompression filter the endian-ness
+of the data as it was stored to to file (typically
 that of  the  writer machine)  and  expects to have to byte-swap that
 buffer before returning to any endian-incompatible caller. So, in the H5Z-ZFP plugin, we wind up having
 to  un-byte-swap an already correct result read in a cross-endian context. That way, when
