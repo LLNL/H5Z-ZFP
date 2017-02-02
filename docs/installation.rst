@@ -8,7 +8,7 @@ Prerequisites
 
 * `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
 * `HDF5 Library <https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz>`_
-* _`H5Z-ZFP filter plugin <https://github.com/LLNL/H5Z-ZFP>`_
+* `H5Z-ZFP filter plugin <https://github.com/LLNL/H5Z-ZFP>`_
 
 ^^^^
 Compiling ZFP
