@@ -8,6 +8,7 @@ Prerequisites
 
 * `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
 * `HDF5 Library <https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz>`_
+* `H5Z-ZFP filter plugin <https://github.com/LLNL/H5Z-ZFP>`_
 
 ^^^^
 Compiling ZFP
@@ -33,8 +34,10 @@ Compiling HDF5
 
 * If you want to be able to run the fortran tests for this filter, HDF5 must be
   configured with *both* the ``--enable-fortran`` and ``--enable-fortran2003``
-  configuration switches. The Fortran interface to this filter *requires* Fortran 2003
-  because it uses ``ISO_C_BINDING``.
+  configuration switches. Otherwise, any vanilla installation of HDF5 is acceptable.
+  
+* The Fortran interface to this filter *requires* a Fortran 2003 compiler
+  because it uses ``ISO_C_BINDING`` to define the Fortran interface.
 
 ----
 Compiling H5Z-ZFP
@@ -106,7 +109,7 @@ Silo Integration
 This plugin is also part of the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
 In particular, the ZFP library
 itself is also embedded in Silo but is protected from appearing in Silo's
-global namespace through a struct of function pointers (see `Namespaces in C <https://visitbugs.ornl.gov/projects/silo/wiki/Using_C_structs_as_a_kind_of_namespace_mechanism_to_reduce_global_symbol_bloat>`_.
+global namespace through a struct of function pointers (see `Namespaces in C) <https://visitbugs.ornl.gov/projects/silo/wiki/Using_C_structs_as_a_kind_of_namespace_mechanism_to_reduce_global_symbol_bloat>`_.
 If you happen to examine the source code for H5Z-ZFP, you will see some logic there
 that is specific to using this plugin within Silo and dealing with ZFP as an embedded
 library using this struct of function pointers wrapper. Just ignore this.
