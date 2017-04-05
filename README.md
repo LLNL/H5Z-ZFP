@@ -18,7 +18,8 @@ For information about HDF5 filter plugins, see...
 
 This H5Z-ZFP plugin supports both ZFP version 0.5.0 and 0.5.1.
 
-This plugin uses the *registered* HDF5 plugin filter id 32013
+This plugin uses the [*registered*](https://support.hdfgroup.org/services/filters.html#zfp)
+HDF5 plugin filter id 32013
 
 The  HDF5  filter  plugin  code here is also part of the Silo library.
 However, we have made an  effort to also support  it as a  stand-alone
