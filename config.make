@@ -122,7 +122,11 @@ else ifeq ($(FC),f77)
     FC =
 endif
 
+ifeq ($(wildcard $(ZFP_HOME)/include),)
 ZFP_INC = $(ZFP_HOME)/inc
+else
+ZFP_INC = $(ZFP_HOME)/include
+endif
 ZFP_LIB = $(ZFP_HOME)/lib
 
 HDF5_INC = $(HDF5_HOME)/include

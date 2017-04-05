@@ -55,21 +55,34 @@ do {                                                              \
 } while(0)
 
 /* Generate a simple, 1D sinusioidal data array with some noise */
-static int gen_data(size_t npoints, double noise, double amp, double **_buf)
+#define TYPINT 1
+#define TYPDBL 2
+static int gen_data(size_t npoints, double noise, double amp, void **_buf, int typ)
 {
     size_t i;
-    double *buf;
+    double *pdbl = 0;
+    int *pint = 0;
 
     /* create data buffer to write */
-    buf = (double *) malloc(npoints * sizeof(double));
+    if (typ == TYPINT)
+        pint = (int *) malloc(npoints * sizeof(int));
+    else
+        pdbl = (double *) malloc(npoints * sizeof(double));
     srandom(0xDeadBeef);
     for (i = 0; i < npoints; i++)
     {
         double x = 2 * M_PI * (double) i / (double) (npoints-1);
         double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
-        buf[i] = amp * (1 + sin(x)) + n;
+        if (typ == TYPINT)
+            pint[i] = (int) (amp * (1 + sin(x)) + n);
+        else
+            pdbl[i] = (double) (amp * (1 + sin(x)) + n);
     }
-    *_buf = buf;
+    if (typ == TYPINT)
+        *_buf = pint;
+    else
+        *_buf = pdbl;
+    return 0;
 }
 
 static int read_data(char const *fname, size_t npoints, double **_buf)
@@ -81,6 +94,7 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
     if (0 == (*_buf = (double *) malloc(nbytes))) ERROR(malloc);
     if (nbytes != read(fd, *_buf, nbytes)) ERROR(read);
     if (0 != close(fd)) ERROR(close);
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -103,6 +117,7 @@ int main(int argc, char **argv)
     hsize_t npoints = 1024;
     double noise = 0.001;
     double amp = 17.7;
+    int doint = 0;
 
     /* compression parameters (defaults taken from ZFP header) */
     int zfpmode = H5Z_ZFP_MODE_ACCURACY;
@@ -113,11 +128,12 @@ int main(int argc, char **argv)
     uint maxbits = 4171;
     uint maxprec = 64;
     int minexp = -1074;
+    int *ibuf = 0;
     double *buf = 0;
 
     /* HDF5 related variables */
     hsize_t chunk = 256;
-    hid_t fid, dsid, sid, cpid;
+    hid_t fid, dsid, idsid, sid, cpid;
     unsigned int cd_values[10];
     int cd_nelmts = 10;
 
@@ -136,6 +152,7 @@ int main(int argc, char **argv)
     HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for generated dataset);
     HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in generated dataset);
     HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in generated dataset);
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer data);
 
     /* HDF5 chunking and ZFP filter arguments */
     HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for dataset);
@@ -152,11 +169,15 @@ int main(int argc, char **argv)
     if (ofile[0] == '\0')
         strncpy(ofile, "test_zfp.h5", NAME_LEN);
 
-    /* create data to write if we're not reading from an existing file */
+    /* create double data to write if we're not reading from an existing file */
     if (ifile[0] == '\0')
-        gen_data((size_t) npoints, noise, amp, &buf);
+        gen_data((size_t) npoints, noise, amp, (void**)&buf, TYPDBL);
     else
         read_data(ifile, (size_t) npoints, &buf);
+
+    /* create integer data to write */
+    if (doint)
+        gen_data((size_t) npoints, noise*100, amp*1000000, (void**)&ibuf, TYPINT);
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
@@ -222,11 +243,23 @@ int main(int argc, char **argv)
     if (0 > (dsid = H5Dcreate(fid, "original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
     if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
     if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (doint)
+    {
+        if (0 > (idsid = H5Dcreate(fid, "int_original", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite(idsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf)) ERROR(H5Dwrite);
+        if (0 > H5Dclose(idsid)) ERROR(H5Dclose);
+    }
 
     /* write the data with requested compression */
     if (0 > (dsid = H5Dcreate(fid, "compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
     if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
     if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (doint)
+    {
+        if (0 > (idsid = H5Dcreate(fid, "int_compressed", H5T_NATIVE_INT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite(idsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf)) ERROR(H5Dwrite);
+        if (0 > H5Dclose(idsid)) ERROR(H5Dclose);
+    }
 
     /* clean up */
     if (0 > H5Sclose(sid)) ERROR(H5Sclose);

@@ -5,13 +5,16 @@
 #define H5Z_FILTER_ZFP 32013
 
 #define H5Z_FILTER_ZFP_VERSION_MAJOR 0
-#define H5Z_FILTER_ZFP_VERSION_MINOR 6
+#define H5Z_FILTER_ZFP_VERSION_MINOR 7
 #define H5Z_FILTER_ZFP_VERSION_PATCH 0
 
 #define H5Z_ZFP_MODE_RATE      1
 #define H5Z_ZFP_MODE_PRECISION 2
 #define H5Z_ZFP_MODE_ACCURACY  3
 #define H5Z_ZFP_MODE_EXPERT    4
+
+#define H5Z_ZFP_CD_NELMTS_MEM ((size_t) 6) /* used in public API to filter */
+#define H5Z_ZFP_CD_NELMTS_MAX ((size_t) 6) /* max, over all versions, used in dataset header */
 
 /* HDF5 filter cd_vals[] layout (6 unsigned ints)
 cd_vals    0       1        2         3         4         5    

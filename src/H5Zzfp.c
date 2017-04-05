@@ -59,9 +59,6 @@
 #define H5Z_FILTER_ZFP_VERSION_NO_(Maj,Min,Pat)   H5Z_FILTER_ZFP_VERSION_NO__(Maj,Min,Pat)
 #define H5Z_FILTER_ZFP_VERSION_NO                 H5Z_FILTER_ZFP_VERSION_NO_(H5Z_FILTER_ZFP_VERSION_MAJOR,H5Z_FILTER_ZFP_VERSION_MINOR,H5Z_FILTER_ZFP_VERSION_PATCH)
 
-#define H5Z_ZFP_CD_NELMTS_MEM ((size_t) 6) /* used in public API to filter */
-#define H5Z_ZFP_CD_NELMTS_MAX ((size_t) 6) /* max, over all versions, used in dataset header */
-
 #define H5Z_ZFP_PUSH_AND_GOTO(MAJ, MIN, RET, MSG)     \
 do                                                    \
 {                                                     \
@@ -155,12 +152,16 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
+#if ZFP_VERSION_NO < 0x0051
     if (B stream_word_bits != 8)
+#else
+    if (B stream_word_bits() != 8)
+#endif
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, -1,
             "ZFP lib not compiled with -DBIT_STREAM_WORD_TYPE=uint8");
 
     /* get datatype class, size and space dimensions */
-    if (0 == (dclass = H5Tget_class(type_id)))
+    if (H5T_NO_CLASS == (dclass = H5Tget_class(type_id)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, -1, "bad datatype class");
 
     if (0 == (dsize = H5Tget_size(type_id)))
@@ -170,9 +171,15 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, -1, "bad chunk data space");
 
     /* confirm ZFP library can handle this data */
+#if ZFP_VERSION_NO < 0x0051
+    if (!(dclass == H5T_FLOAT))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0,
+            "requires datatype class of H5T_FLOAT");
+#else
     if (!(dclass == H5T_FLOAT || dclass == H5T_INTEGER))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0,
             "requires datatype class of H5T_FLOAT or H5T_INTEGER");
+#endif
 
     if (!(dsize == 4 || dsize == 8))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0,
@@ -307,10 +314,18 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                 Z zfp_stream_set_rate(dummy_zstr, ctrls.details.rate, zt, ndims, 0);
                 break;
             case H5Z_ZFP_MODE_PRECISION:
+#if ZFP_VERSION_NO < 0x0051
                 Z zfp_stream_set_precision(dummy_zstr, ctrls.details.prec, zt);
+#else
+                Z zfp_stream_set_precision(dummy_zstr, ctrls.details.prec);
+#endif
                 break;
             case H5Z_ZFP_MODE_ACCURACY:
+#if ZFP_VERSION_NO < 0x0051
                 Z zfp_stream_set_accuracy(dummy_zstr, ctrls.details.acc, zt);
+#else
+                Z zfp_stream_set_accuracy(dummy_zstr, ctrls.details.acc);
+#endif
                 break;
             case H5Z_ZFP_MODE_EXPERT:
                 Z zfp_stream_set_params(dummy_zstr, ctrls.details.expert.minbits,
@@ -329,10 +344,18 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                 Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
                 break;
             case H5Z_ZFP_MODE_PRECISION:
+#if ZFP_VERSION_NO < 0x0051
                 Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
+#else
+                Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2]);
+#endif
                 break;
             case H5Z_ZFP_MODE_ACCURACY:
+#if ZFP_VERSION_NO < 0x0051
                 Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
+#else
+                Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]));
+#endif
                 break;
             case H5Z_ZFP_MODE_EXPERT:
                 Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
@@ -453,7 +476,7 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
 
     H5Z_zfp_init();
 
-    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0060)
+    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0070)
         return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
 
     H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,

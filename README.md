@@ -1,6 +1,6 @@
 # H5Z-ZFP
 
-A highly flexible floating point
+A highly flexible floating point and integer
 compression plugin for the HDF5 library using ZFP compression.
 
 [![Build Status](https://travis-ci.org/LLNL/H5Z-ZFP.svg?branch=master)](https://travis-ci.org/LLNL/H5Z-ZFP)
@@ -16,7 +16,7 @@ For information about HDF5 filter plugins, see...
 
 - https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
 
-This H5Z-ZFP plugin was originally written for ZFP version 0.5.0.
+This H5Z-ZFP plugin supports both ZFP version 0.5.0 and 0.5.1.
 
 This plugin uses the *registered* HDF5 plugin filter id 32013
 
@@ -27,8 +27,8 @@ compression library.
 
 This plugin supports all 4 modes of the ZFP compression library, *rate*,
 *accuracy*, *precision* and *expert*. It supports 1, 2 and 3 dimensional
-datasets of single and double precision floating point data.  It can be applied
-to HDF5 datasets of more than 3 dimensions as  long as no more than 3 
-dimensions of the chunking are of size greater than 1.
+datasets of single and double precision integer and floating point data.
+It can be applied to HDF5 datasets of more than 3 dimensions as  long as
+no more than 3 dimensions of the chunking are of size greater than 1.
 
 [**Full documentation**](http://h5z-zfp.readthedocs.io)
