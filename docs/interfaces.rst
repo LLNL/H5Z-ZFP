@@ -5,7 +5,9 @@ Interfaces
 There  are two  interfaces  to  control the  filter.  One uses  HDF5's
 *generic* interface via  an array of ``unsigned int cd_values`` as is used
 in `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_. The other
-uses HDF5 *unregistered* properties. You  can find examples  of writing
+uses HDF5 `generic <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#GenericPropFuncs>`_ properties
+added to the `dataset creation property list <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#DatasetCreatePropFuncs>`_
+used when the dataset to be compressed is being created. You  can find examples  of writing
 HDF5 data using both of these interfaces in ``test_write.c``.
 
 The plugin is designed to respond correctly when either interface is used.
