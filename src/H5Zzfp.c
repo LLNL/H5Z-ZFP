@@ -152,11 +152,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
-#if ZFP_VERSION_NO < 0x0051
     if (B stream_word_bits != 8)
-#else
-    if (B stream_word_bits() != 8)
-#endif
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, -1,
             "ZFP lib not compiled with -DBIT_STREAM_WORD_TYPE=uint8");
 
