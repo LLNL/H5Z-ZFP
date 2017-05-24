@@ -76,48 +76,48 @@ endif
 #
 # Now, setup various flags based on compiler
 #
-ifeq ($(CC),gcc)
+ifneq ($(findstring gcc, $(CC)),)
     CFLAGS += -fPIC
     SOEXT ?= so
     SHFLAG ?= -shared
     PREPATH = -Wl,-rpath,
-else ifeq ($(CC),clang)
+else ifneq ($(findstring clang, $(CC)),)
     SOEXT ?= dylib
     SHFLAG ?= -dynamiclib
     PREPATH = -L
-else ifeq ($(CC),icc)
+else ifneq ($(findstring icc, $(CC)),)
     CFLAGS += -fpic
     SOEXT ?= so
     SHFLAG ?= -shared
     PREPATH = -Wl,-rpath,
-else ifeq ($(CC),pgcc)
+else ifneq ($(findstring pgcc, $(CC)),)
     CFLAGS += -fpic
     SOEXT ?= so
     SHFLAG ?= -shared
     PREPATH = -Wl,-rpath,
-else ifeq ($(CC),xlc_r)
+else ifneq ($(findstring xlc_r, $(CC)),)
     CFLAGS += -qpic
     SOEXT ?= so
     SHFLAG ?= -qmkshrobj
     PREPATH = -Wl,-R,
-else ifeq ($(CC),bgxlc_r)
+else ifneq ($(findstring bgxlc_r, $(CC)),)
     CFLAGS += -qpic
     SOEXT ?= so
     SHFLAG ?= -qmkshrobj
     PREPATH = -Wl,-R,
 endif
 
-ifeq ($(FC),gfortran)
+ifneq ($(findstring gfortran, $(FC)),)
     FCFLAGS += -fPIC
-else ifeq ($(FC),ifort)
+else ifneq ($(findstring ifort, $(FC)),)
     FCFLAGS += -fpic
-else ifeq ($(FC),pgf90)
+else ifneq ($(findstring pgf90, $(FC)),)
     FCFLAGS += -fpic
-else ifeq ($(FC),xlf_r)
+else ifneq ($(findstring xlf_r, $(FC)),)
     FCFLAGS += -qpic
-else ifeq ($(FC),bgxlf_r)
+else ifneq ($(findstring bgxlf_r, $(FC)),)
     FCFLAGS += -qpic
-else ifeq ($(FC),f77)
+else ifneq ($(findstring f77, $(FC)),)
 # some makefile versions set FC=f77 if FC is not set
     FC =
 endif
