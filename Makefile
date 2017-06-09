@@ -23,6 +23,8 @@ help:
 
 all:
 	cd src; $(MAKE) $(MAKEVARS) $@
+
+test:
 	cd test; $(MAKE) $(MAKEVARS) $@
 
 install:
