@@ -5,17 +5,21 @@ Interfaces
 There  are two  interfaces  to  control the  filter.  One uses  HDF5's
 *generic* interface via  an array of ``unsigned int cd_values`` as is used
 in `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_. The other
-uses HDF5 `generic <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#GenericPropFuncs>`_ properties
+uses HDF5 `properties <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#GenericPropFuncs>`_ 
 added to the `dataset creation property list <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#DatasetCreatePropFuncs>`_
 used when the dataset to be compressed is being created. You  can find examples  of writing
 HDF5 data using both of these interfaces in ``test_write.c``.
 
-The plugin is designed to respond correctly when either interface is used.
-
-The filter supports all of the standard ZFP controls for affecting compression
-including *rate*, *precision*, *accuracy*, and *expert* modes. For more information
-and details about these modes of controlling ZFP compression, please see the
+The filter itself supports either interface. The filter also supports all of the
+standard ZFP controls for affecting compression including *rate*, *precision*,
+*accuracy*, and *expert* modes. For more information and details about these modes
+of controlling ZFP compression, please see the
 `ZFP README <https://github.com/LLNL/zfp/blob/master/README.md>`_.
+
+Finally, you should *not* attempt to combine the ZFP filter with any other
+*byte order altering* filter such as, for example, HDF5's shuffle filter.
+Space-performance will be ruined. This is in contrast to HDF5's *deflate*
+filter which often performs *better* when used in conjunction with the shuffle filter.
 
 .. _generic-interface:
 
@@ -60,7 +64,7 @@ defined like so...
 +-----------+--------+--------+---------+---------+---------+---------+
                    A/B are high/low 32-bit words of a double.
 
-Note that  the cd_values  used in the  interface to  ``H5Pset_filter()`` are
+Note that  the cd_values  used in the generic interface to  ``H5Pset_filter()`` are
 **not the same** cd_values ultimately stored  to the HDF5 dataset header
 for a compressed dataset. The  values are transformed in the set_local
 method to use ZFP's internal  routines for 'meta' and 'mode' data. So,
@@ -73,9 +77,9 @@ suitable for Fortran callers.
 
 .. _properties-interface:
 
-----------
+--------------------
 Properties Interface
-----------
+--------------------
 
 For the properties interface, the following functions are defined in
 the ``H5Zzfp_props.h`` header file::
@@ -88,20 +92,20 @@ the ``H5Zzfp_props.h`` header file::
         unsigned int maxprec, int minexp);
 
 These  functions take a dataset creation property list, ``hid_t dcp_lid`` and
-create  temporary (e.g.  UNregistered)  HDF5 property
+create  temporary HDF5 property
 list entries  to control the  ZFP filter. Calling any of these functions
 removes the effects of any previous call to any one of these functions.
 In addition, calling any one of these functions also has the effect of
 adding the filter to the pipeline.
 
-The properties interface  is more type-safe. However, there  is no way
-for the implementation of these properties to reside within the filter
-plugin itself. The properties  interface requires that the caller link
-with  with the filter *library*, ``libh5zzfp.a``.  The generic 
+The properties interface  is more type-safe than the generic interface.
+However, there  is no way for the implementation of the properties interface
+to reside within the filter plugin itself. The properties interface requires that the caller link
+with  with the filter as a *library*, ``libh5zzfp.a``.  The generic 
 interface does not require this.
 
-Note that the properties and generic interfaces can be used when the
-filter is used either as a plugin or as a library. The difference
+Note that either interface can be used whether the
+filter is used as a plugin or as a library. The difference
 is whether the application calls ``H5Z_zfp_initialize()`` or not.
 
 ----
