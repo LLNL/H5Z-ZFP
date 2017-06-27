@@ -5,7 +5,13 @@ Installation
 ----
 Installing via `Spack <https://spack.io>`_
 ----
-The HDF5 library, the ZFP compression library and the H5Z-ZFP plugin are all now part of the `Spack <https://spack.io>`_ package manager. If you already have Spack installed, the easiest way to install H5Z-ZFP is to simply use the spack command ``spack install h5z-zfp``. If you do not have Spack installed, it is very easy to install.
+The HDF5 library, the ZFP compression library and the H5Z-ZFP plugin are all now part of the `Spack <https://spack.io>`_ package manager. If you already have `Spack <https://spack.io>`_ installed, the easiest way to install H5Z-ZFP is to simply use the `Spack <https://spack.io>`_ command ``spack install h5z-zfp``. If you do not have `Spack <https://spack.io>`_ installed, it is very easy to install.
+
+::
+
+    git clone https://github.com/llnl/spack.git
+    . spack/share/spack/setup-env.sh
+    spack install hdf5
 
 ----
 Prerequisites
