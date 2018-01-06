@@ -41,7 +41,7 @@
 #include "H5Zzfp_plugin.h"
 #include "H5Zzfp_props_private.h"
 
-/* Convenient CPP logic to capture Z version numbers as compile time string and hex number */
+/* Convenient CPP logic to capture ZFP lib version numbers as compile time string and hex number */
 #define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
 #define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
 #define ZFP_VERSION_STR                ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
@@ -285,7 +285,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                 H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "unable to get ZFP controls");
             have_zfp_controls = 1;
         }
-        else // just use ZFP library defaults
+        else /* just use ZFP library defaults */
         {
             mem_cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM;
             H5Pset_zfp_expert_cdata(ZFP_MIN_BITS, ZFP_MAX_BITS, ZFP_MAX_PREC, ZFP_MIN_EXP, mem_cd_nelmts, mem_cd_values);
