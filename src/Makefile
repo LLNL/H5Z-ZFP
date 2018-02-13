@@ -54,8 +54,8 @@ install: all
 	$(INSTALL) libh5zzfp.a $(PREFIX)/lib
 	$(INSTALL) -m 644 H5Zzfp.h H5Zzfp_lib.h H5Zzfp_plugin.h H5Zzfp_props.h $(PREFIX)/include
 ifneq ($(FC),)
-	$(INSTALL) -m 644 H5Zzfp_props_f.mod $(PREFIX)/include
+	$(INSTALL) -m 644 *.[mM][oO][dD] $(PREFIX)/include
 endif
 
 clean:
-	rm -rf plugin libh5zzfp.a *.o *.mod
+	rm -rf plugin libh5zzfp.a *.o *.[mM][oO][dD]
