@@ -23,7 +23,7 @@ before_install:
 install: true
 
 script:
-- make FCFLAGS=--coverage CFLAGS=--coverage LDFLAGS=--coverage FC=gfortran CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.14/my_install all
+- make FCFLAGS="-fPIC --coverage" CFLAGS="-fPIC --coverage" LDFLAGS=--coverage FC=gfortran CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.14/my_install all
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
