@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 /* The logic here for 'Z' and 'B' macros as well as there use within
    the code to call ZFP library methods is due to this filter being
    part of the Silo library but also supported as a stand-alone
