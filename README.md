@@ -5,6 +5,8 @@ compression plugin for the HDF5 library using ZFP compression.
 
 [![Build Status](https://travis-ci.org/LLNL/H5Z-ZFP.svg?branch=master)](https://travis-ci.org/LLNL/H5Z-ZFP)
 [![Documentation Status](https://readthedocs.org/projects/h5z-zfp/badge/?version=latest)](http://h5z-zfp.readthedocs.io)
+[![Coverage](https://img.shields.io/codecov/c/github/LLNL/H5Z-ZFP/master.svg)](https://codecov.io/gh/LLNL/H5Z-ZFP)
+
 
 For information about ZFP compression and the BSD-Licensed ZFP
 library, see...
