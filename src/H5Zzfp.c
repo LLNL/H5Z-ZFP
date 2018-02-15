@@ -152,7 +152,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
-    if (B stream_word_bits != 8)
+    if (B (int) stream_word_bits != 8)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, -1,
             "ZFP lib not compiled with -DBIT_STREAM_WORD_TYPE=uint8");
 
@@ -472,7 +472,7 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
 
     H5Z_zfp_init();
 
-    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0070)
+    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0080)
         return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
 
     H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,

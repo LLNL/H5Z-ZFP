@@ -1,5 +1,7 @@
 include ../config.make
 
+.PHONY: all lib clean
+
 # The filter compiled to be used as a plugin
 H5Zzfp_plugin.o: H5Zzfp.c
 	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
@@ -58,4 +60,6 @@ ifneq ($(FC),)
 endif
 
 clean:
-	rm -rf plugin libh5zzfp.a *.o *.[mM][oO][dD]
+	rm -rf plugin
+	rm -f libh5zzfp.a *.o *.[mM][oO][dD]
+	rm -f *.gcno *.gcda *.gcov

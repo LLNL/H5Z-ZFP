@@ -32,7 +32,7 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 {                                                               \
     int i;                                                      \
     char tmpstr[64];                                            \
-    int len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A); \
+    int len;                                                    \
     int len2 = strlen(#A)+1;                                    \
     for (i = 0; i < argc; i++)                                  \
     {                                                           \
@@ -41,9 +41,15 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
             A = PARSEA;                                         \
             break;                                              \
         }                                                       \
+        else if (!strncasecmp(argv[i], "help", 4))              \
+        {                                                       \
+            return 0;                                           \
+        }                                                       \
     }                                                           \
-    printf("    %s=" PRINTA " %*s\n",#A,A,60-len,#HELPSTR);     \
+    len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A);\
+    printf("    %s%*s\n",tmpstr,60-len,#HELPSTR);               \
 }
+
 
 /* convenience macro to handle errors */
 #define ERROR(FNAME)                                              \
@@ -97,92 +103,18 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
     return 0;
 }
 
-int main(int argc, char **argv)
+static hid_t setup_filter(hsize_t chunk, int zfpmode,
+    double rate, double acc, uint prec,
+    uint minbits, uint maxbits, uint maxprec, int minexp)
 {
-    int i;
-
-    /* filename variables */
-    char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
-    char *ids   = (char *) calloc(NAME_LEN,sizeof(char));
-    char *ofile = (char *) calloc(NAME_LEN,sizeof(char));
-    char *zfile = (char *) calloc(NAME_LEN,sizeof(char));
-
-    /* file data info */
-    int ndims = 0;
-    int dim1 = 0;
-    int dim2 = 0;
-    int dim3 = 0;
-
-    /* sinusoid data generation variables */
-    hsize_t npoints = 1024;
-    double noise = 0.001;
-    double amp = 17.7;
-    int doint = 0;
-
-    /* compression parameters (defaults taken from ZFP header) */
-    int zfpmode = H5Z_ZFP_MODE_ACCURACY;
-    double rate = 4;
-    double acc = 0;
-    uint prec = 11;
-    uint minbits = 0;
-    uint maxbits = 4171;
-    uint maxprec = 64;
-    int minexp = -1074;
-    int *ibuf = 0;
-    double *buf = 0;
-
-    /* HDF5 related variables */
-    hsize_t chunk = 256;
-    hid_t fid, dsid, idsid, sid, cpid;
+    hid_t cpid;
     unsigned int cd_values[10];
-    int cd_nelmts = 10;
-
-    /* compressed/uncompressed difference stat variables */
-    double max_absdiff = 0;
-    double max_reldiff = 0;
-    int num_diffs = 0;
-    
-    /* file arguments */
-    HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
-    HANDLE_ARG(ids,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input datast name);
-    HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
-    HANDLE_ARG(zfile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set compressed filename);
-
-    /* data generation arguments */
-    HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for generated dataset);
-    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in generated dataset);
-    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in generated dataset);
-    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer data);
-
-    /* HDF5 chunking and ZFP filter arguments */
-    HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for dataset);
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert)); 
-    HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode of filter);
-    HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode of filter);
-    HANDLE_ARG(prec,(uint) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode of zfp filter);
-    HANDLE_ARG(minbits,(uint) strtol(argv[i]+len2,0,10),"%u",set minbits for expert mode of zfp filter);
-    HANDLE_ARG(maxbits,(uint) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode of zfp filter);
-    HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode of zfp filter);
-    HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode of zfp filter);
-
-    /* setup output filename if not already specified */
-    if (ofile[0] == '\0')
-        strncpy(ofile, "test_zfp.h5", NAME_LEN);
-
-    /* create double data to write if we're not reading from an existing file */
-    if (ifile[0] == '\0')
-        gen_data((size_t) npoints, noise, amp, (void**)&buf, TYPDBL);
-    else
-        read_data(ifile, (size_t) npoints, &buf);
-
-    /* create integer data to write */
-    if (doint)
-        gen_data((size_t) npoints, noise*100, amp*1000000, (void**)&ibuf, TYPINT);
+    int i, cd_nelmts = 10;
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
     if (0 > H5Pset_chunk(cpid, 1, &chunk)) ERROR(H5Pset_chunk);
-    
+
 #ifdef H5Z_ZFP_USE_PLUGIN
     /* setup zfp filter via generic (cd_values) interface */
     if (zfpmode == H5Z_ZFP_MODE_RATE)
@@ -202,17 +134,12 @@ int main(int argc, char **argv)
         printf("%u,", cd_values[i]);
     printf("\n");
 
-    /* exit if help is requested (do this here instead of earlier to permit
-       use of test_write to print cd_values array for a invokation of h5repack). */
-    for (i = 1; i < argc; i++)
-        if (strcasestr(argv[i],"help")!=0) return 0;
-
     /* Add filter to the pipeline via generic interface */
     if (0 > H5Pset_filter(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values)) ERROR(H5Pset_filter);
 
 #else 
 
-    /* Initialize/register the filter with HDF5 before attempting to use it. */
+    /* When filter is used as a library, we need to init it */
     H5Z_zfp_initialize();
 
     /* Setup the filter using properties interface. These calls also add
@@ -226,12 +153,80 @@ int main(int argc, char **argv)
     else if (zfpmode == H5Z_ZFP_MODE_EXPERT)
         H5Pset_zfp_expert(cpid, minbits, maxbits, maxprec, minexp);
 
-    /* exit if help is requested (do this here instead of earlier to permit
-       use of test_write to print cd_values array for a invokation of h5repack). */
-    for (i = 1; i < argc; i++)
-        if (strcasestr(argv[i],"help")!=0) return 0;
-
 #endif
+
+    return cpid;
+}
+
+
+int main(int argc, char **argv)
+{
+    int i;
+
+    /* filename variables */
+    char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
+    char *ids   = (char *) calloc(NAME_LEN,sizeof(char));
+    char *ofile = (char *) calloc(NAME_LEN,sizeof(char));
+
+    /* sinusoid data generation variables */
+    hsize_t npoints = 1024;
+    double noise = 0.001;
+    double amp = 17.7;
+    int doint = 0;
+    int help = 0;
+
+    /* compression parameters (defaults taken from ZFP header) */
+    int zfpmode = H5Z_ZFP_MODE_ACCURACY;
+    double rate = 4;
+    double acc = 0;
+    uint prec = 11;
+    uint minbits = 0;
+    uint maxbits = 4171;
+    uint maxprec = 64;
+    int minexp = -1074;
+    int *ibuf = 0;
+    double *buf = 0;
+
+    /* HDF5 related variables */
+    hsize_t chunk = 256;
+    hid_t fid, dsid, idsid, sid, cpid;
+
+    /* file arguments */
+    strcpy(ofile, "test_zfp.h5");
+    HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
+    /*HANDLE_ARG(ids,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input datast name);*/
+    HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
+
+    /* data generation arguments */
+    HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for generated dataset);
+    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in generated dataset);
+    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in generated dataset);
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer data);
+
+    /* HDF5 chunking and ZFP filter arguments */
+    HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for dataset);
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert)); 
+    HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode of filter);
+    HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode of filter);
+    HANDLE_ARG(prec,(uint) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode of zfp filter);
+    HANDLE_ARG(minbits,(uint) strtol(argv[i]+len2,0,10),"%u",set minbits for expert mode of zfp filter);
+    HANDLE_ARG(maxbits,(uint) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode of zfp filter);
+    HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode of zfp filter);
+    HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode of zfp filter);
+    cpid = setup_filter(chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+    /* Put this after filter setup to permit printing of otherwise hard to 
+       construct cd_values for possible invokation of h5repack */
+    HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
+
+    /* create double data to write if we're not reading from an existing file */
+    if (ifile[0] == '\0')
+        gen_data((size_t) npoints, noise, amp, (void**)&buf, TYPDBL);
+    else
+        read_data(ifile, (size_t) npoints, &buf);
+
+    /* create integer data to write */
+    if (doint)
+        gen_data((size_t) npoints, noise*100, amp*1000000, (void**)&ibuf, TYPINT);
 
     /* create HDF5 file */
     if (0 > (fid = H5Fcreate(ofile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Fcreate);
@@ -269,11 +264,13 @@ int main(int argc, char **argv)
     free(buf);
     free(ifile);
     free(ofile);
-    free(zfile);
     free(ids);
+
 #ifndef H5Z_ZFP_USE_PLUGIN
+    /* When filter is used as a library, we need to finalize it */
     H5Z_zfp_finalize();
 #endif
+
     H5close();
 
     return 0;

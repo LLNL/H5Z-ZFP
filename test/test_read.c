@@ -78,7 +78,7 @@ purposes.
 {                                                               \
     int i;                                                      \
     char tmpstr[64];                                            \
-    int len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A); \
+    int len;                                                    \
     int len2 = strlen(#A)+1;                                    \
     for (i = 0; i < argc; i++)                                  \
     {                                                           \
@@ -87,8 +87,13 @@ purposes.
             A = PARSEA;                                         \
             break;                                              \
         }                                                       \
+        else if (!strncasecmp(argv[i], "help", 4))              \
+        {                                                       \
+            return 0;                                           \
+        }                                                       \
     }                                                           \
-    printf("    %s=" PRINTA " %*s\n",#A,A,60-len,#HELPSTR);     \
+    len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A);\
+    printf("    %s%*s\n",tmpstr,60-len,#HELPSTR);               \
 }
 
 /* convenience macro to handle errors */
@@ -100,7 +105,7 @@ do {                                                            \
 
 int main(int argc, char **argv)
 {
-    int i;
+    int i, help=0;
     double *obuf, *cbuf;
 
     /* filename variables */
@@ -110,21 +115,22 @@ int main(int argc, char **argv)
     hid_t fid, dsid, dcpl_id, space_id;
     hsize_t npoints;
 
-    /* compressed/uncompressed difference stat variables */
+    /* absolute and relative differencing thresholds */
     double max_absdiff = 0;
     double max_reldiff = 0;
-    int num_diffs = 0;
+
+    /* actual absolute and relative differences observed */
+    double actual_max_absdiff = 0;
+    double actual_max_reldiff = 0;
+    int num_absdiffs = 0;
+    int num_reldiffs = 0;
     
     /* file arguments */
+    strcpy(ifile, "test_zfp.h5");
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
-
-    /* exit if help is requested */
-    for (i = 1; i < argc; i++)
-        if (strcasestr(argv[i],"help")!=0) return 0;
-
-    /* setup input filename if not already specified */
-    if (ifile[0] == '\0')
-        strncpy(ifile, "test_zfp.h5", NAME_LEN);
+    HANDLE_ARG(max_absdiff,strtod(argv[i]+len2,0),"%g",set maximum absolute diff);
+    HANDLE_ARG(max_reldiff,strtod(argv[i]+len2,0),"%g",set maximum relative diff);
+    HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message);
 
 #ifndef H5Z_ZFP_USE_PLUGIN
     H5Z_zfp_initialize();
@@ -163,17 +169,24 @@ int main(int argc, char **argv)
             double reldiff = 0;
             if (obuf[i] != 0) reldiff = absdiff / obuf[i];
 
-            if (absdiff > max_absdiff) max_absdiff = absdiff;
-            if (reldiff > max_reldiff) max_reldiff = reldiff;
-            num_diffs++;
+            if (absdiff > actual_max_absdiff) actual_max_absdiff = absdiff;
+            if (reldiff > actual_max_reldiff) actual_max_reldiff = reldiff;
+            if (absdiff > max_absdiff)
+                num_absdiffs++;
+            if (reldiff > max_reldiff)
+                num_reldiffs++;
         }
     }
-    printf("%d values are different; max-absdiff = %g, max-reldiff = %g\n",
-        num_diffs, max_absdiff, max_reldiff);
+    printf("Absolute Diffs: %d values are different; actual-max-absdiff = %g\n",
+        num_absdiffs, actual_max_absdiff);
+    printf("Relative Diffs: %d values are different; actual-max-reldiff = %g\n",
+        num_reldiffs, actual_max_reldiff);
 
     free(obuf);
     free(cbuf);
     free(ifile);
 
-    return 0;
+    if (max_absdiff != 0) return num_absdiffs>0;
+    if (max_reldiff != 0) return num_reldiffs>0;
+    return (num_absdiffs+num_reldiffs)>0;
 }

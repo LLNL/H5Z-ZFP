@@ -140,11 +140,11 @@ INSTALL ?= install
 
 MAKEVARS = ZFP_HOME=$(ZFP_HOME) HDF5_HOME=$(HDF5_HOME) PREFIX=$(PREFIX)
 
-#.SUFFIXES:
-#.SUFFIXES: .c .F90 .h .o .mod
+.SUFFIXES:
+.SUFFIXES: .c .F90 .h .o .mod
 
-#%.o : %.c
-#	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+%.o : %.c
+	$(CC) $< -o $@ -c $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
-#%.o %.mod : %.F90
-#	$(FC) $< -o $@ -c $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+%.o %.mod : %.F90
+	$(FC) $< -o $@ -c $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)

@@ -1,8 +1,6 @@
 include ../config.make
 
-.PHONY: lib plugin check patch
-
-all: check
+.PHONY: lib plugin check patch clean
 
 patch:
 	@echo "Make sure you have patched HDF5's repack tool"
@@ -37,7 +35,7 @@ test_read_plugin: test_read_plugin.o plugin
 test_read_lib: test_read_lib.o lib
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp $(LDFLAGS)
 
-ifneq ($(FC),)
+ifneq ($(FC),) # Fortran Tests [
 
 test_rw_fortran: test_rw_fortran.o lib
 	$(FC) $(FCFLAGS) -o $@ $< $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5_fortran -lhdf5 -lzfp $(LDFLAGS)
@@ -52,7 +50,7 @@ test_rw_fortran: test_rw_fortran.o lib
 
 # Decrease bit rate and confirm compression ratio increases
 test-rate-f: plugin test_rw_fortran 
-	for r in 32 16 8 4; do\
+	@for r in 32 16 8 4; do\
 	    expected_ratio=$$(expr 64 \/ $$r); \
 	    ./test_rw_fortran zfpmode 1 rate $$r 2>&1 1>/dev/null; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
@@ -89,8 +87,7 @@ test-precision-f: plugin test_rw_fortran
 	done; \
 	echo "Fortran Precision tests Passed"
 
-
-endif
+endif # ] ifneq ($(FC),)
 
 # Decrease bit rate and confirm compression ratio increases
 test-rate: plugin test_write_plugin
@@ -178,7 +175,49 @@ test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
 	fi; \
 	echo "Endian test Passed"
 
-CHECK = test-rate test-precision test-accuracy test-endian
+# Test the filter as a library rather than as a plugin
+test-lib-rate: test_write_lib test_read_lib
+	@for t in 32:1e-07 16:0.003 8:0.4; do\
+	    r=$$(echo $$t | cut -d':' -f1); \
+	    d=$$(echo $$t | cut -d':' -f2); \
+	    ./test_write_lib rate=$$r zfpmode=1 2>&1 1>/dev/null; \
+	    ./test_read_lib max_absdiff=$$d max_reldiff=$$d 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        echo "Lib-rate test failed for rate=$$r"; \
+	        exit 1; \
+	    fi; \
+	done; \
+	echo "Library Rate tests Passed"
+
+test-lib-accuracy: test_write_lib test_read_lib
+	@for v in 0.1:0.025 0.01:0.004 0.001:0.0006 0.0001:4e-5; do\
+	    a=$$(echo $$v | cut -d':' -f1); \
+	    d=$$(echo $$v | cut -d':' -f2); \
+	    ./test_write_lib acc=$$a zfpmode=3 2>&1 1>/dev/null; \
+	    ./test_read_lib max_absdiff=$$d 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        echo "Lib-accuracy test failed for acc=$$a"; \
+	        exit 1; \
+	    fi; \
+	done; \
+	echo "Library Accuracy tests Passed"
+
+test-lib-precision: test_write_lib test_read_lib
+	@for v in 12:0.02 16:0.0005 20:5e-5 24:1e-6; do\
+	    p=$$(echo $$v | cut -d':' -f1); \
+	    d=$$(echo $$v | cut -d':' -f2); \
+	    ./test_write_lib prec=$$p zfpmode=2 2>&1 1>/dev/null; \
+	    ./test_read_lib max_reldiff=$$d 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        echo "Lib-precision test failed for prec=$$p"; \
+	        exit 1; \
+	    fi; \
+	done; \
+	echo "Library Precision tests Passed"
+
+test-lib: test-lib-rate test-lib-accuracy test-lib-precision
+
+CHECK = test-rate test-precision test-accuracy test-endian test-lib
 ifneq ($(FC),)
 CHECK +=  test-rate-f test-precision-f test-accuracy-f
 endif
@@ -188,3 +227,4 @@ clean:
 	rm -f test_write_plugin.o test_write_lib.o test_read_plugin.o test_read_lib.o test_rw_fortran.o
 	rm -f test_write_plugin test_write_lib test_read_plugin test_read_lib test_rw_fortran
 	rm -f test_zfp.h5 test_zfp_fortran.h5 mesh_repack.h5
+	rm -f *.gcno *.gcda *.gcov

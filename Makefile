@@ -3,21 +3,23 @@ include config.make
 .PHONY: help all clean dist install
 
 help:
-	@echo "               This is H5Z-ZFP version $(H5Z_ZFP_VERSINFO)."
-	@echo "See http://h5z-zfp.readthedocs.io/en/latest/ file for detailed information."
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "             This is H5Z-ZFP version $(H5Z_ZFP_VERSINFO)."
+	@echo "See http://h5z-zfp.readthedocs.io/en/latest/ file for more info."
 	@echo ""
 	@echo "Typical make command is..."
 	@echo ""
-	@echo "    make [FC=<Fortran-compiler>] CC=<C-compiler> HDF5_HOME=<path> \\"
-	@echo "    ZFP_HOME=<path> PREFIX=<path> all"
+	@echo "    make CC=<C-compiler> HDF5_HOME=<path> ZFP_HOME=<path> PREFIX=<path> all"
 	@echo ""
-	@echo "where 'path' is a dir whose children are inc/lib/bin subdirs."
-	@echo "Other variables (e.g. CFLAGS, LD, etc.) can be set as usual."
-	@echo "Optionally, add FC=<fortran-compiler> to include Fortran tests."
+	@echo "where <path> is a dir whose children are include/lib/bin subdirs."
+	@echo "Standard make variables (e.g. CFLAGS, LD, etc.) can be set as usual."
+	@echo "Optionally, add FC=<fortran-compiler> to include Fortran support and tests."
 	@echo ""
 	@echo "Available make targets are..."
 	@echo "    all - build everything"
-	@echo "    test - run tests"
+	@echo "    check - all + run tests"
 	@echo "    install - install compiled components"
 	@echo "    clean - clean away all derived targets"
 	@echo "    dist - create distribution tarfile"
@@ -25,7 +27,7 @@ help:
 all:
 	cd src; $(MAKE) $(MAKEVARS) $@
 
-test:
+check: all
 	cd test; $(MAKE) $(MAKEVARS) $@
 
 install:
