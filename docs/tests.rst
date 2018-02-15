@@ -40,6 +40,7 @@ use these tools to read data compressed with the H5Z-ZFP filter, you will need
 to inform the HDF5 library where to find the filter plugin. For example..
 
 ::
+
     env HDF5_PLUGIN_PATH=<dir> h5ls test_zfp.h5
 
 Where ``<dir>`` is the relative or absolute path to a directory containing the
