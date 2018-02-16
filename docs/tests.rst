@@ -1,6 +1,6 @@
-=====
+==================
 Tests and Examples
-=====
+==================
 
 The tests directory contains a few simple tests of the H5Z-ZFP filter.
 

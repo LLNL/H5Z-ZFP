@@ -62,7 +62,8 @@ defined like so...
 +-----------+--------+--------+---------+---------+---------+---------+
 | expert    |     4  | unused |  minbits|  maxbits|  maxprec|  minexp |
 +-----------+--------+--------+---------+---------+---------+---------+
-                   A/B are high/low 32-bit words of a double.
+
+A/B are high/low 32-bit words of a double.
 
 Note that  the cd_values  used in the generic interface to  ``H5Pset_filter()`` are
 **not the same** cd_values ultimately stored  to the HDF5 dataset header
@@ -108,9 +109,9 @@ Note that either interface can be used whether the
 filter is used as a plugin or as a library. The difference
 is whether the application calls ``H5Z_zfp_initialize()`` or not.
 
-----
+-----------------
 Fortran Interface
-----
+-----------------
 
 A Fortran interface based on the properties interface, described above,
 has been added by Scot Breitenfeld of the HDF5 group. The code that
@@ -120,9 +121,9 @@ interface is the only interface available for Fortran callers.
 
 .. _plugin-vs-library:
 
-----
+----------------------------
 Plugin vs. Library Operation
-----
+----------------------------
 
 The filter is designed to be compiled for use as both a standalone HDF5 *plugin*
 and as an explicitly linked *library*.
