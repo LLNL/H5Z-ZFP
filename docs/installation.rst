@@ -78,9 +78,11 @@ H5Z-ZFP_ is designed to be compiled both as a standalone HDF5_ *plugin* and as a
 
 Once you have installed the prerequisites, you can compile H5Z-ZFP_ using a command-line...
 
-| make [FC=<Fortran-compiler>] CC=<C-compiler>
-|     ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5>
-|     PREFIX=<path-to-install>
+::
+
+    make [FC=<Fortran-compiler>] CC=<C-compiler>
+        ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5>
+        PREFIX=<path-to-install>
 
 where ``<path-to-zfp>`` is a directory containing ZFP_ ``inc`` and ``lib`` dirs and
 ``<path-to-hdf5>`` is a directory containing HDF5_ ``include`` and ``lib`` dirs.
@@ -99,9 +101,11 @@ and run a handful of tests.
 If you don't specify a ``PREFIX``, it will install to ``./install``. The installed
 filter will look like...
 
-| $(PREFIX)/include/{H5Zzfp.h,H5Zzfp_plugin.h,H5Zzfp_props.h,H5Zzfp_lib.h}
-| $(PREFIX)/plugin/libh5zzfp.{so,dylib}
-| $(PREFIX)/lib/libh5zzfp.a
+::
+
+    $(PREFIX)/include/{H5Zzfp.h,H5Zzfp_plugin.h,H5Zzfp_props.h,H5Zzfp_lib.h}
+    $(PREFIX)/plugin/libh5zzfp.{so,dylib}
+    $(PREFIX)/lib/libh5zzfp.a
 
 where ``$(PREFIX)`` resolves to whatever the full path of the installation is.
 
@@ -132,9 +136,9 @@ The source code is in two separate directories
       of using both the :ref:`generic-interface` and :ref:`properties-interface`. In 
       addition, there is an example of how to use the filter from Fortran in ``test_rw_fortran.F90``.
 
-----
+----------------
 Silo Integration
-----
+----------------
 
 This plugin is also part of the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
 In particular, the ZFP_ library
