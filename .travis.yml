@@ -25,8 +25,8 @@ install: true
 
 script:
 - make FCFLAGS="-O0 -fPIC --coverage -fprofile-arcs -ftest-coverage" CFLAGS="-O0 -fPIC --coverage" LDFLAGS=--coverage FC=gfortran CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.14/my_install all
-- pushd src; ls; which gcov; gcov *.c; popd
-- pushd test; ls; gcov *.c; popd
+- pushd src; gcov H5Zzfp_lib H5Zzfp_plugin H5Zzfp_props; popd
+- pushd test; gcov test_read_lib test_write_lib test_write_plugin; popd
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
