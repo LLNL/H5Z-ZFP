@@ -63,3 +63,4 @@ clean:
 	rm -rf plugin
 	rm -f libh5zzfp.a *.o *.[mM][oO][dD]
 	rm -f *.gcno *.gcda *.gcov
+	rm -f H5Zzfp_props_f.mod

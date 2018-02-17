@@ -134,9 +134,16 @@ interface is the only interface available for Fortran callers.
 Plugin vs. Library Operation
 ----------------------------
 
-The filter is designed to be compiled for use as both a standalone HDF5_ *plugin*
+The filter is designed to be compiled for use as both a standalone HDF5_
+`dynamically loaded HDF5 plugin <https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf>`_.
 and as an explicitly linked *library*.
-When it is used as a plugin, all HDF5_ applications are *required*
+When it is used as a plugin, it is a best practice to link the ZFP_ library
+into the plugin dynamic/shared object as a *static* library. Why? In so doing,
+we ensure that all ZFP_ public namespace symbols remain *confined* to the plugin
+so as not to interfere with any application that may be directly explicitly linking
+to the ZFP_ library for other reasons.
+
+All HDF5_ applications are *required*
 to *find* the plugin dynamic library (named ``lib*.{so,dylib}``)
 in a directory specified by the enviornment
 variable, ``HDF5_PLUGIN_PATH``. Currently, the HDF5 library offers
