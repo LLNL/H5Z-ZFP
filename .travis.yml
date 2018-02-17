@@ -16,8 +16,8 @@ before_install:
 - tar -xzf hdf5-1.8.14.tar.gz
 - pushd hdf5-1.8.14
 - patch ./tools/h5repack/h5repack_parse.c /home/travis/build/LLNL/H5Z-ZFP/test/h5repack_parse.patch
-- ./configure --prefix=`pwd`/my_install --enable-fortran --enable-fortran2003
-- make -j4 install > /dev/null
+- ./configure --prefix=`pwd`/my_install --enable-production --enable-fortran --enable-fortran2003 --enable-silent-rules
+- make -j4 install
 - popd
 - popd
 
