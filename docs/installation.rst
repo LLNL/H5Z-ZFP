@@ -16,11 +16,12 @@ If you do not have Spack_ installed, it is very easy to install.
     . spack/share/spack/setup-env.sh
     spack install h5z-zfp
 
-If you wish to include support for Fortran callers
+By default, H5Z-ZFP_ will attempt to build with Fortran support which requires
+a Fortran compiler. If you wish to exclude support for Fortran, use the command
 
 ::
 
-    spack install h5z-zfp+fortran
+    spack install h5z-zfp~fortran
 
 Note that these commands will build H5Z-ZFP_ **and** all of its dependencies including
 the HDF5_ library (as well as a number of other dependencies you may not initially
@@ -55,7 +56,7 @@ Compiling ZFP
   false. This will result in silently ignoring an HDF5_ client's  request to compress data with
   ZFP_. Also, be sure to see :ref:`endian-issues`.
 * After you have setup ``Config``, simply run ``make`` and it will build the ZFP_ library placing
-  the library in a ``lib`` sub-directory and the necessary include files in ``inc`` sub-directory.
+  the library in a ``lib`` sub-directory and the necessary include files in ``inc[lude]`` sub-directory.
 * For more information and details, please see the `ZFP README <https://github.com/LLNL/zfp/blob/master/README.md>`_.
 
 ^^^^^^^^^^^^^^^
@@ -67,7 +68,9 @@ Compiling HDF5_
   configuration switches. Otherwise, any vanilla installation of HDF5_ is acceptable.
   
 * The Fortran interface to this filter *requires* a Fortran 2003 compiler
-  because it uses ``ISO_C_BINDING`` to define the Fortran interface.
+  because it uses
+  `ISO_C_BINDING <https://gcc.gnu.org/onlinedocs/gfortran/ISO_005fC_005fBINDING.html>`_
+  to define the Fortran interface.
 
 -----------------
 Compiling H5Z-ZFP
@@ -84,7 +87,7 @@ Once you have installed the prerequisites, you can compile H5Z-ZFP_ using a comm
         ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5>
         PREFIX=<path-to-install>
 
-where ``<path-to-zfp>`` is a directory containing ZFP_ ``inc`` and ``lib`` dirs and
+where ``<path-to-zfp>`` is a directory containing ZFP_ ``inc[lude]`` and ``lib`` dirs and
 ``<path-to-hdf5>`` is a directory containing HDF5_ ``include`` and ``lib`` dirs.
 If you don't specify a C compiler, it will try to guess one from your path. Fortran
 compilation is optional. If you do not specify a Fortran compiler, it will not attempt
@@ -99,7 +102,7 @@ about various make targets and variables. ``make check`` will compile everything
 and run a handful of tests.
 
 If you don't specify a ``PREFIX``, it will install to ``./install``. The installed
-filter will look like...
+package will look like...
 
 ::
 
@@ -140,7 +143,7 @@ The source code is in two separate directories
 Silo Integration
 ----------------
 
-This plugin is also part of the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
+This filter is also built-in to the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
 In particular, the ZFP_ library
 itself is also embedded in Silo but is protected from appearing in Silo's
 global namespace through a struct of function pointers (see `Namespaces in C) <https://visitbugs.ornl.gov/projects/silo/wiki/Using_C_structs_as_a_kind_of_namespace_mechanism_to_reduce_global_symbol_bloat>`_.

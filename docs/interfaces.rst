@@ -23,8 +23,11 @@ of controlling ZFP_ compression, please see the
 
 Finally, you should *not* attempt to combine the ZFP_ filter with any other
 *byte order altering* filter such as, for example, HDF5_'s shuffle filter.
-Space-performance will be ruined. This is in contrast to HDF5_'s *deflate*
-filter which often performs *better* when used in conjunction with the shuffle filter.
+Space-performance will be ruined. This is in contrast to HDF5_'s
+`deflate <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetDeflate>`_
+filter which often performs *better* when used in conjunction with the
+`shuffle <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetShuffle>`_
+filter.
 
 .. _generic-interface:
 
@@ -135,7 +138,7 @@ Plugin vs. Library Operation
 ----------------------------
 
 The filter is designed to be compiled for use as both a standalone HDF5_
-`dynamically loaded HDF5 plugin <https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf>`_.
+`dynamically loaded HDF5 plugin <https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf>`_
 and as an explicitly linked *library*.
 When it is used as a plugin, it is a best practice to link the ZFP_ library
 into the plugin dynamic/shared object as a *static* library. Why? In so doing,
