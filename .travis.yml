@@ -17,7 +17,7 @@ before_install:
 - pushd hdf5-1.8.14
 - patch ./tools/h5repack/h5repack_parse.c /home/travis/build/LLNL/H5Z-ZFP/test/h5repack_parse.patch
 - ./configure --prefix=`pwd`/my_install --enable-production --enable-fortran --enable-fortran2003 --enable-silent-rules
-- make -j4 install
+- make -j4 install 2>&1 1>/dev/null
 - popd
 - popd
 
@@ -25,8 +25,8 @@ install: true
 
 script:
 - make FCFLAGS="-O0 -fPIC --coverage -fprofile-arcs -ftest-coverage" CFLAGS="-O0 -fPIC --coverage" LDFLAGS=--coverage FC=gfortran CC=gcc ZFP_HOME=/tmp/zfp-0.5.0 HDF5_HOME=/tmp/hdf5-1.8.14/my_install all
-- pushd src; gcov H5Zzfp_lib H5Zzfp_plugin H5Zzfp_props; popd
-- pushd test; gcov test_read_lib test_write_lib test_write_plugin; popd
+- pushd src; ls; gcov H5Zzfp_lib H5Zzfp_plugin H5Zzfp_props; popd
+- pushd test; ls; gcov test_read_lib test_write_lib test_write_plugin; popd
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
