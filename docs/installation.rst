@@ -33,9 +33,16 @@ packages to directory *hashes* *within* the cloned Spack_ repository's directory
 installs things, have a look at
 `configuring Spack <https://spack.readthedocs.io/en/latest/config_yaml.html#install-tree>`_
 
--------------
+---------------------
+Manually Installation
+---------------------
+
+If Spack_ is not an option for you, information on *manually* installing is provided
+here.
+
+^^^^^^^^^^^^^
 Prerequisites
--------------
+^^^^^^^^^^^^^
 
 * `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
 * `HDF5 Library <https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz>`_
