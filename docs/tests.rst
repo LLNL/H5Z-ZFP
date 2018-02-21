@@ -15,6 +15,35 @@ example of using the ZFP_ filter either as a plugin or as a library.
 The command ``test_write_lib help`` or ``test_write_plugin help`` will print a
 list of the example's options and how to use them.
 
+------------------
+Write Test Options
+------------------
+
+::
+
+    ifile=""                                  set input filename
+    ofile="test_zfp.h5"                      set output filename
+    npoints=1024      set number of points for generated dataset
+    noise=0.001  set amount of random noise in generated dataset
+    amp=17.7      set amplitude of sinusoid in generated dataset
+    doint=0                                 also do integer data
+    highd=0                      run high-dimensional (>3D) case
+    chunk=256                         set chunk size for dataset
+    zfpmode=3        set zfp mode (1=rate,2=prec,3=acc,4=expert)
+    rate=4                      set rate for rate mode of filter
+    acc=0               set accuracy for accuracy mode of filter
+    prec=11       set precision for precision mode of zfp filter
+    minbits=0          set minbits for expert mode of zfp filter
+    maxbits=4171       set maxbits for expert mode of zfp filter
+    maxprec=64         set maxprec for expert mode of zfp filter
+    minexp=-1074        set minexp for expert mode of zfp filter
+    help=0                                     this help message
+
+The test normally just tests compression of 1D array of integer
+and double precision data of a sinusoidal array with a small
+amount of additive random noise. The ``highd`` test runs a test
+on a 4D array where two of the 4 dimensions are uncorrelated.
+
 There is a companion, `test_read.c <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_read.c>`_
 which is compiled into ``test_read_plugin``
 and ``test_read_lib`` which demonstrates use of the filter reading data as a

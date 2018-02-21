@@ -8,6 +8,7 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
@@ -91,6 +92,147 @@ static int gen_data(size_t npoints, double noise, double amp, void **_buf, int t
     return 0;
 }
 
+/* Populate the hyper-dimensional array with samples of a radially symmetric
+   sinc() function but where certain sub-spaces are randomized through dimindx arrays */
+static void
+hyper_smooth_radial(void *b, int typ, int n, int ndims, int const *dims, int const *m,
+    int const * const dimindx[10])
+{
+    int i;
+    double hyper_radius = 0;
+    const double amp = 10000;
+    double val;
+
+    for (i = ndims-1; i >= 0; i--)
+    {
+        int iar = n / m[i];
+        iar = dimindx[i][iar]; /* allow for randomized shuffle of this axis */
+        iar -= dims[i]/2;      /* ensure centering in middle of the array */
+        n = n % m[i];
+        hyper_radius += iar*iar;
+    }
+    hyper_radius = sqrt(hyper_radius);
+
+    if (hyper_radius < 1e-15)
+        val = amp;
+    else
+        val = amp * sin(0.4*hyper_radius) / (0.4*hyper_radius);
+
+    if (typ == TYPINT)
+    {
+        int *pi = (int*) b;
+        *pi = (int) val;
+    }
+    else
+    {
+        double *pd = (double*) b;
+        *pd = val;
+    }
+}
+
+static double func(int i, double arg)
+{
+    /* a random assortment of interesting, somewhat bounded, unary functions */
+    double (*const funcs[])(double x) = {cos, j0, fabs, sin, cbrt, erf};
+    int const nfuncs = sizeof(funcs)/sizeof(funcs[0]);
+    return funcs[i%nfuncs](arg);
+}
+
+/* Populate the hyper-dimensional array with samples of set of seperable functions
+   but where certain sub-spaces are randomized through dimindx arrays */
+static void
+hyper_smooth_separable(void *b, int typ, int n, int ndims, int const *dims, int const *m,
+    int const * const dimindx[10])
+{
+    int i;
+    double val = 1;
+
+    for (i = ndims-1; i >= 0; i--)
+    {
+        int iar = n / m[i];
+        iar = dimindx[i][iar]; /* allow for randomized shuffle of this axis */
+        iar -= dims[i]/2;      /* ensure centering in middle of the array */
+        n = n % m[i];
+        val *= func(i, (double) iar);
+    }
+
+    if (typ == TYPINT)
+    {
+        int *pi = (int*) b;
+        *pi = (int) val;
+    }
+    else
+    {
+        double *pd = (double*) b;
+        *pd = val;
+    }
+}
+
+/* Produce multi-dimensional array test data with the property that it is random
+   in the UNcorrelated dimensions but smooth in the correlated dimensions. This
+   is achieved by randomized shuffling of the array indices used in specific
+   dimensional axes of the array. */
+static void *
+gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, int const *ucdims)
+{
+    int i, n;
+    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double)); 
+    unsigned char *buf, *buf0;
+    int m[10]; /* subspace multipliers */
+    int *dimindx[10];
+   
+    assert(ndims <= 10);
+
+    /* Set up total size and sub-space multipliers */
+    for (i=0, n=1; i < ndims; i++)
+    {
+        n *= dims[i];
+        m[i] = i==0?1:m[i-1]*dims[i-1];
+    }
+
+    /* allocate buffer of suitable size (doubles or ints) */
+    buf0 = buf = (unsigned char*) malloc(n * nbyt);
+    
+    /* set up dimension identity indexing (e.g. Idx[i]==i) so that
+       we can randomize those dimenions we wish to have UNcorrelated */
+    for (i = 0; i < ndims; i++)
+    {
+        int j;
+        dimindx[i] = (int*) malloc(dims[i]*sizeof(int));
+        for (j = 0; j < dims[i]; j++)
+            dimindx[i][j] = j;
+    }
+
+    /* Randomize selected dimension indexing */
+    srandom(0xDeadBeef);
+    for (i = 0; i < nucdims; i++)
+    {
+        int j, ucdimi = ucdims[i];
+        for (j = 0; j < dims[ucdimi]-1; j++)
+        {
+            int tmp, k = random() % (dims[ucdimi]-j);
+            if (k == j) continue;
+            tmp = dimindx[ucdimi][j];
+            dimindx[ucdimi][j] = k;
+            dimindx[ucdimi][k] = tmp;
+        }
+    }
+
+    /* populate the array data */
+    for (i = 0; i < n; i++)
+    {
+        hyper_smooth_separable(buf, typ, i, ndims, dims, m, (int const * const *) dimindx);
+        buf += nbyt;
+    }
+
+    /* free dimension indexing */
+    for (i = 0; i < ndims; i++)
+        free(dimindx[i]);
+
+    return buf0;
+}
+
+
 static int read_data(char const *fname, size_t npoints, double **_buf)
 {
     size_t const nbytes = npoints * sizeof(double);
@@ -103,7 +245,7 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
     return 0;
 }
 
-static hid_t setup_filter(hsize_t chunk, int zfpmode,
+static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     double rate, double acc, uint prec,
     uint minbits, uint maxbits, uint maxprec, int minexp)
 {
@@ -113,7 +255,7 @@ static hid_t setup_filter(hsize_t chunk, int zfpmode,
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
-    if (0 > H5Pset_chunk(cpid, 1, &chunk)) ERROR(H5Pset_chunk);
+    if (0 > H5Pset_chunk(cpid, n, chunk)) ERROR(H5Pset_chunk);
 
 #ifdef H5Z_ZFP_USE_PLUGIN
     /* setup zfp filter via generic (cd_values) interface */
@@ -173,6 +315,7 @@ int main(int argc, char **argv)
     double noise = 0.001;
     double amp = 17.7;
     int doint = 0;
+    int highd = 0;
     int help = 0;
 
     /* compression parameters (defaults taken from ZFP header) */
@@ -202,6 +345,7 @@ int main(int argc, char **argv)
     HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in generated dataset);
     HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in generated dataset);
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer data);
+    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run high-dimensional (>3D) case);
 
     /* HDF5 chunking and ZFP filter arguments */
     HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for dataset);
@@ -213,9 +357,9 @@ int main(int argc, char **argv)
     HANDLE_ARG(maxbits,(uint) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode of zfp filter);
     HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode of zfp filter);
     HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode of zfp filter);
-    cpid = setup_filter(chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
-    /* Put this after filter setup to permit printing of otherwise hard to 
-       construct cd_values for possible invokation of h5repack */
+    cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+    /* Put this after setup_filter to permit printing of otherwise hard to 
+       construct cd_values to facilitate manual invokation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
     /* create double data to write if we're not reading from an existing file */
@@ -256,12 +400,43 @@ int main(int argc, char **argv)
         if (0 > H5Dclose(idsid)) ERROR(H5Dclose);
     }
 
-    /* clean up */
+    /* clean up from simple tests */
     if (0 > H5Sclose(sid)) ERROR(H5Sclose);
     if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+    free(buf);
+    if (ibuf) free(ibuf);
+
+    /* Test high dimensional (>3D) array */
+    if (highd)
+    {
+        int fd, dims[] = {128,128,16,32}, ucdims[]={1,3};
+        hsize_t hdims[] = {128,128,16,32};
+        hsize_t hchunk[] = {1,128,1,32};
+
+        buf = gen_random_correlated_array(TYPDBL, 4, dims, 2, ucdims);
+
+        cpid = setup_filter(4, hchunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+
+        if (0 > (sid = H5Screate_simple(4, hdims, 0))) ERROR(H5Screate_simple);
+
+        /* write the data WITHOUT compression */
+        if (0 > (dsid = H5Dcreate(fid, "highD_original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+
+        /* write the data with compression */
+        if (0 > (dsid = H5Dcreate(fid, "highD_compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+
+        /* clean up from high dimensional test */
+        if (0 > H5Sclose(sid)) ERROR(H5Sclose);
+        if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+        free(buf);
+    }
+
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
-    free(buf);
     free(ifile);
     free(ofile);
     free(ids);
