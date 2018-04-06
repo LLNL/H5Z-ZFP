@@ -218,7 +218,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     unsigned int hdr_cd_values[H5Z_ZFP_CD_NELMTS_MAX];
     unsigned int flags = 0;
     herr_t retval = 0;
-    hsize_t dims[H5S_MAX_RANK], dims_used[3];
+    hsize_t dims[H5S_MAX_RANK], dims_used[H5S_MAX_RANK];
     H5T_class_t dclass;
     zfp_type zt;
     zfp_field *dummy_field = 0;
@@ -238,13 +238,6 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     if (0 > (ndims = H5Sget_simple_extent_dims(chunk_space_id, dims, 0)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "not a data space");
 
-    for (i = 0; i < ndims; i++)
-    {
-        if (dims[i] <= 1) continue;
-        dims_used[ndims_used] = dims[i];
-        ndims_used++;
-    }
-
     /* setup zfp data type for meta header */
     if (dclass == H5T_FLOAT)
     {
@@ -260,6 +253,14 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
             "datatype class must be H5T_FLOAT or H5T_INTEGER");
     }
 
+    /* computed used (e.g. non-unity) dimensions in chunk */
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] <= 1) continue;
+        dims_used[ndims_used] = dims[i];
+        ndims_used++;
+    }
+
     /* set up dummy zfp field to compute meta header */
     switch (ndims_used)
     {
@@ -267,7 +268,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[1], dims_used[0]); break;
         case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[2], dims_used[1], dims_used[0]); break;
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
-                     "requires chunks w/1,2 or 3 non-unity dims");
+                     "chunks may have only 1,2 or 3 non-unity dims");
     }
     if (!dummy_field)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_field_Xd() failed");
@@ -308,7 +309,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         switch (ctrls.mode)
         {
             case H5Z_ZFP_MODE_RATE:
-                Z zfp_stream_set_rate(dummy_zstr, ctrls.details.rate, zt, ndims, 0);
+                Z zfp_stream_set_rate(dummy_zstr, ctrls.details.rate, zt, ndims_used, 0);
                 break;
             case H5Z_ZFP_MODE_PRECISION:
 #if ZFP_VERSION_NO < 0x0051
@@ -338,7 +339,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         switch (mem_cd_values[0])
         {
             case H5Z_ZFP_MODE_RATE:
-                Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
+                Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims_used, 0);
                 break;
             case H5Z_ZFP_MODE_PRECISION:
 #if ZFP_VERSION_NO < 0x0051
@@ -473,6 +474,7 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
 
     H5Z_zfp_init();
 
+    /* Pass &cd_values[1] here to strip off first entry holding version info */
     if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0080)
         return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
 
