@@ -33,9 +33,9 @@ packages to directory *hashes* *within* the cloned Spack_ repository's directory
 installs things, have a look at
 `configuring Spack <https://spack.readthedocs.io/en/latest/config_yaml.html#install-tree>`_
 
----------------------
-Manually Installation
----------------------
+-------------------
+Manual Installation
+-------------------
 
 If Spack_ is not an option for you, information on *manually* installing is provided
 here.
