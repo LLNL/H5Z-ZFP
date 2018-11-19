@@ -91,7 +91,12 @@ const H5Z_class2_t H5Z_ZFP[1] = {{
 }};
 
 #ifdef H5Z_ZFP_AS_LIB
-int         H5Z_zfp_initialize(void) { herr_t ret = H5Zregister(H5Z_ZFP); return ret<0?-1:1;}
+int H5Z_zfp_initialize(void)
+{
+    if (H5Zfilter_avail(H5Z_FILTER_ZFP))
+        return 1;
+    return H5Zregister(H5Z_ZFP)<0?-1:1;
+}
 #else
 H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
 const void *H5PLget_plugin_info(void) {return H5Z_ZFP;}

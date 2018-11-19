@@ -98,7 +98,17 @@ where ``<path-to-zfp>`` is a directory containing ZFP_ ``inc[lude]`` and ``lib``
 ``<path-to-hdf5>`` is a directory containing HDF5_ ``include`` and ``lib`` dirs.
 If you don't specify a C compiler, it will try to guess one from your path. Fortran
 compilation is optional. If you do not specify a Fortran compiler, it will not attempt
-to build the Fortran interface.
+to build the Fortran interface. However, if the variable ``FC`` is already defined in
+your enviornment (as in Spack_ for example), then H5Z-ZFP_ will attempt to build Fortran.
+If this is not desired, the solution is to pass an *empty* ``FC`` on the make command
+line as in...
+
+::
+
+    make FC= CC=<C-compiler>
+        ZFP_HOME=<path-to-zfp> HDF5_HOME=<path-to-hdf5>
+        PREFIX=<path-to-install>
+
 
 The Makefile uses  GNU Make syntax and is designed to  work on OSX and
 Linux. The filter has been tested on gcc, clang, xlc, icc and pgcc  compilers

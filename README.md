@@ -31,6 +31,8 @@ This plugin supports all 4 modes of the ZFP compression library, *rate*,
 *accuracy*, *precision* and *expert*. It supports 1, 2 and 3 dimensional
 datasets of single and double precision integer and floating point data.
 It can be applied to HDF5 datasets of more than 3 dimensions as  long as
-no more than 3 dimensions of the chunking are of size greater than 1.
+no more than 3 dimensions of the HDF5 dataset chunking are of size greater
+than 1. For datasets greater than 3 dimensions, a good strategy is to select
+non-unity chunk dimensions in decreasing order of greatest spatial correlation.
 
 [**Full documentation**](http://h5z-zfp.readthedocs.io)
