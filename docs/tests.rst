@@ -42,7 +42,10 @@ Write Test Options
 The test normally just tests compression of 1D array of integer
 and double precision data of a sinusoidal array with a small
 amount of additive random noise. The ``highd`` test runs a test
-on a 4D array where two of the 4 dimensions are uncorrelated.
+on a 4D array where two of the 4 dimensions are not correlated.
+This tests the plugin's ability to properly set chunking for
+HDF5 such that chunks span **only** correlated dimensions and
+have non-unity sizes in 3 or fewer dimensions.
 
 There is a companion, `test_read.c <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_read.c>`_
 which is compiled into ``test_read_plugin``
@@ -64,7 +67,8 @@ point data from Fortran callers and this can be done only through the
 to have to link with an implementation of that interface. Since we need to link
 extra code for Fortran, we may as well also link to the filter itself alleviating
 the need to use the filter as a plugin. Also, if you want to use Fortran support,
-the HDF5_ library must have, of coursed, been configured and built with it.
+the HDF5_ library must have, of course, been configured and built with Fortran support
+as well.
 
 In addition, a number tests are performed in the Makefile which test the plugin
 by using some of the HDF5_ tools such as ``h5dump`` and ``h5repack``. Again, to
