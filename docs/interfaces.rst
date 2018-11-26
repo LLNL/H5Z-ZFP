@@ -55,6 +55,14 @@ the  caller to  then call
 `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_
 with  the array  of cd_values constructed by one of these macros.
 
+Here is example code from
+`test_write.c <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c>`_...
+
+.. literalinclude:: ../test/test_write.c
+   :language: c
+   :linenos:
+   :lines: 261-272,279-280
+
 However, these  macros are only a  convenience. You do  not **need** the
 ``H5Zzfp_plugin.h`` header file if you want  to avoid using it. But, you are then
 responsible  for setting  up  the ``cd_values``  array  correctly for  the
@@ -110,6 +118,14 @@ list entries  to control the  ZFP_ filter. Calling any of these functions
 removes the effects of any previous call to any one of these functions.
 In addition, calling any one of these functions also has the effect of
 adding the filter to the pipeline.
+
+Here is example code from
+`test_write.c <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c>`_...
+
+.. literalinclude:: ../test/test_write.c
+   :language: c
+   :linenos:
+   :lines: 284-297
 
 The properties interface  is more type-safe than the generic interface.
 However, there  is no way for the implementation of the properties interface
