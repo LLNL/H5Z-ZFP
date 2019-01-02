@@ -53,7 +53,7 @@ test-rate-f: plugin test_rw_fortran
 	@for r in 32 16 8 4; do\
 	    expected_ratio=$$(expr 64 \/ $$r); \
 	    ./test_rw_fortran zfpmode 1 rate $$r 2>&1 1>/dev/null; \
-	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
+	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
 	        echo "Fortran ZFP rate test failed for rate=$$r"; \
 	        exit 1; \
@@ -65,7 +65,7 @@ test-rate-f: plugin test_rw_fortran
 test-accuracy-f: plugin test_rw_fortran
 	@for a in 0.1 0.01 0.001 0.0001; do\
 	    ./test_rw_fortran zfpmode 3 acc $$a write_only 2>&1 1>/dev/null; \
-	    env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original 2>&1 1>/dev/null; \
+	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "Fortran ZFP accuracy test failed for accuracy=$$a"; \
 	        exit 1; \
@@ -78,7 +78,7 @@ test-precision-f: plugin test_rw_fortran
 	@ldiffcnt=0; \
 	for p in 12 16 20 24; do\
 	    ./test_rw_fortran zfpmode 2 prec $$p write_only 2>&1 1>/dev/null; \
-	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
+	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
 	        echo "Fortran ZFP precision test failed for precision=$$p"; \
 		exit 1; \
@@ -94,7 +94,7 @@ test-rate: plugin test_write_plugin
 	@for r in 32 16 8 4; do\
 	    expected_ratio=$$(expr 64 \/ $$r); \
 	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=1 rate=$$r 2>&1 1>/dev/null; \
-	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
+	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
 	        echo "ZFP rate test failed for rate=$$r"; \
 	        exit 1; \
@@ -106,7 +106,7 @@ test-rate: plugin test_write_plugin
 test-accuracy: plugin test_write_plugin
 	@for a in 0.1 0.01 0.001 0.0001; do\
 	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=3 acc=$$a 2>&1 1>/dev/null; \
-	    env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp.h5 test_zfp.h5 compressed original 2>&1 1>/dev/null; \
+	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp.h5 test_zfp.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "ZFP accuracy test failed for accuracy=$$a"; \
 	        exit 1; \
@@ -119,7 +119,7 @@ test-precision: plugin test_write_plugin
 	@ldiffcnt=0; \
 	for p in 12 16 20 24; do\
 	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=2 prec=$$p 2>&1 1>/dev/null; \
-	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
+	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
 	        echo "ZFP precision test failed for precision=$$p"; \
 		exit 1; \
@@ -138,7 +138,7 @@ test-precision: plugin test_write_plugin
 # A bug-fix patch to h5repack_parse.c is required for this test.
 #
 test-h5repack: plugin mesh.h5 patch
-	@env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5repack -f UD=32013,6,3,0,3539053052,1062232653,0,0 \
+	@env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5repack -f UD=32013,6,3,0,3539053052,1062232653,0,0 \
 	     -l X,Y,Z,Indexes:CHUNK=217 \
 	     -l Indexes2:CHUNK=1517 \
 	     -l Pressure,Pressure2,Pressure3:CHUNK=10x20x5 \
@@ -168,7 +168,7 @@ test-h5repack: plugin mesh.h5 patch
 # There is a bug in h5diff that causes it to return 0 when it can't find plugin.
 # We protect against that by additional check of output error text
 test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
-	@outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.00001 test_zfp_le.h5 test_zfp_be.h5 compressed compressed 2>&1); \
+	@outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.00001 test_zfp_le.h5 test_zfp_be.h5 compressed compressed 2>&1); \
 	if [[ $$? -ne 0 ]] || [[ -n "$$(echo $$outerr | grep 'cannot be read')" ]]; then \
 	    echo "Endian test failed"; \
 	    exit 1; \
