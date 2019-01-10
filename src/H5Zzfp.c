@@ -109,7 +109,7 @@ static
 int H5Z_zfp_finalize(void)
 {
     herr_t ret1, ret2;
-    if (H5Z_ZFP_ERRCLASS != -1 && H5Z_ZFP_ERRCLASS != H5E_ERR_CLS_g)
+    if (H5Z_ZFP_ERRCLASS != -1 && H5Z_ZFP_ERRCLASS != H5E_ERR_CLS)
         ret1 = H5Eunregister_class(H5Z_ZFP_ERRCLASS);
     H5Z_ZFP_ERRCLASS = -1;
     ret2 = H5Zunregister(H5Z_FILTER_ZFP);
@@ -127,7 +127,7 @@ static void H5Z_zfp_init(void)
     /* Register the error class */
     if (H5Z_ZFP_ERRCLASS == -1)
     {
-        if (H5Eget_class_name(H5E_ERR_CLS_g,0,0) < 0)
+        if (H5Eget_class_name(H5E_ERR_CLS,0,0) < 0)
         {
             H5Z_ZFP_ERRCLASS = H5Eregister_class("H5Z-ZFP", "ZFP-" ZFP_VERSION_STR,
                                                  "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
@@ -138,7 +138,7 @@ static void H5Z_zfp_init(void)
         }
         else
         {
-            H5Z_ZFP_ERRCLASS = H5E_ERR_CLS_g;
+            H5Z_ZFP_ERRCLASS = H5E_ERR_CLS;
         }
     }
 }
