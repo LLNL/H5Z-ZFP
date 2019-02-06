@@ -8,9 +8,10 @@ supporting *lossy* compression of floating point and integer data to meet bitrat
 and/or precision targets. The filter uses the
 `registered <https://support.hdfgroup.org/services/filters.html#zfp>`_ HDF5_ filter ID, ``32013``.
 It supports single and double precision floating point and integer data *chunked* in 1, 2 or
-3 dimensions. The filter will function on datasets of more than 3 dimensions, albiet at the
-probable expense of compression performance, as long as the chunking is such that no more than
-3 dimensions of a chunk are non-unity.
+3 dimensions.  The filter will function on datasets of more than 3 dimensions (or 4
+dimensions for ZFP versions 0.5.4 and newer), albeit at the
+probable expense of compression performance, as long as no more than 3
+(or 4) dimensions of the HDF5 dataset chunking are of size greater than 1.
 
 Contents:
 
@@ -20,5 +21,6 @@ Contents:
 
    installation
    interfaces
+   hdf5_chunking
    endian_issues
    tests
