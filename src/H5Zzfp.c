@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* This code was based heavily on one of the HDF5 library's internal
+   filters, H5Zszip.c. The intention in so doing wasn't so much to 
+   plagerize HDF5 developers as it was to produce a code that, if
+   The HDF Group ever decided to in the future, could be easily
+   integrated with the existing HDF5 library code base. */
 
 /* The logic here for 'Z' and 'B' macros as well as there use within
    the code to call ZFP library methods is due to this filter being
@@ -147,6 +152,7 @@ static htri_t
 H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 {   
     static char const *_funcname_ = "H5Z_zfp_can_apply";
+    int const max_ndims = (ZFP_VERSION_NO <= 0x0053) ? 3 : 4;
     int ndims, ndims_used = 0;
     size_t i, dsize;
     htri_t retval = 0;
@@ -194,9 +200,9 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         ndims_used++;
     }
 
-    if (ndims_used == 0 || ndims_used > 3)
+    if (ndims_used == 0 || ndims_used > max_ndims)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
-            "chunk must have only 1-3 non-unity dimensions");
+            "chunk must have only 1-3 (or 4) non-unity dimensions");
 
     /* if caller is doing "endian targetting", disallow that */
     native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
@@ -272,8 +278,11 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         case 1: dummy_field = Z zfp_field_1d(0, zt, dims_used[0]); break;
         case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[1], dims_used[0]); break;
         case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[2], dims_used[1], dims_used[0]); break;
+#if ZFP_VERSION_NO >= 0x0054
+        case 4: dummy_field = Z zfp_field_4d(0, zt, dims_used[3], dims_used[2], dims_used[1], dims_used[0]); break;
+#endif
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
-                     "chunks may have only 1,2 or 3 non-unity dims");
+                     "chunks may have only 1-3 (or 4) non-unity dims");
     }
     if (!dummy_field)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_field_Xd() failed");
@@ -405,15 +414,17 @@ done:
 }
 
 static int
-get_zfp_info_from_cd_values_0x0030(size_t cd_nelmts, unsigned int const *cd_values,
+get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
     uint64 *zfp_mode, uint64 *zfp_meta, H5T_order_t *swap)
 {
-    static char const *_funcname_ = "get_zfp_info_from_cd_values_0x0030";
+    static char const *_funcname_ = "get_zfp_info_from_cd_values";
     unsigned int cd_values_copy[H5Z_ZFP_CD_NELMTS_MAX];
     int retval = 0;
     bitstream *bstr = 0;
     zfp_stream *zstr = 0;
     zfp_field *zfld = 0;
+
+    H5Z_zfp_init();
 
     if (cd_nelmts > H5Z_ZFP_CD_NELMTS_MAX)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_OVERFLOW, 0, "cd_nelmts exceeds max");
@@ -432,7 +443,12 @@ get_zfp_info_from_cd_values_0x0030(size_t cd_nelmts, unsigned int const *cd_valu
     if (0 == (zfld = Z zfp_field_alloc()))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "allocating field failed");
 
-    /* Read ZFP header */
+    /* Do a read of *just* magic to detect possible codec version mismatch */
+    if (0 == (Z zfp_read_header(zstr, zfld, ZFP_HEADER_MAGIC)))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "ZFP codec version mismatch");
+    Z zfp_stream_rewind(zstr);
+
+    /* Now, read ZFP *full* header */
     if (0 == (Z zfp_read_header(zstr, zfld, ZFP_HEADER_FULL)))
     {
         herr_t conv;
@@ -469,26 +485,6 @@ done:
     return retval;
 }
 
-/* Decode cd_values for ZFP info for various versions of this filter */
-static int
-get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
-    uint64 *zfp_mode, uint64 *zfp_meta, H5T_order_t *swap)
-{
-    unsigned int const h5z_zfp_version_no = cd_values[0]&0x0000FFFF;
-    int retval = 0;
-
-    H5Z_zfp_init();
-
-    /* Pass &cd_values[1] here to strip off first entry holding version info */
-    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0080)
-        return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
-
-    H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,
-        "version mismatch: (file) 0x0%x <-> 0x0%x (code)", h5z_zfp_version_no, H5Z_FILTER_ZFP_VERSION_NO);
-
-    return 0;
-}
-
 static size_t
 H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     const unsigned int cd_values[], size_t nbytes,
@@ -504,7 +500,8 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     zfp_stream *zstr = 0;
     zfp_field *zfld = 0;
 
-    if (0 == get_zfp_info_from_cd_values(cd_nelmts, cd_values, &zfp_mode, &zfp_meta, &swap))
+    /* Pass &cd_values[1] here to strip off first entry holding version info */
+    if (0 == get_zfp_info_from_cd_values(cd_nelmts-1, &cd_values[1], &zfp_mode, &zfp_meta, &swap))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "can't get ZFP mode/meta");
 
     if (flags & H5Z_FLAG_REVERSE) /* decompression */
