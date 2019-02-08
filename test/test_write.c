@@ -577,6 +577,76 @@ int main(int argc, char **argv)
     }
     /* End of 6D Example */
 
+    /* Test six dimensional, time varying array...a 3x3 tensor valued variable
+       over a 3D+time domain. Dimension sizes are chosen to miss perfect ZFP block 
+       alignment. */
+    if (sixd)
+    {
+        void *tbuf;
+        int t, fd, dims[] = {31,31,31,3,3}; /* a single time instance */
+        int ucdims[]={3,4}; /* indices of UNcorrleted dimensions in dims (tensor components) */
+        hsize_t  hdims[] = {31,31,31,3,3,H5S_UNLIMITED};
+        hsize_t hchunk[] = {31,31,31,1,1,4}; /* 4 non-unity, requires >= ZFP 0.5.4 */
+        hsize_t hwrite[] = {31,31,31,3,3,4}; /* size/shape of any given H5Dwrite */
+
+        /* Setup the filter properties and create the dataset */
+        cpid = setup_filter(6, hchunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+        if (0 > (sid = H5Screate_simple(6, hwrite, hdims))) ERROR(H5Screate_simple);
+        if (0 > (dsid = H5Dcreate(fid, "6D_extendible", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Sclose(sid)) ERROR(H5Sclose);
+        if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+
+        /* Generate a single buffer which we'll modulate by a time-varying function
+           to represent each timestep */
+        buf = gen_random_correlated_array(TYPDBL, 5, dims, 2, ucdims);
+
+        /* Allocate the "time" buffer where we will buffer up each time step
+           until we have enough to span a width of 4 */
+        tbuf = malloc(31*31*31*3*3*4*sizeof(double));
+
+        /* Iterate, writing 9 timesteps by buffering in time 4x. The last
+           write will contain just one timestep causing ZFP to wind up 
+           padding all those blocks by 3x along the time dimension.  */
+        for (t = 1; t < 5; t++)
+        {
+            hid_t msid, fsid;
+            hsize_t hstart[] = {0,0,0,0,0,t-4}; /* size/shape of any given H5Dwrite */
+            hsize_t hcount[] = {31,31,31,3,3,4}; /* size/shape of any given H5Dwrite */
+
+            /* Update (e.g. modulate) the buf data for the current time step */
+            modulate_by_time(buf, TYPDBL, 5, dims, t);
+
+            /* Buffer this timestep in memory. Since chunk size in time dimension is 4,
+               we need to buffer up 4 time steps before we can issue any writes */ 
+            buffer_time_step(tbuf, buf, TYPDBL, 5, dims, t);
+
+            /* If the buffer isn't full, just continue updating it */
+            if (t%4 && t!=9) continue;
+
+            /* Define the memory dataspace to use for this H5Dwrite call */
+            if (t == 9)
+            {
+                /* last timestep, write a partial buffer */
+                hwrite[5] = 1;
+                hcount[5] = 1;
+            }
+
+            if (0 > (msid = H5Screate_simple(6, hwrite, 0))) ERROR(H5Screate_simple);
+
+            /* Get the file dataspace to use for this H5Dwrite call */
+            if (0 > (fsid = H5Dget_space(dsid))) ERROR(H5Dget_space);
+            if (0 > H5Sselect_hyperslab(fsid, H5S_SELECT_SET, hstart, 0, hcount, 0)) ERROR(H5Sselect_hyperslab);
+
+            /* Write this iteration to the dataset */
+            if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, msid, fsid, H5P_DEFAULT, tbuf)) ERROR(H5Dwrite);
+            if (0 > H5Sclose(msid)) ERROR(H5Sclose);
+            if (0 > H5Sclose(fsid)) ERROR(H5Sclose);
+        }
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        free(buf);
+        free(tbuf);
+    }
+
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
     free(ifile);
