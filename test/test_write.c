@@ -29,6 +29,13 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #define NAME_LEN 256
 
 /* convenience macro to handle command-line args and help */
+#define HANDLE_SEP(SEPSTR)                                      \
+{                                                               \
+    char tmpstr[64];                                            \
+    int len = snprintf(tmpstr, sizeof(tmpstr), "\n%s...", #SEPSTR);\
+    printf("    %*s\n",60-len,tmpstr);                          \
+}
+
 #define HANDLE_ARG(A,PARSEA,PRINTA,HELPSTR)                     \
 {                                                               \
     int i;                                                      \
@@ -232,6 +239,48 @@ gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, in
     return buf0;
 }
 
+static void
+modulate_by_time(void *data, int typ, int ndims, int const *dims, int t)
+{
+    int i, n;
+
+    for (i = 0, n = 1; i < ndims; i++)
+        n *= dims[i];
+
+    if (typ == TYPINT)
+    {
+        int *p = (int *) data;
+        for (i = 0; i < n; i++, p++)
+        {
+            double val = *p;
+            val *= exp(0.1*t*sin(t/9.0*2*M_PI));
+            *p = val;
+        }
+    }
+    else
+    {
+        double *p = (double *) data;
+        for (i = 0; i < n; i++, p++)
+        {
+            double val = *p;
+            val *= exp(0.1*t*sin(t/9.0*2*M_PI));
+            *p = val;
+        }
+    }
+}
+
+static void
+buffer_time_step(void *tbuf, void *data, int typ, int ndims, int const *dims, int t)
+{
+    int i, n;
+    int k = t % 4;
+    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double)); 
+
+    for (i = 0, n = 1; i < ndims; i++)
+        n *= dims[i];
+
+    memcpy((char*)tbuf+k*n*nbyt, data, n*nbyt);
+}
 
 static int read_data(char const *fname, size_t npoints, double **_buf)
 {
@@ -307,7 +356,6 @@ int main(int argc, char **argv)
 
     /* filename variables */
     char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
-    char *ids   = (char *) calloc(NAME_LEN,sizeof(char));
     char *ofile = (char *) calloc(NAME_LEN,sizeof(char));
 
     /* sinusoid data generation variables */
@@ -316,6 +364,7 @@ int main(int argc, char **argv)
     double amp = 17.7;
     int doint = 0;
     int highd = 0;
+    int sixd = 0;
     int help = 0;
 
     /* compression parameters (defaults taken from ZFP header) */
@@ -337,18 +386,18 @@ int main(int argc, char **argv)
     /* file arguments */
     strcpy(ofile, "test_zfp.h5");
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
-    /*HANDLE_ARG(ids,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input datast name);*/
     HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
 
-    /* data generation arguments */
-    HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for generated dataset);
-    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in generated dataset);
-    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in generated dataset);
-    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer data);
-    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run high-dimensional (>3D) case);
+    /* 1D dataset arguments */
+    HANDLE_SEP(1D dataset generation arguments)
+    HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for 1D dataset);
+    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in 1D dataset);
+    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in 1D dataset);
+    HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for 1D dataset);
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer 1D data);
 
-    /* HDF5 chunking and ZFP filter arguments */
-    HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for dataset);
+    /* ZFP filter arguments */
+    HANDLE_SEP(ZFP compression paramaters)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode of filter);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode of filter);
@@ -357,6 +406,12 @@ int main(int argc, char **argv)
     HANDLE_ARG(maxbits,(uint) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode of zfp filter);
     HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode of zfp filter);
     HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode of zfp filter);
+
+    /* Advanced cases */
+    HANDLE_SEP(Advanced cases)
+    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run 4D case);
+    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case (requires ZFP>=0.5.4));
+
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
     /* Put this after setup_filter to permit printing of otherwise hard to 
        construct cd_values to facilitate manual invokation of h5repack */
@@ -409,7 +464,8 @@ int main(int argc, char **argv)
     /* Test high dimensional (>3D) array */
     if (highd)
     {
-        int fd, dims[] = {128,128,16,32}, ucdims[]={1,3};
+        int fd, dims[] = {128,128,16,32};
+        int ucdims[]={1,3}; /* indices of the UNcorrleted dimensions in dims */
         hsize_t hdims[] = {128,128,16,32};
         hsize_t hchunk[] = {1,128,1,32};
 
@@ -435,11 +491,80 @@ int main(int argc, char **argv)
         free(buf);
     }
 
+    /* Test six dimensional, time varying array...a 3x3 tensor valued variable
+       over a 3D+time domain. Dimension sizes are chosen to miss perfect ZFP block 
+       alignment. */
+    if (sixd)
+    {
+        void *tbuf;
+        int t, fd, dims[] = {31,31,31,3,3}; /* a single time instance */
+        int ucdims[]={3,4}; /* indices of UNcorrleted dimensions in dims (tensor components) */
+        hsize_t  hdims[] = {31,31,31,3,3,H5S_UNLIMITED};
+        hsize_t hchunk[] = {31,31,31,1,1,4}; /* 4 non-unity, requires >= ZFP 0.5.4 */
+        hsize_t hwrite[] = {31,31,31,3,3,4}; /* size/shape of any given H5Dwrite */
+
+        /* Setup the filter properties and create the dataset */
+        cpid = setup_filter(6, hchunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+        if (0 > (sid = H5Screate_simple(6, hwrite, hdims))) ERROR(H5Screate_simple);
+        if (0 > (dsid = H5Dcreate(fid, "6D_extendible", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Sclose(sid)) ERROR(H5Sclose);
+        if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+
+        /* Generate a single buffer which we'll modulate by a time-varying function
+           to represent each timestep */
+        buf = gen_random_correlated_array(TYPDBL, 5, dims, 2, ucdims);
+
+        /* Allocate the "time" buffer where we will buffer up each time step
+           until we have enough to span a width of 4 */
+        tbuf = malloc(31*31*31*3*3*4*sizeof(double));
+
+        /* Iterate, writing 9 timesteps by buffering in time 4x. The last
+           write will contain just one timestep causing ZFP to wind up 
+           padding all those blocks by 3x along the time dimension.  */
+        for (t = 1; t < 5; t++)
+        {
+            hid_t msid, fsid;
+            hsize_t hstart[] = {0,0,0,0,0,t-4}; /* size/shape of any given H5Dwrite */
+            hsize_t hcount[] = {31,31,31,3,3,4}; /* size/shape of any given H5Dwrite */
+
+            /* Update (e.g. modulate) the buf data for the current time step */
+            modulate_by_time(buf, TYPDBL, 5, dims, t);
+
+            /* Buffer this timestep in memory. Since chunk size in time dimension is 4,
+               we need to buffer up 4 time steps before we can issue any writes */ 
+            buffer_time_step(tbuf, buf, TYPDBL, 5, dims, t);
+
+            /* If the buffer isn't full, just continue updating it */
+            if (t%4 && t!=9) continue;
+
+            /* Define the memory dataspace to use for this H5Dwrite call */
+            if (t == 9)
+            {
+                /* last timestep, write a partial buffer */
+                hwrite[5] = 1;
+                hcount[5] = 1;
+            }
+
+            if (0 > (msid = H5Screate_simple(6, hwrite, 0))) ERROR(H5Screate_simple);
+
+            /* Get the file dataspace to use for this H5Dwrite call */
+            if (0 > (fsid = H5Dget_space(dsid))) ERROR(H5Dget_space);
+            if (0 > H5Sselect_hyperslab(fsid, H5S_SELECT_SET, hstart, 0, hcount, 0)) ERROR(H5Sselect_hyperslab);
+
+            /* Write this iteration to the dataset */
+            if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, msid, fsid, H5P_DEFAULT, tbuf)) ERROR(H5Dwrite);
+            if (0 > H5Sclose(msid)) ERROR(H5Sclose);
+            if (0 > H5Sclose(fsid)) ERROR(H5Sclose);
+        }
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        free(buf);
+        free(tbuf);
+    }
+
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
     free(ifile);
     free(ofile);
-    free(ids);
 
 #ifndef H5Z_ZFP_USE_PLUGIN
     /* When filter is used as a library, we need to finalize it */
