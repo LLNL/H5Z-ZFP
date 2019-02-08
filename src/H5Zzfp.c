@@ -1,24 +1,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* This code was based heavily on one of the HDF5 library's internal
-   filters, H5Zszip.c. The intention in so doing wasn't so much to 
-   plagerize HDF5 developers as it was to produce a code that, if
-   The HDF Group ever decided to in the future, could be easily
-   integrated with the existing HDF5 library code base. */
+/*
+This code was based heavily on one of the HDF5 library's internal
+filter, H5Zszip.c. The intention in so doing wasn't so much to 
+plagerize HDF5 developers as it was to produce a code that, if
+The HDF Group ever decided to in the future, could be easily
+integrated with the existing HDF5 library code base.
 
-/* The logic here for 'Z' and 'B' macros as well as there use within
-   the code to call ZFP library methods is due to this filter being
-   part of the Silo library but also supported as a stand-alone
-   package. In Silo, the ZFP library is embedded inside a C struct
-   to avoid pollution of the global namespace as well as collision
-   with any other implementation of ZFP a Silo executable may be
-   linked with. Calls to ZFP lib methods are preface with 'Z ' 
-   and calls to bitstream methods with 'B ' as in
+The logic here for 'Z' and 'B' macros as well as there use within
+the code to call ZFP library methods is due to this filter being
+part of the Silo library but also supported as a stand-alone
+package. In Silo, the ZFP library is embedded inside a C struct
+to avoid pollution of the global namespace as well as collision
+with any other implementation of ZFP a Silo executable may be
+linked with. Calls to ZFP lib methods are preface with 'Z ' 
+and calls to bitstream methods with 'B ' as in
 
-       Z zfp_stream_open(...);
-       B sream_open(...);
-
+    Z zfp_stream_open(...);
+    B stream_open(...);
 */
 
 #ifdef Z

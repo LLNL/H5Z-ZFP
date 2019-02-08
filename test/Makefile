@@ -170,7 +170,7 @@ test-h5repack: plugin mesh.h5 patch
 # We should test return code but h5diff's return code has been unreliable across
 # versions and so am not relying on it here.
 test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
-	outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.00001 test_zfp_le.h5 test_zfp_be.h5 compressed compressed 2>&1); \
+	@outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.00001 test_zfp_le.h5 test_zfp_be.h5 compressed compressed 2>&1); \
 	if [[ -z "$$(echo $$outerr | grep '0 differences found')" ]]; then \
 	    echo "Endian test failed"; \
 	    exit 1; \
