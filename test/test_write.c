@@ -513,6 +513,9 @@ int main(int argc, char **argv)
         /* Generate a single buffer which we'll modulate by a time-varying function
            to represent each timestep */
         buf = gen_random_correlated_array(TYPDBL, 5, dims, 2, ucdims);
+
+        /* Allocate the "time" buffer where we will buffer up each time step
+           until we have enough to span a width of 4 */
         tbuf = malloc(31*31*31*3*3*4*sizeof(double));
 
         /* Iterate, writing 9 timesteps by buffering in time 4x. The last

@@ -20,8 +20,22 @@ own where `d` is the dataset dimension (*rank* in HDF5_ parlance). This means
 that that whenever possible `chunking`_ dimensions you select in HDF5_ should be
 multiples of 4. When a chunk_ dimension is not a multiple of 4, ZFP_ will wind
 up with partial chunklets which it will pad with useless data reducing overall
-time and space efficiency of the results. On the other hand when chunk_ dimensions
-are many times a multiple 4, this overhead is also likely to be negligible.
+time and space efficiency of the results.
+
+The degree to which this may degrade performance depends on the percentage of a
+chunk_ that is padded. Suppose we have 2D chunk of dimensions 27 x 101. ZFP_ will
+have to treat it as 28 x 104 by padding out each dimension to the next closest
+multiple of 4. The fraction of space that will wind up being wasted due to ZFP_
+chunklet padding will be (28x104-27x101) / (28x104) which is about 6.4%. On the
+other hand, consider a 3D chunk that is 1024 x 1024 x 2. ZFP_ will have to treat
+it as a 1024 x 1024 x 4 resulting in 50% waste.
+
+The latter example is potentialy very relevant when attemping to apply ZFP_ to
+compress data long the *time* dimension in a large, 3D, simulation. Ordinarily,
+a simulation advances one time step at a time and so needs to store in memory
+only the *current* timestep. In order to give ZFP_ enough *width* in the time
+dimension to satisfy the minimum chunklet dimension size of 4, the simulation
+needs to keep in memory 4 timesteps. This is demonstrated in the example below.
 
 -----------------------------
 More Than 3 (or 4) Dimensions
@@ -57,12 +71,21 @@ newer) dimensions of the chunk_ can be non-unity.
 In the code snipit below, we demonstrate this case. A key issue to deal
 with is that because we will use ZFP_ to compress along the time dimension,
 this forces us to keep in memory a sufficient number of timesteps to match
-ZFP_'s chunklet size of 4. The code below iterates over 9 timesteps. Each
-of the first two groups of 4 timesteps are buffered in memory. Once 4
-timesteps have been buffered, we can issue an H5Dwrite call on the 6D 
-dataset. But, notice that the chunk_ dimensions are such that only 4
-of the 6 dimensions are non-unity. This means ZFP_ will only ever see
-something to compress that is 4D.
+ZFP_'s chunklet size of 4.
+
+The code below iterates over 9 timesteps. Each of the first two groups of 4
+timesteps are buffered in memory in ``tbuf``. Once 4 timesteps have been buffered, we
+can issue an `H5Dwrite <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Write>`_
+call doing `hyperslab <https://support.hdfgroup.org/HDF5/Tutor/selectsimple.html>`_
+partial I/O on the 6D, `extendible <https://support.hdfgroup.org/HDF5/Tutor/extend.html>`_
+dataset. But, notice that the chunk_ dimensions (line 10) are such that only 4 of the
+6 dimensions are non-unity. This means ZFP_ will only ever see something to
+compress that is essentially 4D.
+
+On the last iteration, we have only one *new* timestep. So, when we write this
+to ZFP_ 75% of that write will be *wasted* due to ZFP_ chunklet padding. However,
+if the application were to *restart* from this time and continue forward, this
+*waste* will ulimately get overwritten with new timesteps.
 
 .. include:: ../test/test_write.c
    :code: c

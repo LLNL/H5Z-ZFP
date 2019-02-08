@@ -9,9 +9,9 @@ uses HDF5_ `properties <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Gen
 added to the `dataset creation property list <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#DatasetCreatePropFuncs>`_
 used when the dataset to be compressed is being created. You  can find examples  of writing
 HDF5_ data using both the
-`generic <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c#L119>`_ 
+`generic <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c#L263>`_ 
 and
-`properties <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c#L145>`_ 
+`properties <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c#L290>`__
 interfaces in
 `test_write.c <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c>`_.
 
