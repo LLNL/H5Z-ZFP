@@ -510,6 +510,8 @@ int main(int argc, char **argv)
 
         /* Setup the filter properties and create the dataset */
         cpid = setup_filter(6, hchunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+
+        /* Create the time-varying, 6D dataset */
         if (0 > (sid = H5Screate_simple(6, hwrite, hdims))) ERROR(H5Screate_simple);
         if (0 > (dsid = H5Dcreate(fid, "6D_extendible", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
         if (0 > H5Sclose(sid)) ERROR(H5Sclose);
@@ -526,11 +528,12 @@ int main(int argc, char **argv)
         /* Iterate, writing 9 timesteps by buffering in time 4x. The last
            write will contain just one timestep causing ZFP to wind up 
            padding all those blocks by 3x along the time dimension.  */
-        for (t = 1; t < 5; t++)
+        for (t = 1; t < 10; t++)
         {
             hid_t msid, fsid;
             hsize_t hstart[] = {0,0,0,0,0,t-4}; /* size/shape of any given H5Dwrite */
             hsize_t hcount[] = {31,31,31,3,3,4}; /* size/shape of any given H5Dwrite */
+            hsize_t hextend[] = {31,31,31,3,3,t}; /* size/shape of */
 
             /* Update (e.g. modulate) the buf data for the current time step */
             modulate_by_time(buf, TYPDBL, 5, dims, t);
@@ -542,7 +545,7 @@ int main(int argc, char **argv)
             /* If the buffer isn't full, just continue updating it */
             if (t%4 && t!=9) continue;
 
-            /* Define the memory dataspace to use for this H5Dwrite call */
+            /* For last step, adjust time dim of this write down from 4 to just 1 */
             if (t == 9)
             {
                 /* last timestep, write a partial buffer */
@@ -550,10 +553,17 @@ int main(int argc, char **argv)
                 hcount[5] = 1;
             }
 
+            /* extend the dataset in time */
+            if (t > 4)
+                H5Dextend(dsid, hextend);
+
+            /* Create the memory dataspace */
             if (0 > (msid = H5Screate_simple(6, hwrite, 0))) ERROR(H5Screate_simple);
 
             /* Get the file dataspace to use for this H5Dwrite call */
             if (0 > (fsid = H5Dget_space(dsid))) ERROR(H5Dget_space);
+
+            /* Do a hyperslab selection on the file dataspace for this write*/
             if (0 > H5Sselect_hyperslab(fsid, H5S_SELECT_SET, hstart, 0, hcount, 0)) ERROR(H5Sselect_hyperslab);
 
             /* Write this iteration to the dataset */
