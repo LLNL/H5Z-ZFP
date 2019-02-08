@@ -61,7 +61,8 @@ Here is example code from
 .. literalinclude:: ../test/test_write.c
    :language: c
    :linenos:
-   :lines: 261-272,279-280
+   :start-after: setup zfp filter via generic (cd_values) interface
+   :end-before: #else
 
 However, these  macros are only a  convenience. You do  not **need** the
 ``H5Zzfp_plugin.h`` header file if you want  to avoid using it. But, you are then
@@ -125,7 +126,8 @@ Here is example code from
 .. literalinclude:: ../test/test_write.c
    :language: c
    :linenos:
-   :lines: 284-297
+   :start-after: When filter is used as a library, we need to init it
+   :end-before: #endif 
 
 The properties interface  is more type-safe than the generic interface.
 However, there  is no way for the implementation of the properties interface

@@ -464,10 +464,11 @@ int main(int argc, char **argv)
     /* Test high dimensional (>3D) array */
     if (highd)
     {
-        int fd, dims[] = {128,128,16,32};
-        int ucdims[]={1,3}; /* indices of the UNcorrleted dimensions in dims */
-        hsize_t hdims[] = {128,128,16,32};
-        hsize_t hchunk[] = {1,128,1,32};
+     /* dimension indices 0   1   2  3 */
+        int fd, dims[] = {256,128,32,16};
+        int ucdims[]={1,3}; /* UNcorrleted dimensions indices */
+        hsize_t hdims[] = {256,128,32,16};
+        hsize_t hchunk[] = {256,1,32,1};
 
         buf = gen_random_correlated_array(TYPDBL, 4, dims, 2, ucdims);
 
@@ -490,10 +491,14 @@ int main(int argc, char **argv)
         if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
         free(buf);
     }
+    /* End of high dimensional test */
 
-    /* Test six dimensional, time varying array...a 3x3 tensor valued variable
-       over a 3D+time domain. Dimension sizes are chosen to miss perfect ZFP block 
-       alignment. */
+    /* 6D Example */
+    /* Test six dimensional, time varying array...
+           ...a 3x3 tensor valued variable
+           ...over a 3D+time domain.
+           Dimension sizes are chosen to miss perfect ZFP block alignment.
+    */
     if (sixd)
     {
         void *tbuf;
@@ -560,6 +565,7 @@ int main(int argc, char **argv)
         free(buf);
         free(tbuf);
     }
+    /* End of 6D Example */
 
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
