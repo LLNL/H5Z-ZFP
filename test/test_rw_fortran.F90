@@ -109,7 +109,7 @@ PROGRAM main
 
      ELSE IF (INDEX(arg(1:len),'help').NE.0)THEN
         PRINT*," *** USAGE *** "
-        PRINT*,"zfpmode <val> - set zfp mode (1=rate,2=prec,3=acc,4=expert)"
+        PRINT*,"zfpmode <val> - 1=rate,2=prec,3=acc,4=expert,5=reversible"
         PRINT*,"rate <val>    - set rate for rate mode of filter"
         PRINT*,"acc <val>     - set accuracy for accuracy mode of filter"
         PRINT*,"prec <val>    - set PRECISION for PRECISION mode of zfp filter"
@@ -205,6 +205,9 @@ PROGRAM main
   ELSE IF (zfpmode .EQ. H5Z_ZFP_MODE_EXPERT) THEN
      status = H5Pset_zfp_expert(cpid, minbits, maxbits, maxprec, minexp)
      CALL check("H5Pset_zfp_expert", status, nerr)
+  ELSE IF (zfpmode .EQ. H5Z_ZFP_MODE_REVERSIBLE) THEN
+     status = H5Pset_zfp_reversible(cpid)
+     CALL check("H5Pset_zfp_reversible", status, nerr)
   ENDIF
   CALL h5dcreate_f(fid, "compressed", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
   CALL check("h5dcreate_f", status, nerr)
