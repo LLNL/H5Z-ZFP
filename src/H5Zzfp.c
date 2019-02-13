@@ -379,8 +379,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                 Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
                     mem_cd_values[4], (int) mem_cd_values[5]);
                 break;
-#if ZFP_VERSION_NO >= 0x0054
-#warning FIXME
+#if ZFP_VERSION_NO >= 0x0055
             case H5Z_ZFP_MODE_REVERSIBLE:
                 Z zfp_stream_set_reversible(dummy_zstr);
                 break;
