@@ -316,6 +316,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
         H5Pset_zfp_accuracy_cdata(acc, cd_nelmts, cd_values);
     else if (zfpmode == H5Z_ZFP_MODE_EXPERT)
         H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values);
+    else if (zfpmode == H5Z_ZFP_MODE_REVERSIBLE)
+        H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values);
     else
         cd_nelmts = 0; /* causes default behavior of ZFP library */
 
@@ -343,6 +345,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
         H5Pset_zfp_accuracy(cpid, acc);
     else if (zfpmode == H5Z_ZFP_MODE_EXPERT)
         H5Pset_zfp_expert(cpid, minbits, maxbits, maxprec, minexp);
+    else if (zfpmode == H5Z_ZFP_MODE_REVERSIBLE)
+        H5Pset_zfp_reversible(cpid);
 
 #endif
 
@@ -398,7 +402,7 @@ int main(int argc, char **argv)
 
     /* ZFP filter arguments */
     HANDLE_SEP(ZFP compression paramaters)
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert)); 
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode of filter);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode of filter);
     HANDLE_ARG(prec,(uint) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode of zfp filter);
