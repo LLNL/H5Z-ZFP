@@ -17,8 +17,8 @@ interfaces in
 
 The filter itself supports either interface. The filter also supports all of the
 standard ZFP_ controls for affecting compression including *rate*, *precision*,
-*accuracy*, and *expert* modes. For more information and details about these modes
-of controlling ZFP_ compression, please see the
+*accuracy*, *expert* and *reversible* modes. For more information and details about
+these modes of controlling ZFP_ compression, please see the
 `ZFP README <https://github.com/LLNL/zfp/blob/master/README.md>`_.
 
 Finally, you should *not* attempt to combine the ZFP_ filter with any other
@@ -48,6 +48,7 @@ the ``H5Zzfp_plugin.h`` header file::
     H5Pset_zfp_expert_cdata(unsigned int minbits, unsigned int maxbits,
                             unsigned int maxprec, int minexp,
                             size_t cd_nelmts, unsigned int *cd_vals);
+    H5Pset_zfp_reversible_cdata(size_t cd_nelmts, unsigned int *cd_vals);
 
 These  macros  utilize *type punning* to store the relevant ZFP_ parameters  into  a
 sufficiently large array (>=6) of ``unsigned int cd_values``. It is up to
@@ -83,11 +84,13 @@ defined like so...
 +-----------+--------+--------+---------+---------+---------+---------+
 | expert    |     4  | unused |  minbits|  maxbits|  maxprec|  minexp |
 +-----------+--------+--------+---------+---------+---------+---------+
+| reversible|     5  | unused |  unused |  unused |  unused |  unsued |
++-----------+--------+--------+---------+---------+---------+---------+
 
 A/B are high/low 32-bit words of a double.
 
-Note that  the cd_values  used in the generic interface to  ``H5Pset_filter()`` are
-**not the same** cd_values ultimately stored  to the HDF5_ dataset header
+Note that  the cd_values  used in the generic interface to  ``H5Pset_filter()``
+are **not the same** cd_values ultimately stored  to the HDF5_ dataset header
 for a compressed dataset. The  values are transformed in the set_local
 method to use ZFP_'s internal  routines for 'meta' and 'mode' data. So,
 don't make the mistake of examining  the values you find in a file and
@@ -112,6 +115,7 @@ the ``H5Zzfp_props.h`` header file::
     herr_t H5Pset_zfp_expert(hid_t dcpl_id,
         unsigned int minbits, unsigned int maxbits,
         unsigned int maxprec, int minexp);
+    herr_t H5Pset_zfp_reversible(hid_t dcpl_id);
 
 These  functions take a dataset creation property list, ``hid_t dcp_lid`` and
 create  temporary HDF5_ property
