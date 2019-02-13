@@ -12,6 +12,7 @@
 #define H5Z_ZFP_MODE_PRECISION 2
 #define H5Z_ZFP_MODE_ACCURACY  3
 #define H5Z_ZFP_MODE_EXPERT    4
+#define H5Z_ZFP_MODE_REVERSIBLE 5
 
 #define H5Z_ZFP_CD_NELMTS_MEM ((size_t) 6) /* used in public API to filter */
 #define H5Z_ZFP_CD_NELMTS_MAX ((size_t) 6) /* max, over all versions, used in dataset header */
@@ -72,5 +73,12 @@ do {                                                    \
         q = MiE; *q = (int) CD[5];                      \
     }                                                   \
 } while(0)
+
+#define H5Pset_zfp_reversible_cdata(N, CD)       \
+do { if (N>=1) {                                 \
+CD[0]=H5Z_ZFP_MODE_REVERSIBLE; N=1;}} while(0)
+
+#define H5Pget_zfp_reversible_cdata(N, CD) \
+((int)(((N>=1)&&(CD[0]==H5Z_ZFP_MODE_REVERSIBLE))?1:-1))
 
 #endif

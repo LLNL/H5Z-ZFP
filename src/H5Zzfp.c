@@ -317,7 +317,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     if (0 == (dummy_zstr = Z zfp_stream_open(dummy_bstr)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_stream_open() failed");
 
-    /* Set the ZFP stream basic mode from mem_cd_values[0] */
+    /* Set the ZFP stream mode from zfp_control properties or mem_cd_values[0] */
     if (have_zfp_controls)
     {
         switch (ctrls.mode)
@@ -344,6 +344,12 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                     ctrls.details.expert.maxbits, ctrls.details.expert.maxprec,
                     ctrls.details.expert.minexp);
                 break;
+#if ZFP_VERSION_NO >= 0x0054
+#warning FIX ME
+            case H5Z_ZFP_MODE_REVERSIBLE:
+                Z zfp_stream_set_reversible(dummy_zstr);
+                break;
+#endif
             default:
                 H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
         }
@@ -373,6 +379,12 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                 Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
                     mem_cd_values[4], (int) mem_cd_values[5]);
                 break;
+#if ZFP_VERSION_NO >= 0x0054
+#warning FIXME
+            case H5Z_ZFP_MODE_REVERSIBLE:
+                Z zfp_stream_set_reversible(dummy_zstr);
+                break;
+#endif
             default:
                 H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
         }
