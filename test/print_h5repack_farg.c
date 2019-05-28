@@ -9,12 +9,9 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 */
 
 #include <errno.h>
-#include <fcntl.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 typedef unsigned int uint;
 
@@ -77,6 +74,8 @@ static void print_cdvals(int zfpmode, double rate, double acc, uint prec,
         H5Pset_zfp_accuracy_cdata(acc, cd_nelmts, cd_values);
     else if (zfpmode == H5Z_ZFP_MODE_EXPERT)
         H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values);
+    else if (zfpmode == H5Z_ZFP_MODE_REVERSIBLE)
+        H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values);
     else
         return;
 
@@ -97,19 +96,19 @@ int main(int argc, char **argv)
     int i;
 
     /* compression parameters (defaults taken from ZFP header) */
-    int zfpmode = H5Z_ZFP_MODE_ACCURACY;
+    int zfpmode = 0;
     double rate = 4;
     double acc = 0;
-    uint prec = 11;
+    uint prec = 0;
     uint minbits = 0;
-    uint maxbits = 4171;
-    uint maxprec = 64;
-    int minexp = -1074;
+    uint maxbits = 0;
+    uint maxprec = 0;
+    int minexp = 0;
     int help = 0;
 
     /* ZFP filter arguments */
     HANDLE_SEP(Print cdvals for set of ZFP compression paramaters)
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert)); 
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert,5=rev)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode of filter);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode of filter);
     HANDLE_ARG(prec,(uint) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode of zfp filter);
