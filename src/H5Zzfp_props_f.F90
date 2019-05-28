@@ -13,11 +13,11 @@ MODULE H5Zzfp_props_f
   INTEGER(C_SIZE_T), PARAMETER :: H5Z_ZFP_CD_NELMTS_MEM=6  ! used in public API to filter
   INTEGER(C_SIZE_T), PARAMETER :: H5Z_ZFP_CD_NELMTS_MAX=6  ! max, over all versions, used in dataset header
 
-  INTEGER, PARAMETER :: H5Z_ZFP_MODE_RATE      = 1
-  INTEGER, PARAMETER :: H5Z_ZFP_MODE_PRECISION = 2
-  INTEGER, PARAMETER :: H5Z_ZFP_MODE_ACCURACY  = 3
-  INTEGER, PARAMETER :: H5Z_ZFP_MODE_EXPERT    = 4
-  INTEGER, PARAMETER :: H5Z_ZFP_MODE_EXPERT    = 5
+  INTEGER, PARAMETER :: H5Z_ZFP_MODE_RATE       = 1
+  INTEGER, PARAMETER :: H5Z_ZFP_MODE_PRECISION  = 2
+  INTEGER, PARAMETER :: H5Z_ZFP_MODE_ACCURACY   = 3
+  INTEGER, PARAMETER :: H5Z_ZFP_MODE_EXPERT     = 4
+  INTEGER, PARAMETER :: H5Z_ZFP_MODE_REVERSIBLE = 5
 
   INTERFACE
      INTEGER(C_INT) FUNCTION H5Z_zfp_initialize() BIND(C, NAME='H5Z_zfp_initialize')
@@ -62,7 +62,7 @@ MODULE H5Zzfp_props_f
        INTEGER(C_INT), VALUE :: minexp
      END FUNCTION H5Pset_zfp_expert
 
-     INTEGER(C_INT) FUNCTION H5Pset_zfp_reversible(plist, acc) BIND(C, NAME='H5Pset_zfp_reversible')
+     INTEGER(C_INT) FUNCTION H5Pset_zfp_reversible(plist) BIND(C, NAME='H5Pset_zfp_reversible')
        IMPORT :: C_INT, HID_T
        IMPLICIT NONE
        INTEGER(HID_T), VALUE :: plist
