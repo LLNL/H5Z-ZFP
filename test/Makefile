@@ -35,6 +35,12 @@ test_read_plugin: test_read_plugin.o plugin
 test_read_lib: test_read_lib.o lib
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp $(LDFLAGS)
 
+print_h5repack_farg: print_h5repack_farg.o
+	$(CC) $< -o $@ $(LDFLAGS)
+
+print_h5repack_farg.o: print_h5repack_farg.c
+	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(HDF5_INC)
+
 ifneq ($(FC),) # Fortran Tests [
 
 test_rw_fortran: test_rw_fortran.o lib
@@ -274,4 +280,5 @@ clean:
 	rm -f test_write_plugin.o test_write_lib.o test_read_plugin.o test_read_lib.o test_rw_fortran.o
 	rm -f test_write_plugin test_write_lib test_read_plugin test_read_lib test_rw_fortran
 	rm -f test_zfp.h5 test_zfp_fortran.h5 mesh_repack.h5
+	rm -f print_h5repack_farg.o print_h5repack_farg
 	rm -f *.gcno *.gcda *.gcov
