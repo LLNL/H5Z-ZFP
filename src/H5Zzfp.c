@@ -344,8 +344,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
                     ctrls.details.expert.maxbits, ctrls.details.expert.maxprec,
                     ctrls.details.expert.minexp);
                 break;
-#if ZFP_VERSION_NO >= 0x0054
-#warning FIX ME
+#if ZFP_VERSION_NO >= 0x0055
             case H5Z_ZFP_MODE_REVERSIBLE:
                 Z zfp_stream_set_reversible(dummy_zstr);
                 break;
