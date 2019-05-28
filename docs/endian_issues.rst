@@ -25,6 +25,7 @@ that cross-endian reads/writes work correctly.
 
 Finally, *endian-targetting*,  that is setting the file  datatype for an
 endian-ness that is possibly  different than the native endian-ness of
-the  writer,  is  currently  dis-allowed  with  H5Z-ZFP_ because it is really
-a non-sensical operation with this filter. Since ZFP_ writes an
-endian-independent format, there is really no such thing as *endian-targetting*.
+the  writer (to, for example, alleviate down-stream consumers from having
+to byte-swap due to endian incompatability between writer and reader)
+is explicitly dis-allowed because it is not an operation that is currently
+supported by the HDF5 library.

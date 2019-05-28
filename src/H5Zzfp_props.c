@@ -65,6 +65,10 @@ static herr_t H5Pset_zfp(hid_t plist, int mode, ...)
             ctrls_p->details.expert.minexp  = va_arg(ap, int);
             break;
         }
+        case H5Z_ZFP_MODE_REVERSIBLE:
+        {
+            break;
+        }
         default:
         {
             H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, -1, "bad ZFP mode.");
@@ -126,4 +130,9 @@ herr_t H5Pset_zfp_expert(hid_t plist, unsigned int minbits, unsigned int maxbits
     unsigned int maxprec, int minexp)
 {
     return H5Pset_zfp(plist, H5Z_ZFP_MODE_EXPERT, minbits, maxbits, maxprec, minexp);
+}
+
+herr_t H5Pset_zfp_reversible(hid_t plist)
+{
+    return H5Pset_zfp(plist, H5Z_ZFP_MODE_REVERSIBLE);
 }

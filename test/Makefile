@@ -61,11 +61,11 @@ test-rate-f: plugin test_rw_fortran
 	    ./test_rw_fortran zfpmode 1 rate $$r 2>&1 1>/dev/null; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
-	        echo "Fortran ZFP rate test failed for rate=$$r"; \
+	        echo "Fortran rate test failed for rate=$$r"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Fortran Rate tests Passed"
+	echo "Fortran Rate tests passed"
 
 # Increase accuracy and test absolute error tolerance is within accuracy
 test-accuracy-f: plugin test_rw_fortran
@@ -73,11 +73,11 @@ test-accuracy-f: plugin test_rw_fortran
 	    ./test_rw_fortran zfpmode 3 acc $$a write_only 2>&1 1>/dev/null; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "Fortran ZFP accuracy test failed for accuracy=$$a"; \
+	        echo "Fortran accuracy test failed for accuracy=$$a"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Fortran Accuracy tests Passed"
+	echo "Fortran Accuracy tests passed"
 
 # Increase precision and confirm diff count for given tolerance drops
 test-precision-f: plugin test_rw_fortran
@@ -86,12 +86,22 @@ test-precision-f: plugin test_rw_fortran
 	    ./test_rw_fortran zfpmode 2 prec $$p write_only 2>&1 1>/dev/null; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
-	        echo "Fortran ZFP precision test failed for precision=$$p"; \
+	        echo "Fortran precision test failed for precision=$$p"; \
 		exit 1; \
 	    fi; \
 	    ldiffcnt=$$diffcnt; \
 	done; \
-	echo "Fortran Precision tests Passed"
+	echo "Fortran Precision tests passed"
+
+# Ensure reversible gives bit-for-bit identical results
+test-reversible-f: plugin test_rw_fortran
+	@./test_rw_fortran zfpmode 5 write_only 2>&1 1>/dev/null; \
+	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
+	if [[ $$diffcnt -ne 0 ]]; then \
+	    echo "Fortran Reversible test failed"; \
+	    exit 1; \
+	fi; \
+	echo "Fortran Reversible test passed"
 
 endif # ] ifneq ($(FC),)
 
@@ -102,11 +112,11 @@ test-rate: plugin test_write_plugin
 	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=1 rate=$$r 2>&1 1>/dev/null; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
-	        echo "ZFP rate test failed for rate=$$r"; \
+	        echo "Plugin rate test failed for rate=$$r"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Rate tests Passed"
+	echo "Plugin rate tests passed"
 
 # Increase accuracy and test absolute error tolerance is within accuracy
 test-accuracy: plugin test_write_plugin
@@ -114,11 +124,11 @@ test-accuracy: plugin test_write_plugin
 	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=3 acc=$$a 2>&1 1>/dev/null; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp.h5 test_zfp.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "ZFP accuracy test failed for accuracy=$$a"; \
+	        echo "Plugin accuracy test failed for accuracy=$$a"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Accuracy tests Passed"
+	echo "Plugin accuracy tests passed"
 
 # Increase precision and confirm diff count for given tolerance drops
 test-precision: plugin test_write_plugin
@@ -127,12 +137,22 @@ test-precision: plugin test_write_plugin
 	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=2 prec=$$p 2>&1 1>/dev/null; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
-	        echo "ZFP precision test failed for precision=$$p"; \
+	        echo "Plugin precision test failed for precision=$$p"; \
 		exit 1; \
 	    fi; \
 	    ldiffcnt=$$diffcnt; \
 	done; \
-	echo "Precision tests Passed"
+	echo "Plugin precision tests passed"
+
+# Ensure reversible mode works
+test-reversible: plugin test_write_plugin
+	@env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=5 2>&1 1>/dev/null; \
+	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
+	if [[ $$diffcnt -ne 0 ]]; then \
+	    echo "Plugin reversible test failed"; \
+	    exit 1; \
+	fi; \
+	echo "Plugin reversible tests passed"
 
 #
 # Uses h5repack to test ZFP filter on float and int datasets in
@@ -168,7 +188,7 @@ test-h5repack: plugin mesh.h5 patch
 	    echo "ZFP Repack Test failed"; \
 	    exit 1; \
 	fi; \
-	echo "Repack test Passed"
+	echo "Repack test passed"
 
 # Diff ZFP compressed data from little endian and big endian machines
 # There is a bug in h5diff that causes it to return 0 when it can't find plugin.
@@ -181,7 +201,7 @@ test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
 	    echo "Endian test failed"; \
 	    exit 1; \
 	fi; \
-	echo "Endian test Passed"
+	echo "Endian test passed"
 
 # Test the filter as a library rather than as a plugin
 test-lib-rate: test_write_lib test_read_lib
@@ -191,11 +211,11 @@ test-lib-rate: test_write_lib test_read_lib
 	    ./test_write_lib rate=$$r zfpmode=1 2>&1 1>/dev/null; \
 	    ./test_read_lib max_absdiff=$$d max_reldiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "Lib-rate test failed for rate=$$r"; \
+	        echo "Library rate test failed for rate=$$r"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Library Rate tests Passed"
+	echo "Library rate tests passed"
 
 test-lib-accuracy: test_write_lib test_read_lib
 	@for v in 0.1:0.025 0.01:0.004 0.001:0.0006 0.0001:4e-5; do\
@@ -204,11 +224,11 @@ test-lib-accuracy: test_write_lib test_read_lib
 	    ./test_write_lib acc=$$a zfpmode=3 2>&1 1>/dev/null; \
 	    ./test_read_lib max_absdiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "Lib-accuracy test failed for acc=$$a"; \
+	        echo "Library accuracy test failed for acc=$$a"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Library Accuracy tests Passed"
+	echo "Library accuracy tests passed"
 
 test-lib-precision: test_write_lib test_read_lib
 	@for v in 12:0.02 16:0.0005 20:5e-5 24:1e-6; do\
@@ -217,18 +237,43 @@ test-lib-precision: test_write_lib test_read_lib
 	    ./test_write_lib prec=$$p zfpmode=2 2>&1 1>/dev/null; \
 	    ./test_read_lib max_reldiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "Lib-precision test failed for prec=$$p"; \
+	        echo "Library precision test failed for prec=$$p"; \
 	        exit 1; \
 	    fi; \
 	done; \
-	echo "Library Precision tests Passed"
+	echo "Library precision tests passed"
 
-test-lib: test-lib-rate test-lib-accuracy test-lib-precision
+test-lib-reversible: test_write_lib test_read_lib
+	@./test_write_lib zfpmode=5 2>&1 1>/dev/null; \
+	./test_read_lib max_absdiff=0 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "Library reversible test failed for acc=$$a"; \
+	    exit 1; \
+	fi; \
+	echo "Library reversible tests passed"
 
-CHECK = test-rate test-precision test-accuracy test-endian test-lib
-ifneq ($(FC),)
-CHECK +=  test-rate-f test-precision-f test-accuracy-f
+FORTRAN_CHECK = test-rate-f test-accuracy-f test-precision-f
+ifneq ($(ZFP_HAS_REVERSIBLE),)
+    FORTRAN_CHECK += test-reversible-f
 endif
+
+LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision
+ifneq ($(ZFP_HAS_REVERSIBLE),)
+    LIB_CHECK += test-lib-reversible
+endif
+
+PLUGIN_CHECK = test-rate test-accuracy test-precision
+ifneq ($(ZFP_HAS_REVERSIBLE),)
+    PLUGIN_CHECK += test-reversible
+endif
+PLUGIN_CHECK += test-endian
+
+ifneq ($(FC),)
+    CHECK = $(FORTRAN_CHECK) $(LIB_CHECK) $(PLUGIN_CHECK)
+else
+    CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
+endif
+
 check: $(CHECK)
 
 clean:
