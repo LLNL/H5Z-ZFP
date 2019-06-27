@@ -27,7 +27,7 @@ help:
 all:
 	cd src; $(MAKE) $(MAKEVARS) $@
 
-check: all
+check: all install
 	cd test; $(MAKE) $(MAKEVARS) $@
 
 install:

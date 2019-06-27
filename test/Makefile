@@ -268,10 +268,9 @@ ifneq ($(ZFP_HAS_REVERSIBLE),)
 endif
 PLUGIN_CHECK += test-endian
 
+CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
 ifneq ($(FC),)
-    CHECK = $(FORTRAN_CHECK) $(LIB_CHECK) $(PLUGIN_CHECK)
-else
-    CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
+    CHECK += $(FORTRAN_CHECK)
 endif
 
 check: $(CHECK)

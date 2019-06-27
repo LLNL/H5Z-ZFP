@@ -143,7 +143,7 @@ static
 int H5Z_zfp_finalize(void)
 {
     herr_t ret1 = 0, ret2 = 0;
-    if (H5Z_ZFP_ERRCLASS != -1)
+    if (H5Iis_valid(H5Z_ZFP_ERRCLASS) > 0)
         ret1 = H5Eunregister_class(H5Z_ZFP_ERRCLASS);
     H5Z_ZFP_ERRCLASS = -1;
     if (H5Z_ZFP_WAS_REGISTERED)
@@ -541,6 +541,8 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     bitstream *bstr = 0;
     zfp_stream *zstr = 0;
     zfp_field *zfld = 0;
+
+    H5Z_zfp_init();
 
     /* Pass &cd_values[1] here to strip off first entry holding version info */
     if (0 == get_zfp_info_from_cd_values(cd_nelmts-1, &cd_values[1], &zfp_mode, &zfp_meta, &swap))
