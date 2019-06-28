@@ -35,6 +35,12 @@ test_read_plugin: test_read_plugin.o plugin
 test_read_lib: test_read_lib.o lib
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp $(LDFLAGS)
 
+test_error.o: test_error.c
+	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+
+test_error: test_error.o lib
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp -lm $(LDFLAGS)
+
 print_h5repack_farg: print_h5repack_farg.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
@@ -222,7 +228,7 @@ test-lib-accuracy: test_write_lib test_read_lib
 	    a=$$(echo $$v | cut -d':' -f1); \
 	    d=$$(echo $$v | cut -d':' -f2); \
 	    ./test_write_lib acc=$$a zfpmode=3 2>&1 1>/dev/null; \
-	    ./test_read_lib max_absdiff=$$d 2>&1 1>/dev/null; \
+	    ./test_read_lib ret=1 max_absdiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "Library accuracy test failed for acc=$$a"; \
 	        exit 1; \
@@ -235,7 +241,7 @@ test-lib-precision: test_write_lib test_read_lib
 	    p=$$(echo $$v | cut -d':' -f1); \
 	    d=$$(echo $$v | cut -d':' -f2); \
 	    ./test_write_lib prec=$$p zfpmode=2 2>&1 1>/dev/null; \
-	    ./test_read_lib max_reldiff=$$d 2>&1 1>/dev/null; \
+	    ./test_read_lib ret=2 max_reldiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "Library precision test failed for prec=$$p"; \
 	        exit 1; \
@@ -245,19 +251,54 @@ test-lib-precision: test_write_lib test_read_lib
 
 test-lib-reversible: test_write_lib test_read_lib
 	@./test_write_lib zfpmode=5 2>&1 1>/dev/null; \
-	./test_read_lib max_absdiff=0 2>&1 1>/dev/null; \
+	./test_read_lib ret=1 max_absdiff=0 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "Library reversible test failed for acc=$$a"; \
+	    echo "Library reversible test failed"; \
 	    exit 1; \
 	fi; \
 	echo "Library reversible tests passed"
+
+test-int: test_write_lib test_read_lib
+	@./test_write_lib doint=1 2>&1 1>/dev/null; \
+	./test_read_lib ret=1 max_absdiff=2 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "Integer test failed"; \
+	    exit 1; \
+	fi; \
+	echo "Integer test passed"
+
+test-highd: test_write_lib
+	@./test_write_lib highd=1 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "4D test failed"; \
+	    exit 1; \
+	fi; \
+	echo "4D test passed"
+
+test-sixd: test_write_lib
+	@./test_write_lib sixd=1 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "6D, extendible test failed"; \
+	    exit 1; \
+	fi; \
+	echo "6D, extendible test passed"
+
+test-error: test_error
+	@./test_error 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+            echo "Error check test failed"; \
+            exit 1; \
+        fi; \
+        echo "Error check test passed"
+
+test-special: test-int test-highd test-sixd
 
 FORTRAN_CHECK = test-rate-f test-accuracy-f test-precision-f
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     FORTRAN_CHECK += test-reversible-f
 endif
 
-LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision
+LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision test-special test-error
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     LIB_CHECK += test-lib-reversible
 endif
@@ -268,17 +309,16 @@ ifneq ($(ZFP_HAS_REVERSIBLE),)
 endif
 PLUGIN_CHECK += test-endian
 
+CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
 ifneq ($(FC),)
-    CHECK = $(FORTRAN_CHECK) $(LIB_CHECK) $(PLUGIN_CHECK)
-else
-    CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
+    CHECK += $(FORTRAN_CHECK)
 endif
 
 check: $(CHECK)
 
 clean:
-	rm -f test_write_plugin.o test_write_lib.o test_read_plugin.o test_read_lib.o test_rw_fortran.o
-	rm -f test_write_plugin test_write_lib test_read_plugin test_read_lib test_rw_fortran
+	rm -f test_write_plugin.o test_write_lib.o test_read_plugin.o test_read_lib.o test_rw_fortran.o test_error.o
+	rm -f test_write_plugin test_write_lib test_read_plugin test_read_lib test_rw_fortran test_error
 	rm -f test_zfp.h5 test_zfp_fortran.h5 mesh_repack.h5
 	rm -f print_h5repack_farg.o print_h5repack_farg
 	rm -f *.gcno *.gcda *.gcov

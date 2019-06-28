@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
 
     /* HDF5 dataset info */
-    hid_t fid, dsid, dcpl_id, space_id;
+    hid_t fid, dsid, space_id;
     hsize_t npoints;
 
     /* absolute and relative differencing thresholds */
@@ -124,12 +124,16 @@ int main(int argc, char **argv)
     double actual_max_reldiff = 0;
     int num_absdiffs = 0;
     int num_reldiffs = 0;
+    int doint = 0;
+    int ret = 0;
     
     /* file arguments */
     strcpy(ifile, "test_zfp.h5");
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
     HANDLE_ARG(max_absdiff,strtod(argv[i]+len2,0),"%g",set maximum absolute diff);
     HANDLE_ARG(max_reldiff,strtod(argv[i]+len2,0),"%g",set maximum relative diff);
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",check integer datasets instead);
+    HANDLE_ARG(ret,(int) strtol(argv[i]+len2,0,10),"%d",return count of abs(1) or rel(2) diffs);
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message);
 
 #ifndef H5Z_ZFP_USE_PLUGIN
@@ -140,7 +144,7 @@ int main(int argc, char **argv)
     if (0 > (fid = H5Fopen(ifile, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
 
     /* read the original dataset */
-    if (0 > (dsid = H5Dopen(fid, "original", H5P_DEFAULT))) ERROR(H5Dopen);
+    if (0 > (dsid = H5Dopen(fid, doint?"int_original":"original", H5P_DEFAULT))) ERROR(H5Dopen);
     if (0 > (space_id = H5Dget_space(dsid))) ERROR(H5Dget_space);
     if (0 == (npoints = H5Sget_simple_extent_npoints(space_id))) ERROR(H5Sget_simple_extent_npoints);
     if (0 > H5Sclose(space_id)) ERROR(H5Sclose);
@@ -149,14 +153,12 @@ int main(int argc, char **argv)
     if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
     
     /* read the compressed dataset */
-    if (0 > (dsid = H5Dopen(fid, "compressed", H5P_DEFAULT))) ERROR(H5Dopen);
-    if (0 > (dcpl_id = H5Dget_create_plist(dsid))) ERROR(H5Dget_create_plist);
+    if (0 > (dsid = H5Dopen(fid, doint?"int_compressed":"compressed", H5P_DEFAULT))) ERROR(H5Dopen);
     if (0 == (cbuf = (double *) malloc(npoints * sizeof(double)))) ERROR(malloc);
     if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuf)) ERROR(H5Dread);
     if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
 
     /* clean up */
-    if (0 > H5Pclose(dcpl_id)) ERROR(H5Pclose);
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
     /* compare original to compressed */
@@ -186,7 +188,7 @@ int main(int argc, char **argv)
     free(cbuf);
     free(ifile);
 
-    if (max_absdiff != 0) return num_absdiffs>0;
-    if (max_reldiff != 0) return num_reldiffs>0;
+    if (ret == 1) return num_absdiffs>0;
+    if (ret == 2) return num_reldiffs>0;
     return (num_absdiffs+num_reldiffs)>0;
 }
