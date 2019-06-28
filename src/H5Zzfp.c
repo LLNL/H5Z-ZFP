@@ -182,7 +182,11 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 
     if (ndims_used == 0 || ndims_used > max_ndims)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
-            "chunk must have only 1-3 (or 4) non-unity dimensions");
+#if ZFP_VERSION_NO < 0x0053
+            "chunk must have only 1...3 non-unity dimensions");
+#else
+            "chunk must have only 1...4 non-unity dimensions");
+#endif
 
     /* if caller is doing "endian targetting", disallow that */
     native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
@@ -230,11 +234,21 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     /* setup zfp data type for meta header */
     if (dclass == H5T_FLOAT)
     {
-        zt = (dsize == 4) ? zfp_type_float : zfp_type_double;
+        if (dsize == sizeof(float))
+            zt = zfp_type_float;
+        else if (dsize == sizeof(double))
+            zt = zfp_type_double;
+        else
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "invalid datatype size");
     }
     else if (dclass == H5T_INTEGER)
     {
-        zt = (dsize == 4) ? zfp_type_int32 : zfp_type_int64;
+        if (dsize == sizeof(int32))
+            zt = zfp_type_int32;
+        else if (dsize == sizeof(int64))
+            zt = zfp_type_int64;
+        else
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "invalid datatype size");
     }
     else
     {
@@ -260,7 +274,11 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         case 4: dummy_field = Z zfp_field_4d(0, zt, dims_used[3], dims_used[2], dims_used[1], dims_used[0]); break;
 #endif
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
-                     "chunks may have only 1-3 (or 4) non-unity dims");
+#if ZFP_VERSION_NO < 0x0053
+                     "chunks may have only 1...3 non-unity dims");
+#else
+                     "chunks may have only 1...4 non-unity dims");
+#endif
     }
     if (!dummy_field)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_field_Xd() failed");
@@ -509,8 +527,10 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         bsize = Z zfp_field_size(zfld, 0);
         switch (Z zfp_field_type(zfld))
         {
-            case zfp_type_int32: case zfp_type_float:  dsize = 4; break;
-            case zfp_type_int64: case zfp_type_double: dsize = 8; break;
+            case zfp_type_int32:  dsize = sizeof(int32);  break;
+            case zfp_type_int64:  dsize = sizeof(int64);  break;
+            case zfp_type_float:  dsize = sizeof(float);  break;
+            case zfp_type_double: dsize = sizeof(double); break;
             default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0, "invalid datatype");
         }
         bsize *= dsize;
