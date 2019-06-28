@@ -222,7 +222,7 @@ test-lib-accuracy: test_write_lib test_read_lib
 	    a=$$(echo $$v | cut -d':' -f1); \
 	    d=$$(echo $$v | cut -d':' -f2); \
 	    ./test_write_lib acc=$$a zfpmode=3 2>&1 1>/dev/null; \
-	    ./test_read_lib max_absdiff=$$d 2>&1 1>/dev/null; \
+	    ./test_read_lib ret=1 max_absdiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "Library accuracy test failed for acc=$$a"; \
 	        exit 1; \
@@ -235,7 +235,7 @@ test-lib-precision: test_write_lib test_read_lib
 	    p=$$(echo $$v | cut -d':' -f1); \
 	    d=$$(echo $$v | cut -d':' -f2); \
 	    ./test_write_lib prec=$$p zfpmode=2 2>&1 1>/dev/null; \
-	    ./test_read_lib max_reldiff=$$d 2>&1 1>/dev/null; \
+	    ./test_read_lib ret=2 max_reldiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "Library precision test failed for prec=$$p"; \
 	        exit 1; \
@@ -245,19 +245,46 @@ test-lib-precision: test_write_lib test_read_lib
 
 test-lib-reversible: test_write_lib test_read_lib
 	@./test_write_lib zfpmode=5 2>&1 1>/dev/null; \
-	./test_read_lib max_absdiff=0 2>&1 1>/dev/null; \
+	./test_read_lib ret=1 max_absdiff=0 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "Library reversible test failed for acc=$$a"; \
+	    echo "Library reversible test failed"; \
 	    exit 1; \
 	fi; \
 	echo "Library reversible tests passed"
+
+test-int: test_write_lib test_read_lib
+	@./test_write_lib doint=1 2>&1 1>/dev/null; \
+	./test_read_lib ret=1 max_absdiff=2 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "Integer test failed"; \
+	    exit 1; \
+	fi; \
+	echo "Integer test passed"
+
+test-highd:
+	@./test_write_lib highd=1 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "4D test failed"; \
+	    exit 1; \
+	fi; \
+	echo "4D test passed"
+
+test-sixd:
+	@./test_write_lib sixd=1 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "6D, extendible test failed"; \
+	    exit 1; \
+	fi; \
+	echo "6D, extendible test passed"
+
+test-special: test-int test-highd test-sixd
 
 FORTRAN_CHECK = test-rate-f test-accuracy-f test-precision-f
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     FORTRAN_CHECK += test-reversible-f
 endif
 
-LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision
+LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision test-special
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     LIB_CHECK += test-lib-reversible
 endif
