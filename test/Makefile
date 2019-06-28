@@ -35,6 +35,12 @@ test_read_plugin: test_read_plugin.o plugin
 test_read_lib: test_read_lib.o lib
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp $(LDFLAGS)
 
+test_error.o: test_error.c
+	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+
+test_error: test_error.o lib
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp -lm $(LDFLAGS)
+
 print_h5repack_farg: print_h5repack_farg.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
@@ -261,7 +267,7 @@ test-int: test_write_lib test_read_lib
 	fi; \
 	echo "Integer test passed"
 
-test-highd:
+test-highd: test_write_lib
 	@./test_write_lib highd=1 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    echo "4D test failed"; \
@@ -269,13 +275,21 @@ test-highd:
 	fi; \
 	echo "4D test passed"
 
-test-sixd:
+test-sixd: test_write_lib
 	@./test_write_lib sixd=1 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    echo "6D, extendible test failed"; \
 	    exit 1; \
 	fi; \
 	echo "6D, extendible test passed"
+
+test-error: test_error
+	@./test_error 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+            echo "Error check test failed"; \
+            exit 1; \
+        fi; \
+        echo "Error check test passed"
 
 test-special: test-int test-highd test-sixd
 
@@ -284,7 +298,7 @@ ifneq ($(ZFP_HAS_REVERSIBLE),)
     FORTRAN_CHECK += test-reversible-f
 endif
 
-LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision test-special
+LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision test-special test-error
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     LIB_CHECK += test-lib-reversible
 endif
@@ -303,8 +317,8 @@ endif
 check: $(CHECK)
 
 clean:
-	rm -f test_write_plugin.o test_write_lib.o test_read_plugin.o test_read_lib.o test_rw_fortran.o
-	rm -f test_write_plugin test_write_lib test_read_plugin test_read_lib test_rw_fortran
+	rm -f test_write_plugin.o test_write_lib.o test_read_plugin.o test_read_lib.o test_rw_fortran.o test_error.o
+	rm -f test_write_plugin test_write_lib test_read_plugin test_read_lib test_rw_fortran test_error
 	rm -f test_zfp.h5 test_zfp_fortran.h5 mesh_repack.h5
 	rm -f print_h5repack_farg.o print_h5repack_farg
 	rm -f *.gcno *.gcda *.gcov
