@@ -27,7 +27,7 @@ However, we have made an  effort to also support  it as a  stand-alone
 package  due  to  the  likely  broad  appeal  and  utility  of the ZFP
 compression library.
 
-This plugin supports all 4 modes of the ZFP compression library, *rate*,
+This plugin supports all modes of the ZFP compression library, *rate*,
 *accuracy*, *precision* and *expert* and *lossless*. It supports 1, 2 and
 3 dimensional datasets of single and double precision integer and floating
 point data. It can be applied to HDF5 datasets of more than 3 dimensions
