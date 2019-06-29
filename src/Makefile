@@ -52,7 +52,6 @@ all: lib plugin
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/{plugin,include,lib}
-	echo $(MAKEVARS) > $(DESTDIR)$(PREFIX)/include/make.vars.inc
 	$(INSTALL) plugin/libh5zzfp.$(SOEXT) $(DESTDIR)$(PREFIX)/plugin
 	$(INSTALL) libh5zzfp.a $(DESTDIR)$(PREFIX)/lib
 	$(INSTALL) -m 644 H5Zzfp.h H5Zzfp_lib.h H5Zzfp_plugin.h H5Zzfp_props.h $(DESTDIR)$(PREFIX)/include
