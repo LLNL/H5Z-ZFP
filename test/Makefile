@@ -21,7 +21,7 @@ test_write_plugin: test_write_plugin.o plugin
 	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 -lzfp -lm $(LDFLAGS)
 
 test_write_lib: test_write_lib.o lib
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp -lm $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp -lcfp -lstdc++ -lm $(LDFLAGS)
 
 test_read_plugin.o: test_read.c
 	$(CC) -c $< -o $@ -DH5Z_ZFP_USE_PLUGIN $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
@@ -259,7 +259,7 @@ test-lib-reversible: test_write_lib test_read_lib
 	echo "Library reversible tests passed"
 
 test-int: test_write_lib test_read_lib
-	@./test_write_lib doint=1 2>&1 1>/dev/null; \
+	@./test_write_lib zfpmode=3 doint=1 2>&1 1>/dev/null; \
 	./test_read_lib ret=1 max_absdiff=2 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    echo "Integer test failed"; \

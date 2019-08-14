@@ -17,6 +17,9 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <string.h>
 #include <unistd.h>
 
+#warning FIX UNCONDITIONAL INCLUSION HERE
+#include "../cfp/include/cfparrays.h"
+
 #include "hdf5.h"
 
 #ifdef H5Z_ZFP_USE_PLUGIN
@@ -369,10 +372,11 @@ int main(int argc, char **argv)
     int doint = 0;
     int highd = 0;
     int sixd = 0;
+    int zfparr = 0;
     int help = 0;
 
     /* compression parameters (defaults taken from ZFP header) */
-    int zfpmode = H5Z_ZFP_MODE_ACCURACY;
+    int zfpmode = H5Z_ZFP_MODE_RATE;
     double rate = 4;
     double acc = 0;
     uint prec = 11;
@@ -392,14 +396,6 @@ int main(int argc, char **argv)
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
     HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
 
-    /* 1D dataset arguments */
-    HANDLE_SEP(1D dataset generation arguments)
-    HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for 1D dataset);
-    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in 1D dataset);
-    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in 1D dataset);
-    HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for 1D dataset);
-    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer 1D data);
-
     /* ZFP filter arguments */
     HANDLE_SEP(ZFP compression paramaters)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
@@ -411,10 +407,19 @@ int main(int argc, char **argv)
     HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode);
     HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode);
 
+    /* 1D dataset arguments */
+    HANDLE_SEP(1D dataset generation arguments)
+    HANDLE_ARG(npoints,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set number of points for 1D dataset);
+    HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in 1D dataset);
+    HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in 1D dataset);
+    HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for 1D dataset);
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer 1D data);
+
     /* Advanced cases */
     HANDLE_SEP(Advanced cases)
     HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run 4D case);
     HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case (requires ZFP>=0.5.4));
+    HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
@@ -581,6 +586,65 @@ int main(int argc, char **argv)
         free(tbuf);
     }
     /* End of 6D Example */
+
+    /* ZFP Array Example */
+    if (zfparr>0 && zfpmode==1 && rate>0)
+    {
+        int            dims[] = {38, 128};
+        /*int      chunk_dims[] = {19, 34};*/
+        int      chunk_dims[] = {38, 128};
+        hsize_t       hdims[] = {38, 128};
+        /*hsize_t hchunk_dims[] = {19, 34};*/
+        hsize_t hchunk_dims[] = {38, 128};
+        hsize_t hchunk_off[] = {0, 0};
+        cfp_array2d* origarr;
+
+        /* Create the array data */
+        buf = gen_random_correlated_array(TYPDBL, 2, dims, 0, 0);
+
+        /* Instantiate a cfp array */
+        origarr = cfp.array2d.ctor(dims[0], dims[1], rate, buf, 0);
+
+{
+    printf("First ten words of compressed array memory\n");
+    for (int q = 0; q < 10; q++)
+        printf("0x%X\n", ((int*)cfp.array2d.compressed_data(origarr))[q]);
+}
+
+/* compare compressed array to original */
+#if 0
+{
+    int ii,jj;
+    for (ii = 0; ii < 38; ii++)
+    {
+        for (jj = 0; jj < 128; jj++)
+            printf("%03d,%03d: orig=%g, cfp=%g\n", ii, jj, ((double*)buf)[jj*38+ii], cfp.array2d.get(origarr, ii, jj));
+    }
+}
+#endif
+        cpid = setup_filter(2, hchunk_dims, 1, rate, acc, prec, minbits, maxbits, maxprec, minexp);
+
+        if (0 > (sid = H5Screate_simple(2, hdims, 0))) ERROR(H5Screate_simple);
+
+        /* write the data WITHOUT compression */
+        if (0 > (dsid = H5Dcreate(fid, "zfparr_original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+
+        /* write the data with compression via the filter */
+        if (0 > (dsid = H5Dcreate(fid, "zfparr_compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+
+        /* write the data direct from compressed array using H5Dwrite_chunk calls */
+        if (0 > (dsid = H5Dcreate(fid, "zfparr_direct", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+        if (0 > H5Dwrite_chunk(dsid, H5P_DEFAULT, 0, hchunk_off, cfp.array2d.compressed_size(origarr), cfp.array2d.compressed_data(origarr))) ERROR(H5Dwrite_chunk);
+         
+        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+
+        free(buf);
+        cfp.array2d.dtor(origarr);
+    }
 
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
