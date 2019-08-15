@@ -633,6 +633,7 @@ int main(int argc, char **argv)
         free(buf);
         cfp.array2d.dtor(origarr);
     }
+    /* End of ZFP Array Example */
 #endif
 
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
