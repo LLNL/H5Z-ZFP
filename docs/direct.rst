@@ -27,4 +27,9 @@ the compressed dataset named ``zfparr_compressed`` using the filter and then the
 data a second time named ``zfparr_direct`` using a direct write. Then, the ``h5diff`` tool
 is used to compare the data in the original and direct datasets.
 
+Note that in order for consumers to work as normal, the producer must set dataset *creation*
+properties as it ordinarily would using the H5Z-ZFP_ filter. In the call to ``H5Dchunk_write``,
+the caller indicates to the HDF5 library not to invoke the filter via the ``filters`` mask
+argument.
+
 .. _direct: https://portal.hdfgroup.org/display/HDF5/H5D_WRITE_CHUNK
