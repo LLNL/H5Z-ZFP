@@ -625,6 +625,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         if (zsize > msize)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_OVERFLOW, 0, "uncompressed buffer overrun");
 {
+printf("In Filter, size = %d\n", (int) zsize);
 printf("First ten words...\n");
 for (int q = 0; q < 10; q++)
     printf("0x%X\n", ((int*)newbuf)[q]);

@@ -604,8 +604,10 @@ int main(int argc, char **argv)
 
         /* Instantiate a cfp array */
         origarr = cfp.array2d.ctor(dims[0], dims[1], rate, buf, 0);
+        cfp.array2d.flush_cache(origarr);
 
 {
+    printf("In array, size = %d\n", (int) cfp.array2d.compressed_size(origarr));
     printf("First ten words of compressed array memory\n");
     for (int q = 0; q < 10; q++)
         printf("0x%X\n", ((int*)cfp.array2d.compressed_data(origarr))[q]);
