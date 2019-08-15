@@ -1,5 +1,10 @@
 include ../config.make
 
+ZFP_LIBS = -lzfp
+ifneq ($(ZFP_HAS_CFP),)
+    ZFP_LIBS += -lcfp -lstdc++
+endif
+
 .PHONY: lib plugin check patch clean
 
 patch:
@@ -15,13 +20,13 @@ test_write_plugin.o: test_write.c
 	$(CC) -c $< -o $@ -DH5Z_ZFP_USE_PLUGIN $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_write_lib.o: test_write.c
-	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+	$(CC) -c $< -o $@ $(CFLAGS) -DZFP_HAS_CFP=$(ZFP_HAS_CFP) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_write_plugin: test_write_plugin.o plugin
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 -lzfp -lm $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 $(ZFP_LIBS) -lm $(LDFLAGS)
 
 test_write_lib: test_write_lib.o lib
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp -lcfp -lstdc++ -lm $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 $(ZFP_LIBS) -lm $(LDFLAGS)
 
 test_read_plugin.o: test_read.c
 	$(CC) -c $< -o $@ -DH5Z_ZFP_USE_PLUGIN $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
@@ -30,16 +35,16 @@ test_read_lib.o: test_read.c
 	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_read_plugin: test_read_plugin.o plugin
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 -lzfp $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 $(ZFP_LIBS) $(LDFLAGS)
 
 test_read_lib: test_read_lib.o lib
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 $(ZFP_LIBS) $(LDFLAGS)
 
 test_error.o: test_error.c
 	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_error: test_error.o lib
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 -lzfp -lm $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 $(ZFP_LIBS) -lm $(LDFLAGS)
 
 print_h5repack_farg: print_h5repack_farg.o
 	$(CC) $< -o $@ $(LDFLAGS)
@@ -50,7 +55,7 @@ print_h5repack_farg.o: print_h5repack_farg.c
 ifneq ($(FC),) # Fortran Tests [
 
 test_rw_fortran: test_rw_fortran.o lib
-	$(FC) $(FCFLAGS) -o $@ $< $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5_fortran -lhdf5 -lzfp $(LDFLAGS)
+	$(FC) $(FCFLAGS) -o $@ $< $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5_fortran -lhdf5 $(ZFP_LIBS) $(LDFLAGS)
 	./test_rw_fortran
 
 %.o:%.F90
@@ -291,14 +296,30 @@ test-error: test_error
         fi; \
         echo "Error check test passed"
 
-test-special: test-int test-highd test-sixd
+test-zfparr: test_write_lib
+	@./test_write_lib zfparr=1 rate=10 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "ZFP array direct write test failed"; \
+	    exit 1; \
+	fi; \
+	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.01 test_zfp.h5 test_zfp.h5 zfparr_original zfparr_direct 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    echo "ZFP array direct write test failed"; \
+	    exit 1; \
+	fi; \
+	echo "ZFP array direct write test passed"
+
+SPECIAL_CHECK = test-int test-highd test-sixd
+ifneq ($(ZFP_HAS_CFP),)
+    SPECIAL_CHECK += test-zfparr
+endif
 
 FORTRAN_CHECK = test-rate-f test-accuracy-f test-precision-f
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     FORTRAN_CHECK += test-reversible-f
 endif
 
-LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision test-special test-error
+LIB_CHECK = test-lib-rate test-lib-accuracy test-lib-precision test-error
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     LIB_CHECK += test-lib-reversible
 endif
@@ -309,7 +330,7 @@ ifneq ($(ZFP_HAS_REVERSIBLE),)
 endif
 PLUGIN_CHECK += test-endian
 
-CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
+CHECK = $(LIB_CHECK) $(PLUGIN_CHECK) $(SPECIAL_CHECK)
 ifneq ($(FC),)
     CHECK += $(FORTRAN_CHECK)
 endif

@@ -17,8 +17,9 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <string.h>
 #include <unistd.h>
 
-#warning FIX UNCONDITIONAL INCLUSION HERE
+#if ZFP_HAS_CFP
 #include "../cfp/include/cfparrays.h"
+#endif
 
 #include "hdf5.h"
 
@@ -419,7 +420,9 @@ int main(int argc, char **argv)
     HANDLE_SEP(Advanced cases)
     HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run 4D case);
     HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case (requires ZFP>=0.5.4));
+#if ZFP_HAS_CFP
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
+#endif
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
@@ -587,6 +590,7 @@ int main(int argc, char **argv)
     }
     /* End of 6D Example */
 
+#if ZFP_HAS_CFP
     /* ZFP Array Example */
     if (zfparr>0 && zfpmode==1 && rate>0)
     {
@@ -603,27 +607,9 @@ int main(int argc, char **argv)
         buf = gen_random_correlated_array(TYPDBL, 2, dims, 0, 0);
 
         /* Instantiate a cfp array */
-        origarr = cfp.array2d.ctor(dims[0], dims[1], rate, buf, 0);
+        origarr = cfp.array2d.ctor(dims[1], dims[0], rate, buf, 0);
         cfp.array2d.flush_cache(origarr);
 
-{
-    printf("In array, size = %d\n", (int) cfp.array2d.compressed_size(origarr));
-    printf("First ten words of compressed array memory\n");
-    for (int q = 0; q < 10; q++)
-        printf("0x%X\n", ((int*)cfp.array2d.compressed_data(origarr))[q]);
-}
-
-/* compare compressed array to original */
-#if 0
-{
-    int ii,jj;
-    for (ii = 0; ii < 38; ii++)
-    {
-        for (jj = 0; jj < 128; jj++)
-            printf("%03d,%03d: orig=%g, cfp=%g\n", ii, jj, ((double*)buf)[jj*38+ii], cfp.array2d.get(origarr, ii, jj));
-    }
-}
-#endif
         cpid = setup_filter(2, hchunk_dims, 1, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
         if (0 > (sid = H5Screate_simple(2, hdims, 0))) ERROR(H5Screate_simple);
@@ -647,6 +633,7 @@ int main(int argc, char **argv)
         free(buf);
         cfp.array2d.dtor(origarr);
     }
+#endif
 
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
