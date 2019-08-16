@@ -1,7 +1,7 @@
 include ../config.make
 
 ZFP_LIBS = -lzfp
-ifneq ($(ZFP_HAS_CFP),)
+ifeq ($(ZFP_HAS_CFP),1)
     ZFP_LIBS += -lcfp -lstdc++
 endif
 
@@ -310,7 +310,7 @@ test-zfparr: test_write_lib
 	echo "ZFP array direct write test passed"
 
 SPECIAL_CHECK = test-int test-highd test-sixd
-ifneq ($(ZFP_HAS_CFP),0)
+ifeq ($(ZFP_HAS_CFP),1)
     SPECIAL_CHECK += test-zfparr
 endif
 
