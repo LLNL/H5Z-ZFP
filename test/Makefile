@@ -310,7 +310,7 @@ test-zfparr: test_write_lib
 	echo "ZFP array direct write test passed"
 
 SPECIAL_CHECK = test-int test-highd test-sixd
-ifneq ($(ZFP_HAS_CFP),)
+ifneq ($(ZFP_HAS_CFP),0)
     SPECIAL_CHECK += test-zfparr
 endif
 
