@@ -96,8 +96,8 @@ int main(int argc, char **argv)
     int i;
 
     /* compression parameters (defaults taken from ZFP header) */
-    int zfpmode = 0;
-    double rate = 4;
+    int zfpmode = 1;
+    double rate = 3.5;
     double acc = 0;
     uint prec = 0;
     uint minbits = 0;
