@@ -184,6 +184,11 @@ int main(int argc, char **argv)
     printf("Relative Diffs: %d values are different; actual-max-reldiff = %g\n",
         num_reldiffs, actual_max_reldiff);
 
+#ifndef H5Z_ZFP_USE_PLUGIN
+    /* When filter is used as a library, we need to finalize it */
+    H5Z_zfp_finalize();
+#endif
+
     free(obuf);
     free(cbuf);
     free(ifile);
