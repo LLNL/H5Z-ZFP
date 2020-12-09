@@ -1,8 +1,6 @@
 #ifndef H5Z_ZFP_PROPS_H
 #define H5Z_ZFP_PROPS_H
 
-#include "hdf5.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
