@@ -37,14 +37,14 @@ set(CMAKE_INSTALL_CMAKEDIR lib/cmake/h5z_zfp)
 #------------------------------------------------------------------------------#
 # Required packages
 #------------------------------------------------------------------------------#
-# Find HDF5, relies on HDF5_ROOT being set in environment.
+# Find HDF5, relies on HDF5_DIR or HDF5_ROOT being set in environment.
 set(COMPONENTS C)
 if (FORTRAN_INTERFACE)
   list(APPEND COMPONENTS Fortran)
 endif ()
 find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS})
 
-# Find ZFP, relies on ZFP_ROOT being set in environment.
+# Find ZFP, relies on ZFP_DIR or ZFP_ROOT being set in environment.
 find_package(ZFP REQUIRED CONFIG)
 
 #------------------------------------------------------------------------------#
