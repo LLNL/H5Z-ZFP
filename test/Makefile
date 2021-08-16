@@ -65,6 +65,11 @@ test-rate-f: plugin test_rw_fortran
 	@for r in 32 16 8 4; do\
 	    expected_ratio=$$(expr 64 \/ $$r); \
 	    ./test_rw_fortran zfpmode 1 rate $$r 2>&1 1>/dev/null; \
+            status=$$?; \
+            if [[ $$status -ne 0 ]]; then \
+	        echo "Fortran rate test failed for rate=$$r"; \
+	        exit 1; \
+            fi; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
 	        echo "Fortran rate test failed for rate=$$r"; \
@@ -77,6 +82,11 @@ test-rate-f: plugin test_rw_fortran
 test-accuracy-f: plugin test_rw_fortran
 	@for a in 0.1 0.01 0.001 0.0001; do\
 	    ./test_rw_fortran zfpmode 3 acc $$a write_only 2>&1 1>/dev/null; \
+            status=$$?; \
+            if [[ $$status -ne 0 ]]; then \
+	        echo "Fortran accuracy test failed for accuracy=$$a"; \
+	        exit 1; \
+            fi; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        echo "Fortran accuracy test failed for accuracy=$$a"; \
@@ -90,6 +100,11 @@ test-precision-f: plugin test_rw_fortran
 	@ldiffcnt=0; \
 	for p in 12 16 20 24; do\
 	    ./test_rw_fortran zfpmode 2 prec $$p write_only 2>&1 1>/dev/null; \
+            status=$$?; \
+            if [[ $$status -ne 0 ]]; then \
+	        echo "Fortran precision test failed for precision=$$p"; \
+	        exit 1; \
+            fi; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
 	        echo "Fortran precision test failed for precision=$$p"; \
@@ -102,6 +117,11 @@ test-precision-f: plugin test_rw_fortran
 # Ensure reversible gives bit-for-bit identical results
 test-reversible-f: plugin test_rw_fortran
 	@./test_rw_fortran zfpmode 5 write_only 2>&1 1>/dev/null; \
+        status=$$?; \
+        if [[ $$status -ne 0 ]]; then \
+	    echo "Fortran precision test failed for precision=$$p"; \
+            exit 1; \
+         fi; \
 	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	if [[ $$diffcnt -ne 0 ]]; then \
 	    echo "Fortran Reversible test failed"; \
