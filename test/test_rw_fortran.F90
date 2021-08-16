@@ -35,8 +35,8 @@ PROGRAM main
   INTEGER(C_SIZE_T) :: cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM
 
   ! compressed/uncompressed difference stat variables 
-  REAL(dp) :: max_absdiff = 0
-  REAL(dp) :: max_reldiff = 0
+  REAL(dp) :: max_absdiff = 0.0_dp
+  REAL(dp) :: max_reldiff = 0.0_dp
   INTEGER(C_INT) :: num_diffs = 0
 
   REAL(dp) :: noise = 0.001
@@ -275,8 +275,7 @@ PROGRAM main
          
          IF (absdiff > max_absdiff) max_absdiff = absdiff
          IF (reldiff > max_reldiff) max_reldiff = reldiff
-
-         IF( .NOT.real_eq(obuf(j), cbuf(j), 125) ) THEN
+         IF( .NOT.real_eq(obuf(j), cbuf(j), 200) ) THEN
             num_diffs = num_diffs + 1
          ENDIF
       ENDIF
