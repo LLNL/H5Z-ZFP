@@ -143,7 +143,6 @@ ifneq (,$(findstring ",",$(HDF5_HOME)))
   HDF5_BIN = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$3}')
   MAKEVARS =
 else
-
   HDF5_INC = $(HDF5_HOME)/include
   ifeq ($(wildcard $(HDF5_HOME)/lib),)
     HDF5_LIB = $(HDF5_HOME)/lib64
