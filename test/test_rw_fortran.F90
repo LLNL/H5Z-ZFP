@@ -35,8 +35,8 @@ PROGRAM main
   INTEGER(C_SIZE_T) :: cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM
 
   ! compressed/uncompressed difference stat variables 
-  REAL(dp) :: max_absdiff = 0
-  REAL(dp) :: max_reldiff = 0
+  REAL(dp) :: max_absdiff = 0.0_dp
+  REAL(dp) :: max_reldiff = 0.0_dp
   INTEGER(C_INT) :: num_diffs = 0
 
   REAL(dp) :: noise = 0.001
@@ -74,34 +74,34 @@ PROGRAM main
      CALL GET_COMMAND_ARGUMENT(i,arg,len,status)
      IF (status .NE. 0) THEN
         WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
-        STOP
+        STOP 1
      END IF
      IF(arg(1:len).EQ.'zfpmode') THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
            WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
-           STOP
+           STOP 1
         END IF
         READ(arg(1:len), *) zfpmode
      ELSE IF (arg(1:len).EQ.'rate')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
            WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
-           STOP
+           STOP 1
         END IF
         READ(arg(1:len), *) rate
      ELSE IF (arg(1:len).EQ.'acc')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
            WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
-           STOP
+           STOP 1
         END IF
         READ(arg(1:len), *) acc
      ELSE IF (arg(1:len).EQ.'prec')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
            WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
-           STOP
+           STOP 1
         END IF
         READ(arg(1:len), *) prec
      ELSE IF (arg(1:len).EQ.'write')THEN
@@ -114,7 +114,7 @@ PROGRAM main
         PRINT*,"acc <val>     - set accuracy for accuracy mode of filter"
         PRINT*,"prec <val>    - set PRECISION for PRECISION mode of zfp filter"
         PRINT*,"write         - only write the file"
-        STOP
+        STOP 1
      ENDIF
       
   END DO
@@ -275,8 +275,7 @@ PROGRAM main
          
          IF (absdiff > max_absdiff) max_absdiff = absdiff
          IF (reldiff > max_reldiff) max_reldiff = reldiff
-
-         IF( .NOT.real_eq(obuf(j), cbuf(j), 125) ) THEN
+         IF( .NOT.real_eq(obuf(j), cbuf(j), 2000) ) THEN
             num_diffs = num_diffs + 1
          ENDIF
       ENDIF
@@ -286,8 +285,10 @@ PROGRAM main
       WRITE(*,'(A)') "Fortran read/write test Failed"
       WRITE(*,'(I0," values are different; max-absdiff = ",E15.8,", max-reldiff = ",E15.8)')  &
            num_diffs,max_absdiff, max_reldiff
+      STOP 1
    ELSE IF(nerr.NE.0)THEN
       WRITE(*,'(A)') "Fortran read/write test Failed"
+      STOP 1
    ELSE
       WRITE(*,'(A)') "Fortran read/write test Passed"
    ENDIF
@@ -319,10 +320,10 @@ SUBROUTINE gen_data(npoints, noise, amp, buf)
   pi = 4.0_C_DOUBLE*ATAN(1.0_C_DOUBLE)
 
   DO i = 1, npoints
-     rand = i
+     rand = REAL(i, C_DOUBLE)
      CALL RANDOM_NUMBER(rand)
      x = 2_c_double * pi * REAL(i-1, C_DOUBLE) / REAL(npoints-1, C_DOUBLE)
-     buf(i) = amp*( 1_C_DOUBLE + SIN(x)) + (rand - 0.5)*noise
+     buf(i) = amp*( 1.0_C_DOUBLE + SIN(x)) + (rand - 0.5_C_DOUBLE)*noise
   ENDDO
 
 END SUBROUTINE gen_data
