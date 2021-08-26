@@ -28,15 +28,15 @@ PROGRAM main
   integer(C_INT), PARAMETER :: maxbits = 4171
   integer(C_INT), PARAMETER :: maxprec = 64
   integer(C_INT), PARAMETER :: minexp = -1074
-  
+
   ! HDF5 related variables
   INTEGER(hid_t) fid, dsid, sid, cpid, dcpl_id, space_id
   INTEGER(C_INT), DIMENSION(1:H5Z_ZFP_CD_NELMTS_MEM) :: cd_values
   INTEGER(C_SIZE_T) :: cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM
 
   ! compressed/uncompressed difference stat variables 
-  REAL(dp) :: max_absdiff = 0.0_dp
-  REAL(dp) :: max_reldiff = 0.0_dp
+  REAL(dp) :: max_absdiff = 1.e-8_dp
+  REAL(dp) :: max_reldiff = 1.e-8_dp
   INTEGER(C_INT) :: num_diffs = 0
 
   REAL(dp) :: noise = 0.001
@@ -45,7 +45,7 @@ PROGRAM main
   REAL(dp), DIMENSION(1:DIM0,1:DIM1), TARGET :: wdata
   INTEGER(hsize_t), DIMENSION(1:2) ::  dims = (/DIM0, DIM1/)
   INTEGER(hsize_t), DIMENSION(1:2) ::  chunk2 = (/CHUNK0, CHUNK1/)
-  REAL(dp), DIMENSION(:), ALLOCATABLE, TARGET :: obuf, cbuf
+  REAL(dp), DIMENSION(:), ALLOCATABLE, TARGET :: obuf, cbuf, cbuf1, cbuf2
   CHARACTER(LEN=180) :: ofile="test_zfp_fortran.h5"
 
   INTEGER :: status
@@ -140,13 +140,7 @@ PROGRAM main
   CALL check("h5pcreate_f", status, nerr)
   CALL h5pset_chunk_f(cpid, 2, chunk2, status)
   CALL check("h5pset_chunk_f", status, nerr)
-  
-  cd_nelmts = 4
-  cd_values(1:cd_nelmts) = (/3,0,0,0/) 
 
-  CALL H5Pset_filter_f(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values, status)
-  CALL check("H5Pset_filter_f", status, nerr)
-  
   !
   ! Check that filter is registered with the library now.
   ! If it is registered, retrieve filter's configuration.
@@ -182,7 +176,11 @@ PROGRAM main
   CALL check("h5dclose_f", status, nerr)
 
   ! write data using default parameters
-  CALL h5dcreate_f(fid, "compressed_default", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
+  cd_nelmts = 0
+  CALL H5Pset_filter_f(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values, status)
+  CALL check("H5Pset_filter_f", status, nerr)
+  
+  CALL h5dcreate_f(fid, "compressed-default", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
   CALL check("h5dcreate_f", status, nerr)
   f_ptr = C_LOC(wdata(1,1))
   CALL h5dwrite_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
@@ -209,7 +207,55 @@ PROGRAM main
      status = H5Pset_zfp_reversible(cpid)
      CALL check("H5Pset_zfp_reversible", status, nerr)
   ENDIF
+  CALL check("H5Pset_filter_f", status, nerr)
   CALL h5dcreate_f(fid, "compressed", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
+  CALL check("h5dcreate_f", status, nerr)
+  f_ptr = C_LOC(wdata(1,1))
+  CALL h5dwrite_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
+  CALL check("h5dwrite_f", status, nerr)
+  CALL h5dclose_f(dsid,status)
+  CALL check("h5dclose_f", status, nerr)
+
+  ! write the data using plug-in
+  CALL H5Premove_filter_f(cpid, H5Z_FILTER_ZFP, status)
+  cd_values = 0
+  cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM
+  IF (zfpmode .EQ. H5Z_ZFP_MODE_RATE) THEN
+     CALL H5Pset_zfp_rate_cdata(rate, cd_nelmts, cd_values)
+     IF(cd_values(1).NE.1 .OR. cd_nelmts.NE.4)THEN
+        PRINT*,'H5Pset_zfp_rate_cdata failed'
+        STOP 1
+     ENDIF
+  ELSE IF (zfpmode .EQ. H5Z_ZFP_MODE_PRECISION) THEN
+     CALL H5Pset_zfp_precision_cdata(prec, cd_nelmts, cd_values)
+     IF(cd_values(1).NE.2 .OR. cd_nelmts.NE.3)THEN
+        PRINT*,'H5Pset_zfp_precision_cdata failed'
+        STOP 1
+     ENDIF
+  ELSE IF (zfpmode .EQ. H5Z_ZFP_MODE_ACCURACY)THEN
+     CALL H5Pset_zfp_accuracy_cdata(0._dp, cd_nelmts, cd_values)
+     IF(cd_values(1).NE.3 .OR. cd_nelmts.NE.4)THEN
+        PRINT*,'H5Pset_zfp_accuracy_cdata failed'
+        STOP 1
+     ENDIF
+  ELSE IF (zfpmode .EQ. H5Z_ZFP_MODE_EXPERT) THEN
+     CALL H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values)
+     IF(cd_values(1).NE.4 .OR. cd_nelmts.NE.6)THEN
+        PRINT*,'H5Pset_zfp_expert_cdata failed'
+        STOP 1
+     ENDIF
+  ELSE IF (zfpmode .EQ. H5Z_ZFP_MODE_REVERSIBLE) THEN
+     CALL H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values)
+     IF(cd_values(1).NE.5 .OR. cd_nelmts.NE.1)THEN
+        PRINT*,'H5Pset_zfp_reversible_cdata failed'
+        STOP 1
+     ENDIF
+  ENDIF
+
+  CALL H5Pset_filter_f(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values, status)
+  CALL check("H5Pset_filter_f", status, nerr)
+
+  CALL h5dcreate_f(fid, "compressed-plugin", H5T_NATIVE_DOUBLE, sid, dsid, status, dcpl_id=cpid)
   CALL check("h5dcreate_f", status, nerr)
   f_ptr = C_LOC(wdata(1,1))
   CALL h5dwrite_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
@@ -247,8 +293,8 @@ PROGRAM main
   CALL H5Dclose_f(dsid, status)
   CALL check("H5Dclose_f", status, nerr)
 
-  ! read the compressed dataset 
-  CALL h5dopen_f (fid, "compressed_default", dsid, status)
+  ! read the compressed dataset
+  CALL h5dopen_f (fid, "compressed-default", dsid, status)
   CALL check("", status, nerr)
   CALL H5Dget_create_plist_f(dsid, dcpl_id, status )
   CALL check("", status, nerr)
@@ -259,7 +305,31 @@ PROGRAM main
   CALL H5Dclose_f(dsid, status)
   CALL check("H5Dclose_f", status, nerr)
 
-  ! clean up 
+ ! read the compressed dataset
+  CALL h5dopen_f (fid, "compressed", dsid, status)
+  CALL check("", status, nerr)
+  CALL H5Dget_create_plist_f(dsid, dcpl_id, status )
+  CALL check("", status, nerr)
+  ALLOCATE(cbuf1(1:npoints))
+  f_ptr = C_LOC(cbuf1(1))
+  CALL H5Dread_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
+  CALL check("H5Dread_f", status, nerr)
+  CALL H5Dclose_f(dsid, status)
+  CALL check("H5Dclose_f", status, nerr)
+
+ ! read the compressed dataset (plugin)
+  CALL h5dopen_f (fid, "compressed-plugin", dsid, status)
+  CALL check("", status, nerr)
+  CALL H5Dget_create_plist_f(dsid, dcpl_id, status )
+  CALL check("", status, nerr)
+  ALLOCATE(cbuf2(1:npoints))
+  f_ptr = C_LOC(cbuf2(1))
+  CALL H5Dread_f(dsid, H5T_NATIVE_DOUBLE, f_ptr, status)
+  CALL check("H5Dread_f", status, nerr)
+  CALL H5Dclose_f(dsid, status)
+  CALL check("H5Dclose_f", status, nerr)
+
+  ! clean up
   CALL H5Pclose_f(dcpl_id, status)
   CALL check("H5Pclose_f", status, nerr)
   CALL H5Fclose_f(fid, status)
@@ -269,18 +339,18 @@ PROGRAM main
   DO j = 1, npoints
      absdiff = obuf(j) - cbuf(j)
      if(absdiff < 0) absdiff = -absdiff
-     IF(absdiff > 0) THEN
+     IF(absdiff > max_absdiff) THEN
          reldiff = 0
          IF (obuf(j) .NE. 0) reldiff = absdiff / obuf(j)
          
          IF (absdiff > max_absdiff) max_absdiff = absdiff
          IF (reldiff > max_reldiff) max_reldiff = reldiff
-         IF( .NOT.real_eq(obuf(j), cbuf(j), 2000) ) THEN
+         IF( .NOT.real_eq(obuf(j), cbuf(j), 100) ) THEN
             num_diffs = num_diffs + 1
          ENDIF
       ENDIF
    ENDDO
-   
+
    IF(num_diffs.NE.0)THEN
       WRITE(*,'(A)') "Fortran read/write test Failed"
       WRITE(*,'(I0," values are different; max-absdiff = ",E15.8,", max-reldiff = ",E15.8)')  &
@@ -293,7 +363,7 @@ PROGRAM main
       WRITE(*,'(A)') "Fortran read/write test Passed"
    ENDIF
 
-   DEALLOCATE(obuf, cbuf)
+   DEALLOCATE(obuf, cbuf, cbuf1, cbuf2)
 
    ! initialize the ZFP filter
    status = H5Z_zfp_finalize()
