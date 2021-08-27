@@ -3,6 +3,8 @@ include ../config.make
 NO_COLOR=\033[0m
 OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
+padlimit=60
+padlength=60
 
 .PHONY: lib plugin check patch clean
 
@@ -65,13 +67,11 @@ test_rw_fortran: test_rw_fortran.o lib
 
 test-default : test_rw_fortran
 	 @echo " "; \
-	 padlimit=60; \
-	 pad=$$(printf '%*s' "$$padlimit"); \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
 	 pad=$${pad// /.}; \
-         padlength=60; \
          x="./test_rw_fortran"; \
 	 printf "$$x"; \
-	 printf ' %*.*s' 0 $$((padlength - $${#x} )) "$$pad"; \
+	 printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
          $$x 2>&1 1>/dev/null; \
          if [[ $$status -ne 0 ]]; then \
 	     printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
@@ -82,14 +82,12 @@ test-default : test_rw_fortran
 # Decrease bit rate and confirm compression ratio increases
 test-rate-f: plugin test_rw_fortran
 	 @echo " "; \
-	 padlimit=60; \
-	 pad=$$(printf '%*s' "$$padlimit"); \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
 	 pad=$${pad// /.}; \
-         padlength=60; \
 	 for r in 32 16 8 4; do\
             x="./test_rw_fortran zfpmode 1 rate $$r"; \
             printf "$$x"; \
-	    printf ' %*.*s' 0 $$((padlength - $${#x} )) "$$pad"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	    expected_ratio=$$(expr 64 \/ $$r); \
 	    $$x >/dev/null 2>/dev/null; \
             status=$$?; \
@@ -113,14 +111,12 @@ test-rate-f: plugin test_rw_fortran
 # Increase accuracy and test absolute error tolerance is within accuracy
 test-accuracy-f: plugin test_rw_fortran
 	 @echo " "; \
-	 padlimit=60; \
-	 pad=$$(printf '%*s' "$$padlimit"); \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
 	 pad=$${pad// /.}; \
-         padlength=60; \
 	 for a in 0.1 0.01 0.001 0.0001; do\
             x="./test_rw_fortran zfpmode 3 acc $$a write"; \
             printf "$$x"; \
-	    printf ' %*.*s' 0 $$((padlength - $${#x} )) "$$pad"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	    $$x >/dev/null 2>/dev/null; \
             status=$$?; \
             if [[ $$status -ne 0 ]]; then \
@@ -143,14 +139,12 @@ test-accuracy-f: plugin test_rw_fortran
 # Increase precision and confirm diff count for given tolerance drops
 test-precision-f: plugin test_rw_fortran
 	 @echo " "; \
-	 padlimit=60; \
-	 pad=$$(printf '%*s' "$$padlimit"); \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
 	 pad=$${pad// /.}; \
-         padlength=60; \
 	 for p in 12 16 20 24; do\
             x="./test_rw_fortran zfpmode 2 prec $$p write"; \
             printf "$$x"; \
-	    printf ' %*.*s' 0 $$((padlength - $${#x} )) "$$pad"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	    $$x >/dev/null 2>/dev/null; \
             status=$$?; \
             if [[ $$status -ne 0 ]]; then \
@@ -173,13 +167,11 @@ test-precision-f: plugin test_rw_fortran
 # Ensure reversible gives bit-for-bit identical results
 test-reversible-f: plugin test_rw_fortran
 	@echo " "; \
-	padlimit=60; \
-	pad=$$(printf '%*s' "$$padlimit"); \
+	pad=$$(printf '%*s' "$(padlimit)"); \
 	pad=$${pad// /.}; \
-        padlength=60; \
 	x="./test_rw_fortran zfpmode 5 write"; \
         printf "$$x"; \
-	printf ' %*.*s' 0 $$((padlength - $${#x} )) "$$pad"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	$$x >/dev/null 2>/dev/null; \
         status=$$?; \
         if [[ $$status -ne 0 ]]; then \
