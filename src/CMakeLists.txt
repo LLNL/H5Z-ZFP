@@ -20,7 +20,8 @@ target_compile_definitions(h5z_zfp_static PRIVATE H5Z_ZFP_AS_LIB)
 target_include_directories(h5z_zfp_static
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    ${HDF5_INCLUDE_DIRS})
 target_link_libraries(h5z_zfp_static PUBLIC zfp::zfp ${HDF5_LIBRARIES})
 set_target_properties(h5z_zfp_static PROPERTIES POSITION_INDEPENDENT_CODE 1)
 set_target_properties(h5z_zfp_static PROPERTIES OUTPUT_NAME h5zzfp)
