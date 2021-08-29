@@ -1,6 +1,7 @@
 PROGRAM main
 
   USE ISO_C_BINDING
+  USE ISO_FORTRAN_ENV, ONLY: ERROR_UNIT, OUTPUT_UNIT
   USE HDF5
   USE h5zzfp_props_f
   IMPLICIT NONE
@@ -73,34 +74,34 @@ PROGRAM main
   DO i = 1, COMMAND_ARGUMENT_COUNT()
      CALL GET_COMMAND_ARGUMENT(i,arg,len,status)
      IF (status .NE. 0) THEN
-        WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+        WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
         STOP 1
      END IF
      IF(arg(1:len).EQ.'zfpmode') THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
-           WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+           WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
            STOP 1
         END IF
         READ(arg(1:len), *) zfpmode
      ELSE IF (arg(1:len).EQ.'rate')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
-           WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+           WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
            STOP 1
         END IF
         READ(arg(1:len), *) rate
      ELSE IF (arg(1:len).EQ.'acc')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
-           WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+           WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
            STOP 1
         END IF
         READ(arg(1:len), *) acc
      ELSE IF (arg(1:len).EQ.'prec')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
-           WRITE (*,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+           WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
            STOP 1
         END IF
         READ(arg(1:len), *) prec
@@ -352,15 +353,15 @@ PROGRAM main
    ENDDO
 
    IF(num_diffs.NE.0)THEN
-      WRITE(*,'(A)') "Fortran read/write test Failed"
-      WRITE(*,'(I0," values are different; max-absdiff = ",E15.8,", max-reldiff = ",E15.8)')  &
+      WRITE(ERROR_UNIT,'(A)') "Fortran read/write test Failed"
+      WRITE(ERROR_UNIT,'(I0," values are different; max-absdiff = ",E15.8,", max-reldiff = ",E15.8)')  &
            num_diffs,max_absdiff, max_reldiff
       STOP 1
    ELSE IF(nerr.NE.0)THEN
-      WRITE(*,'(A)') "Fortran read/write test Failed"
+      WRITE(ERROR_UNIT,'(A)') "Fortran read/write test Failed"
       STOP 1
    ELSE
-      WRITE(*,'(A)') "Fortran read/write test Passed"
+      WRITE(OUTPUT_UNIT,'(A)') "Fortran read/write test Passed"
    ENDIF
 
    DEALLOCATE(obuf, cbuf, cbuf1, cbuf2)
@@ -375,7 +376,6 @@ END PROGRAM main
 
 ! Generate a simple, 1D sinusioidal data array with some noise
 SUBROUTINE gen_data(npoints, noise, amp, buf)
-  
   USE ISO_C_BINDING
   IMPLICIT NONE
   INTEGER(C_SIZE_T) :: npoints
@@ -383,12 +383,19 @@ SUBROUTINE gen_data(npoints, noise, amp, buf)
   REAL(C_DOUBLE) :: amp
   REAL(C_DOUBLE), DIMENSION(1:npoints) :: buf
 
+  INTEGER :: size
+  INTEGER, DIMENSION(:), ALLOCATABLE :: seed
   INTEGER(C_SIZE_T) :: i
   REAL(C_DOUBLE) :: x
   REAL(C_DOUBLE) :: pi
   REAL(C_DOUBLE) :: rand
-  pi = 4.0_C_DOUBLE*ATAN(1.0_C_DOUBLE)
 
+  CALL RANDOM_SEED(SIZE=size)
+  ALLOCATE(seed(size))
+  seed = 123456789
+  CALL RANDOM_SEED(PUT=seed)
+
+  pi = 4.0_C_DOUBLE*ATAN(1.0_C_DOUBLE)
   DO i = 1, npoints
      rand = REAL(i, C_DOUBLE)
      CALL RANDOM_NUMBER(rand)
@@ -396,6 +403,7 @@ SUBROUTINE gen_data(npoints, noise, amp, buf)
      buf(i) = amp*( 1.0_C_DOUBLE + SIN(x)) + (rand - 0.5_C_DOUBLE)*noise
   ENDDO
 
+  IF (ALLOCATED(seed)) DEALLOCATE(seed)
 END SUBROUTINE gen_data
 
 LOGICAL FUNCTION real_eq(a,b,ulp)
@@ -409,11 +417,12 @@ LOGICAL FUNCTION real_eq(a,b,ulp)
 END FUNCTION real_eq
 
 SUBROUTINE check(string,error,total_error)
+  USE ISO_FORTRAN_ENV, ONLY: ERROR_UNIT
   CHARACTER(LEN=*) :: string
   INTEGER :: error, total_error
   IF (error .LT. 0) THEN
      total_error=total_error+1
-     WRITE(*,*) string, " FAILED"
+     WRITE(ERROR_UNIT,*) string, " FAILED"
   ENDIF
   RETURN
 END SUBROUTINE check
