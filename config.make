@@ -137,8 +137,8 @@ endif
 
 # Check if specified individually the HDF5 include directory,
 # library directory and bin directory separated by commas, i.e. HDF5_HOME=INC,LIB,BIN
-
-ifneq (, $(findstring \, ,$(HDF5_HOME)))
+FOUND_LIST=$(shell echo "$(HDF5_HOME)" | grep -q "," && echo "true")
+ifeq ("$(FOUND_LIST)","true")
   HDF5_INC = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$1}')
   HDF5_LIB = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$2}')
   HDF5_BIN = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$3}')
