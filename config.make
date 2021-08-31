@@ -17,6 +17,7 @@ else ifeq ($(PWD_BASE),test)
 else ifeq ($(PWD_BASE),H5Z-ZFP)
     H5Z_ZFP_BASE := ./src
 endif
+
 H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
 H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_plugin.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
 ZFP_HAS_REVERSIBLE := $(shell grep zfp_stream_set_reversible $(ZFP_HOME)/include/zfp.h)
@@ -136,8 +137,8 @@ endif
 
 # Check if specified individually the HDF5 include directory,
 # library directory and bin directory separated by commas, i.e. HDF5_HOME=INC,LIB,BIN
-
-ifneq (,$(findstring ",",$(HDF5_HOME)))
+FOUND_LIST=$(shell echo "$(HDF5_HOME)" | grep -q "," && echo "true")
+ifeq ("$(FOUND_LIST)","true")
   HDF5_INC = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$1}')
   HDF5_LIB = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$2}')
   HDF5_BIN = $(shell echo $(HDF5_HOME) | awk -F'[,]' '{print $$3}')

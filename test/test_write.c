@@ -300,7 +300,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 {
     hid_t cpid;
     unsigned int cd_values[10];
-    int i, cd_nelmts = 10;
+    int i;
+    size_t cd_nelmts = 10;
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
