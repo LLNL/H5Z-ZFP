@@ -16,7 +16,6 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <stdlib.h>
 #define _GNU_SOURCE
 #include <string.h>
-#undef _GNU_SOURCE
 #include <strings.h>
 #include <unistd.h>
 
