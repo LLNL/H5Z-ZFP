@@ -144,7 +144,7 @@ is whether the application calls ``H5Z_zfp_initialize()`` or not.
 Fortran Interface
 -----------------
 
-A Fortran interface based on the properties interface and generic interface described above
+Fortran equivalents for both the properties and generic interfaces, described above,
 has been added by Scot Breitenfeld of the HDF5_ group. The code that
 implements the Fortran interfaces is in the file ``H5Zzfp_props_f.F90``.
 An example of its use is in ``test/test_rw_fortran.F90``.
