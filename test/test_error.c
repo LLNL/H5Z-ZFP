@@ -141,7 +141,7 @@ static int walk_hdf5_error_stack_cb(unsigned int n, H5E_error_t const *err_desc,
 {   
     client_data_t *cd  = (client_data_t *) _cd;
     if (n > 0) return 0;
-    cd->has_str = strcasestr(err_desc->desc, cd->str) != 0;
+    cd->has_str = (strcasestr(err_desc->desc, cd->str) != 0);
     return 0;
 }
 
