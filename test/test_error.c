@@ -8,7 +8,7 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
-#define _GNU_SOURCE
+#define _GNU_SOURCE /* ahead of ALL headers to take proper effect */
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -138,7 +138,7 @@ static int walk_hdf5_error_stack_cb(unsigned int n, H5E_error_t const *err_desc,
 {   
     client_data_t *cd  = (client_data_t *) _cd;
     if (n > 0) return 0;
-    cd->has_str = (strcasestr(err_desc->desc, cd->str) != 0);
+    cd->has_str = strcasestr(err_desc->desc, cd->str) != 0;
     return 0;
 }
 
