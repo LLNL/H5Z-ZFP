@@ -8,19 +8,16 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define _GNU_SOURCE
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
-
-#define _GNU_SOURCE
-#include <string.h>
 
 #include "hdf5.h"
 
