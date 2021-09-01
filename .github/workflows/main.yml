@@ -53,12 +53,12 @@ jobs:
       run: |
         git clone https://github.com/LLNL/zfp.git
         export HOME_DIR=$(echo ~)
-# BUILD USING AUTOTOOLS
+        # BUILD USING AUTOTOOLS
         cd zfp
         export DEFS="-DBIT_STREAM_WORD_TYPE=uint8"
         make
         echo "ZFP_HOME=$PWD" >> $GITHUB_ENV
-# BUILD USING CMAKE
+        # BUILD USING CMAKE
         mkdir build; cd build
         cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 \
         -D CMAKE_INSTALL_PREFIX=$PWD/zfp \
