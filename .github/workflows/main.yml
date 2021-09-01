@@ -32,7 +32,6 @@ jobs:
     - name: Install Dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt update
         sudo apt-get install -qq cmake
         sudo apt-get install -qq libhdf5-dev
         sudo apt-get install -qq hdf5-tools
@@ -61,7 +60,7 @@ jobs:
         echo "ZFP_HOME=$PWD" >> $GITHUB_ENV
         # BUILD USING CMAKE
         mkdir build; cd build
-        cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 \
+        cmake --build . --config Release -D ZFP_BIT_STREAM_WORD_SIZE=8 \
         -D CMAKE_INSTALL_PREFIX=$PWD/zfp \
         ..
         make
