@@ -32,6 +32,7 @@ jobs:
     - name: Install Dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
+        sudo apt update
         sudo apt-get install -qq cmake
         sudo apt-get install -qq libhdf5-dev
         sudo apt-get install -qq hdf5-tools
