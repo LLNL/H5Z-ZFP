@@ -377,20 +377,18 @@ END PROGRAM main
 ! Generate a simple, 1D sinusioidal data array with some noise
 SUBROUTINE gen_data(npoints, noise, amp, buf)
   USE ISO_C_BINDING
-  USE ISO_FORTRAN_ENV, ONLY: REAL128
   IMPLICIT NONE
   INTEGER(C_SIZE_T) :: npoints
   REAL(C_DOUBLE) :: noise
   REAL(C_DOUBLE) :: amp
   REAL(C_DOUBLE), DIMENSION(1:npoints) :: buf
 
-  REAL(REAL128), PARAMETER :: PI = 3.1415926535897932384626433832795028841971_REAL128
+  REAL(C_DOUBLE), PARAMETER :: PI = 3.1415926535897932384626433832795028841971_C_DOUBLE
 
   INTEGER :: size
   INTEGER, DIMENSION(:), ALLOCATABLE :: seed
   INTEGER(C_SIZE_T) :: i
   REAL(C_DOUBLE) :: x
-  REAL(C_DOUBLE) :: c_pi
   REAL(C_DOUBLE) :: rand
 
   ! Fixed random seed.
@@ -399,11 +397,10 @@ SUBROUTINE gen_data(npoints, noise, amp, buf)
   seed = 123456789
   CALL RANDOM_SEED(PUT=seed)
 
-  c_pi = REAL(PI, C_DOUBLE)
   DO i = 1, npoints
      rand = REAL(i, C_DOUBLE)
      CALL RANDOM_NUMBER(rand)
-     x = 2_c_double * c_pi * REAL(i-1, C_DOUBLE) / REAL(npoints-1, C_DOUBLE)
+     x = 2_c_double * PI * REAL(i-1, C_DOUBLE) / REAL(npoints-1, C_DOUBLE)
      buf(i) = amp*( 1.0_C_DOUBLE + SIN(x)) + (rand - 0.5_C_DOUBLE)*noise
   ENDDO
 
