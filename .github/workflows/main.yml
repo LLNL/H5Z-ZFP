@@ -62,8 +62,7 @@ jobs:
         mkdir build; cd build
         cmake --version
         cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 -D CMAKE_INSTALL_PREFIX=$PWD/zfp ..
-        make
-        make install
+        cmake --build . --config Release
         echo "ZFP_DIR=$PWD/zfp" >> $GITHUB_ENV
       shell: bash
 
