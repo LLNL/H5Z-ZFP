@@ -79,6 +79,10 @@ Compiling HDF5_
   `ISO_C_BINDING <https://gcc.gnu.org/onlinedocs/gfortran/ISO_005fC_005fBINDING.html>`_
   to define the Fortran interface.
 
+* If you are using HDF5-1.12 and wish to use the filter as a *library* (see :ref:`plugin-vs-library`),
+  you may need configure HDF5 with ``--disable-memory-alloc-sanity-check`` to work
+  around an memory management issue in HDF5.
+
 -----------------
 Compiling H5Z-ZFP
 -----------------
