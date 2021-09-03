@@ -124,11 +124,14 @@ else ifneq ($(findstring f77, $(FC)),)
     FC =
 endif
 
-ifeq ($(wildcard $(ZFP_HOME)/include),)
+ifneq ($(wildcard $(ZFP_HOME)/include),)
+ZFP_INC = $(ZFP_HOME)/include
+else ifneq ($(wildcard $(ZFP_HOME)/inc),)
 ZFP_INC = $(ZFP_HOME)/inc
 else
-ZFP_INC = $(ZFP_HOME)/include
+$(error "cannot find ZFP include dir")
 endif
+
 ifeq ($(wildcard $(ZFP_HOME)/lib),)
 ZFP_LIB = $(ZFP_HOME)/lib64
 else
