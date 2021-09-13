@@ -1,5 +1,11 @@
 include ../config.make
 
+NO_COLOR=\033[0m
+OK_COLOR=\033[32;01m
+ERROR_COLOR=\033[31;01m
+padlimit=60
+padlength=60
+
 ZFP_LIBS = -lzfp
 ifeq ($(ZFP_HAS_CFP),1)
     ZFP_LIBS += -lcfp -lstdc++
@@ -65,54 +71,130 @@ test_rw_fortran: test_rw_fortran.o lib
 # Note: The write-half of all the Fortran tests utilize the default and properties
 # interface library to control the filter. The read-half uses the plugin.
 
+test-default : test_rw_fortran
+	 @echo " "; \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
+	 pad=$${pad// /.}; \
+         x="./test_rw_fortran"; \
+	 printf "$$x"; \
+	 printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+         $$x 2>&1 1>/dev/null; \
+         if [[ $$status -ne 0 ]]; then \
+	     printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	     exit 1; \
+          fi; \
+	  printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
+
 # Decrease bit rate and confirm compression ratio increases
-test-rate-f: plugin test_rw_fortran 
-	@for r in 32 16 8 4; do\
+test-rate-f: plugin test_rw_fortran
+	 @echo " "; \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
+	 pad=$${pad// /.}; \
+	 for r in 32 16 8 4; do\
+            x="./test_rw_fortran zfpmode 1 rate $$r"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	    expected_ratio=$$(expr 64 \/ $$r); \
-	    ./test_rw_fortran zfpmode 1 rate $$r 2>&1 1>/dev/null; \
+	    $$x >/dev/null 2>/dev/null; \
+            status=$$?; \
+            if [[ $$status -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        exit 1; \
+            fi; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
-	        echo "Fortran rate test failed for rate=$$r"; \
+	        printf " [$(ERROR_COLOR)FAILED *H5DUMP*$(NO_COLOR)]\n"; \
 	        exit 1; \
 	    fi; \
+	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed-plugin -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
+	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED *H5DUMP*$(NO_COLOR)]\n"; \
+	        exit 1; \
+	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
-	echo "Fortran Rate tests passed"
 
 # Increase accuracy and test absolute error tolerance is within accuracy
 test-accuracy-f: plugin test_rw_fortran
-	@for a in 0.1 0.01 0.001 0.0001; do\
-	    ./test_rw_fortran zfpmode 3 acc $$a write_only 2>&1 1>/dev/null; \
+	 @echo " "; \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
+	 pad=$${pad// /.}; \
+	 for a in 0.1 0.01 0.001 0.0001; do\
+            x="./test_rw_fortran zfpmode 3 acc $$a write"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    $$x >/dev/null 2>/dev/null; \
+            status=$$?; \
+            if [[ $$status -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        exit 1; \
+            fi; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "Fortran accuracy test failed for accuracy=$$a"; \
+	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
 	        exit 1; \
 	    fi; \
+	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed-plugin original 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
+	        exit 1; \
+	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
-	echo "Fortran Accuracy tests passed"
 
 # Increase precision and confirm diff count for given tolerance drops
 test-precision-f: plugin test_rw_fortran
-	@ldiffcnt=0; \
-	for p in 12 16 20 24; do\
-	    ./test_rw_fortran zfpmode 2 prec $$p write_only 2>&1 1>/dev/null; \
+	 @echo " "; \
+	 pad=$$(printf '%*s' "$(padlimit)"); \
+	 pad=$${pad// /.}; \
+	 for p in 12 16 20 24; do\
+            x="./test_rw_fortran zfpmode 2 prec $$p write"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    $$x >/dev/null 2>/dev/null; \
+            status=$$?; \
+            if [[ $$status -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        exit 1; \
+            fi; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
-	        echo "Fortran precision test failed for precision=$$p"; \
+	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
 		exit 1; \
 	    fi; \
-	    ldiffcnt=$$diffcnt; \
-	done; \
-	echo "Fortran Precision tests passed"
+	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed-plugin original | grep 'differences found' | cut -d' ' -f1); \
+	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
+		exit 1; \
+	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
+	 done; \
 
 # Ensure reversible gives bit-for-bit identical results
 test-reversible-f: plugin test_rw_fortran
-	@./test_rw_fortran zfpmode 5 write_only 2>&1 1>/dev/null; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_rw_fortran zfpmode 5 write"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x >/dev/null 2>/dev/null; \
+        status=$$?; \
+        if [[ $$status -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+            exit 1; \
+         fi; \
 	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	if [[ $$diffcnt -ne 0 ]]; then \
-	    echo "Fortran Reversible test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "Fortran Reversible test passed"
+	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed-plugin original | grep 'differences found' | cut -d' ' -f1); \
+	if [[ $$diffcnt -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n\n"; \
 
 endif # ] ifneq ($(FC),)
 
@@ -314,7 +396,7 @@ ifeq ($(ZFP_HAS_CFP),1)
     SPECIAL_CHECK += test-zfparr
 endif
 
-FORTRAN_CHECK = test-rate-f test-accuracy-f test-precision-f
+FORTRAN_CHECK = test-default test-rate-f test-accuracy-f test-precision-f
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     FORTRAN_CHECK += test-reversible-f
 endif

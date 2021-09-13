@@ -304,7 +304,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 {
     hid_t cpid;
     unsigned int cd_values[10];
-    int i, cd_nelmts = 10;
+    int i;
+    size_t cd_nelmts = 10;
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
@@ -326,8 +327,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
         cd_nelmts = 0; /* causes default behavior of ZFP library */
 
     /* print cd-values array used for filter */
-    printf("%d cd_values= ",cd_nelmts);
-    for (i = 0; i < cd_nelmts; i++)
+    printf("%d cd_values= ", (int) cd_nelmts);
+    for (i = 0; i < (int) cd_nelmts; i++)
         printf("%u,", cd_values[i]);
     printf("\n");
 

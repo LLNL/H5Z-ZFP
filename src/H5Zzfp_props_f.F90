@@ -67,7 +67,47 @@ MODULE H5Zzfp_props_f
        IMPLICIT NONE
        INTEGER(HID_T), VALUE :: plist
      END FUNCTION H5Pset_zfp_reversible
-    
+
+     SUBROUTINE H5Pset_zfp_rate_cdata(rate, cd_nelmts, cd_values) BIND(C, NAME='H5Pset_zfp_rate_cdata_f')
+       IMPORT :: C_DOUBLE, C_INT, C_SIZE_T
+       IMPLICIT NONE
+       REAL(C_DOUBLE), VALUE :: rate
+       INTEGER(C_SIZE_T) :: cd_nelmts
+       INTEGER(C_INT), DIMENSION(*) :: cd_values
+     END SUBROUTINE H5Pset_zfp_rate_cdata
+
+     SUBROUTINE H5Pset_zfp_accuracy_cdata(acc, cd_nelmts, cd_values) BIND(C, NAME='H5Pset_zfp_accuracy_cdata_f')
+       IMPORT :: C_DOUBLE, C_INT, C_SIZE_T
+       IMPLICIT NONE
+       REAL(C_DOUBLE), VALUE :: acc
+       INTEGER(C_SIZE_T) :: cd_nelmts
+       INTEGER(C_INT), DIMENSION(*) :: cd_values
+     END SUBROUTINE H5Pset_zfp_accuracy_cdata
+
+    SUBROUTINE H5Pset_zfp_precision_cdata(prec, cd_nelmts, cd_values) BIND(C, NAME='H5Pset_zfp_precision_cdata_f')
+       IMPORT :: C_INT, C_SIZE_T
+       IMPLICIT NONE
+       INTEGER(C_INT), VALUE :: prec
+       INTEGER(C_SIZE_T) :: cd_nelmts
+       INTEGER(C_INT), DIMENSION(*) :: cd_values
+     END SUBROUTINE H5Pset_zfp_precision_cdata
+
+    SUBROUTINE H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values) &
+         BIND(C, NAME='H5Pset_zfp_expert_cdata_f')
+       IMPORT :: C_INT, C_SIZE_T
+       IMPLICIT NONE
+       INTEGER(C_INT), VALUE :: minbits, maxbits, maxprec, minexp
+       INTEGER(C_SIZE_T) :: cd_nelmts
+       INTEGER(C_INT), DIMENSION(*) :: cd_values
+     END SUBROUTINE H5Pset_zfp_expert_cdata
+
+   SUBROUTINE H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values) BIND(C, NAME='H5Pset_zfp_reversible_cdata_f')
+       IMPORT :: C_INT, C_SIZE_T
+       IMPLICIT NONE
+       INTEGER(C_SIZE_T) :: cd_nelmts
+       INTEGER(C_INT), DIMENSION(*) :: cd_values
+     END SUBROUTINE H5Pset_zfp_reversible_cdata
+
   END INTERFACE
 
 END MODULE H5Zzfp_props_f

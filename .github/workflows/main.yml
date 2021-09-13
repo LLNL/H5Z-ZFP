@@ -1,0 +1,69 @@
+name: h5z-zfp
+
+# Controls when the action will run. 
+#Triggers the workflow on push or pull requests.
+on: 
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that
+# can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+      matrix:
+        name: ["Ubuntu Latest GCC"]
+        include:
+          - name: "Ubuntu Latest GCC"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-latest
+
+    name: ${{ matrix.name }}
+    # The type of runner that the job will run on.
+    runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    # Steps represent a sequence of tasks that will be executed 
+    # as part of the job.
+    steps:
+    - name: Install Dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install -qq libhdf5-dev
+        sudo apt-get install -qq hdf5-tools
+        echo  "HDF5_HOME=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        # Set env vars
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+        echo "CXX=g++"  >> $GITHUB_ENV
+        
+ # Checks-out the repository under $GITHUB_WORKSPACE so the job can access it.
+    - name: Get Sources
+      uses: actions/checkout@v2
+
+##################################
+# INSTALL ZFP
+##################################
+                 
+    - name: install ZFP
+      run: |
+        git clone https://github.com/LLNL/zfp.git
+        export HOME_DIR=$(echo ~)
+        cd zfp
+        export DEFS="-DBIT_STREAM_WORD_TYPE=uint8"
+        make
+        echo "ZFP_HOME=$PWD" >> $GITHUB_ENV
+      shell: bash
+
+##################################
+# BUILD AND TEST H5Z-ZFP
+##################################
+
+    - name: build and check
+      run: |
+        make all
+        make check
+      shell: bash
