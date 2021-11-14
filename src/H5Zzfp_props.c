@@ -6,6 +6,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+typedef unsigned int uint;
+#endif
+
 #define H5Z_ZFP_PUSH_AND_GOTO(MAJ, MIN, RET, MSG)     \
 do                                                    \
 {                                                     \
