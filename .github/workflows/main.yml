@@ -12,7 +12,7 @@ on:
 # can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  linux-build:
     strategy:
       matrix:
         name: ["Ubuntu Latest GCC"]
@@ -79,3 +79,51 @@ jobs:
       shell: bash
 
     
+  windows-build:
+    name: 'Windows MSVC/Clang'
+    defaults:
+      run:
+        shell: bash
+    runs-on: windows-2019
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+      - name: install prerequisites
+        run: |
+          choco install \
+            unzip \
+            wget
+      - name: setup MSVC Tools
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: download HDF5 for Windows
+        run: |
+          wget --quiet \
+            https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/bin/windows/hdf5-1.12.1-Std-win10_64-vs16.zip
+          unzip hdf5-1.12.1-Std-win10_64-vs16.zip
+      - name: Install HDF5 for Windows
+        run: msiexec /i "hdf\HDF5-1.12.1-win64.msi" /qn
+        shell: cmd
+      - name: Download and install ZFP
+        run: |
+          git clone https://github.com/LLNL/zfp.git
+          mkdir -p zfp/build
+          cd zfp/build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_UTILITIES=OFF \
+            -DBUILD_TESTING=OFF
+          cmake --build . -j 3
+          cmake --build . --target install
+      - name: update PATH
+        run: |
+          echo "C:/Program Files/HDF_Group/HDF5/1.12.1/bin" >> $GITHUB_PATH
+      - name: configure cmake
+        run: |
+          mkdir build
+          cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DFORTRAN_INTERFACE=OFF \
+            -TClangCL
+          cmake --build . -j 3
+          cmake --build . --target install
