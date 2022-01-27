@@ -51,6 +51,7 @@ jobs:
     - name: install ZFP
       run: |
         git clone https://github.com/LLNL/zfp.git
+        git checkout 0.5.5
         export HOME_DIR=$(echo ~)
         cd zfp
         mkdir build;cd build
