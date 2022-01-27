@@ -18,7 +18,7 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <unistd.h>
 
 #if ZFP_HAS_CFP
-#include "../cfp/include/cfparrays.h"
+#include "cfparrays.h"
 #endif
 
 #include "hdf5.h"
@@ -602,7 +602,7 @@ int main(int argc, char **argv)
         /*hsize_t hchunk_dims[] = {19, 34};*/
         hsize_t hchunk_dims[] = {38, 128};
         hsize_t hchunk_off[] = {0, 0};
-        cfp_array2d* origarr;
+        cfp_array2d origarr;
 
         /* Create the array data */
         buf = gen_random_correlated_array(TYPDBL, 2, dims, 0, 0);

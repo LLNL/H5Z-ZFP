@@ -53,17 +53,28 @@ jobs:
         git clone https://github.com/LLNL/zfp.git
         export HOME_DIR=$(echo ~)
         cd zfp
-        export DEFS="-DBIT_STREAM_WORD_TYPE=uint8"
-        make
-        echo "ZFP_HOME=$PWD" >> $GITHUB_ENV
+        mkdir build;cd build
+        cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 -D BUILD_CFP=ON -D CMAKE_INSTALL_PREFIX=$PWD/zfp -D BUILD_TESTING=OFF -D BUILD_UTILITIES=OFF ..
+        make install
+        echo "ZFP_HOME=$PWD/zfp" >> $GITHUB_ENV
+        echo "ZFP_DIR=$PWD/zfp" >> $GITHUB_ENV
       shell: bash
 
 ##################################
 # BUILD AND TEST H5Z-ZFP
 ##################################
 
-    - name: build and check
+    - name: build (autotools) and check
       run: |
         make all
         make check
       shell: bash
+
+    - name: build (cmake)
+      run: |
+        mkdir build; cd build
+        cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release ..
+        make
+      shell: bash
+
+    
