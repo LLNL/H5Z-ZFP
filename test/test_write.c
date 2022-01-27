@@ -17,10 +17,6 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <string.h>
 #include <unistd.h>
 
-#if ZFP_HAS_CFP
-#include "../cfp/include/cfparrays.h"
-#endif
-
 #include "hdf5.h"
 
 #ifdef H5Z_ZFP_USE_PLUGIN
@@ -28,6 +24,25 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #else
 #include "H5Zzfp_lib.h"
 #include "H5Zzfp_props.h"
+#endif
+
+#include "zfp.h"
+
+#ifdef ZFP_VERSION_MAJOR /* versioned release */
+#define ZFP_VERSION_LE(Maj,Min,Pat)  \
+        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH<=Pat)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
+         (ZFP_VERSION_MAJOR<Maj))
+#else /* develop */
+#define ZFP_VERSION_LE(Maj,Min,Pat) 0
+#endif
+
+#if ZFP_HAS_CFP
+#if ZFP_VERSION_LE(0,5,5)
+#include "cfparrays.h"
+#else
+#include "cfparray.h"
+#endif
 #endif
 
 #define NAME_LEN 256
@@ -602,7 +617,11 @@ int main(int argc, char **argv)
         /*hsize_t hchunk_dims[] = {19, 34};*/
         hsize_t hchunk_dims[] = {38, 128};
         hsize_t hchunk_off[] = {0, 0};
-        cfp_array2d* origarr;
+#if ZFP_VERSION_LE(0,5,5)
+        cfp_array2d *origarr;
+#else
+        cfp_array2d origarr;
+#endif
 
         /* Create the array data */
         buf = gen_random_correlated_array(TYPDBL, 2, dims, 0, 0);
