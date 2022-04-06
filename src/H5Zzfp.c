@@ -47,6 +47,16 @@ and calls to bitstream methods with 'B ' as in
 #include "H5Zzfp_plugin.h"
 #include "H5Zzfp_props_private.h"
 
+#ifdef ZFP_VERSION_PATCH
+/* Convenient CPP logic to capture ZFP lib version numbers as compile time string and hex number */
+#define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
+#define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
+#define ZFP_VERSION_STR                ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_PATCH)
+
+#define ZFP_VERSION_NO__(Maj,Min,Rel)  (0x0 ## Maj ## Min ## Rel)
+#define ZFP_VERSION_NO_(Maj,Min,Rel)   ZFP_VERSION_NO__(Maj,Min,Rel)
+#define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_PATCH)
+#else
 /* Convenient CPP logic to capture ZFP lib version numbers as compile time string and hex number */
 #define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
 #define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
@@ -55,6 +65,7 @@ and calls to bitstream methods with 'B ' as in
 #define ZFP_VERSION_NO__(Maj,Min,Rel)  (0x0 ## Maj ## Min ## Rel)
 #define ZFP_VERSION_NO_(Maj,Min,Rel)   ZFP_VERSION_NO__(Maj,Min,Rel)
 #define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
+#endif
 
 /* Convenient CPP logic to capture H5Z_ZFP Filter version numbers as string and hex number */
 #define H5Z_FILTER_ZFP_VERSION_STR__(Maj,Min,Pat) #Maj "." #Min "." #Pat
