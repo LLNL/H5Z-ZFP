@@ -47,11 +47,7 @@ and calls to bitstream methods with 'B ' as in
 #include "H5Zzfp_plugin.h"
 #include "H5Zzfp_props_private.h"
 
-/* Convenient CPP logic to capture ZFP lib version numbers as compile time string and hex number */
-#define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
-#define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
-#define ZFP_VERSION_STR                ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
-
+/* Convenient CPP logic to capture ZFP lib version numbers as compile time hex number */
 #define ZFP_VERSION_NO__(Maj,Min,Rel)  (0x0 ## Maj ## Min ## Rel)
 #define ZFP_VERSION_NO_(Maj,Min,Rel)   ZFP_VERSION_NO__(Maj,Min,Rel)
 #define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
@@ -90,7 +86,7 @@ const H5Z_class2_t H5Z_ZFP[1] = {{
     1,                      /* decoder_present flag         */
     "H5Z-ZFP"               /* Filter name for debugging    */
     "-" H5Z_FILTER_ZFP_VERSION_STR
-    " (ZFP-" ZFP_VERSION_STR ")",
+    " (ZFP-" ZFP_VERSION_STRING ")",
     H5Z_zfp_can_apply,      /* The "can apply" callback     */
     H5Z_zfp_set_local,      /* The "set local" callback     */
     H5Z_filter_zfp,         /* The actual filter function   */
@@ -516,7 +512,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         /* Worry about zfp version and endian mismatch only for decompression */
         if (cd_vals_zfpver > ZFP_VERSION)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_NOSPACE, 0, "ZFP lib version, "
-                ZFP_VERSION_STR ", too old to decompress this data");
+                ZFP_VERSION_STRING ", too old to decompress this data");
 
         /* Set up the ZFP field object */
         if (0 == (zfld = Z zfp_field_alloc()))
