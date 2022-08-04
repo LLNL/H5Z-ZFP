@@ -176,7 +176,7 @@ In the source code for H5Z-ZFP_ this manifests as something like what is shown i
    :end-before:  if (!dummy_field)
    
 In the code snippet above, note the funny ``Z`` in front of calls to various methods in the ZFP_ library.
-When compiling H5Z_ZFP_ normally, that ``Z`` normally resolves to the empty string.
+When compiling H5Z-ZFP_ normally, that ``Z`` normally resolves to the empty string.
 But, when the code is compiled with ``-DAS_SILO_BUILTIN`` (which is supported and should be done *only* when ``H5Zzfp.c`` is being compiled *within* the Silo library and *next to* a version of ZFP_ that is embedded in Silo) that ``Z`` resolves to the name of a struct and struct-member dereferncing operator as in ``zfp.``.
 There is a similar ``B`` used for a similar purpose ahead of calls to ZFP_'s bitstream library.
 This is something to be aware of and to adhere to if you plan to contribute any code changes here.
