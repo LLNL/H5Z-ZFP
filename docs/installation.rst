@@ -164,21 +164,19 @@ The source code is in two separate directories
 Silo Integration
 ----------------
 
-This filter is also built-in to the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
-In particular, the ZFP_ library
-itself is also embedded in Silo but is protected from appearing in Silo's
-global namespace through a struct of function pointers (see `Namespaces in C) <https://github.com/markcmiller86/silo-issues/wiki/Using-C-structs-as-a-kind-of-namespace-mechanism-to-reduce-global-symbol-bloat>`_.
-If you happen to examine the source code for H5Z-ZFP_, you will see some logic there
-that is specific to using this plugin within Silo and dealing with ZFP_ as an embedded
-library using this struct of function pointers wrapper. In the source code for H5Z-ZFP_ this will manifest as something like is shown in the code below... 
+This filter (``H5Zzfp.c``) is also built-in to the `Silo library <https://wci.llnl.gov/simulation/computer-codes/silo>`_.
+In particular, the ZFP_ library itself is also embedded in Silo but is protected from appearing in Silo's global namespace through a struct of function pointers (see `Namespaces in C) <https://github.com/markcmiller86/silo-issues/wiki/Using-C-structs-as-a-kind-of-namespace-mechanism-to-reduce-global-symbol-bloat>`_.
+If you happen to examine the source code here for H5Z-ZFP_, you will see some logic here that is specific to using this plugin within Silo and dealing with ZFP_ as an embedded library using this struct of function pointers wrapper.
+In the source code for H5Z-ZFP_ this manifests as something like is shown in the code snippet below... 
 
-literalinclude:: ../src/H5Zzfp.c
+.. literalinclude:: ../src/H5Zzfp.c
    :language: c
    :linenos:
    :start-after: /* set up dummy zfp field to compute meta header */
    :end-before:  if (!dummy_field)
    
- In the code snipit above, note the funny ``Z `` in front of calls to various methods in the ZFP_ library.
- Depending upon whether the code is compiled with ``-DAS_SILO_BUILTIN`` that ``Z `` resolves to either the empty string of the name of a struct and struct-member dereferncing operator as in ``zfp.``.
- There is a similar ``B `` used ahead of calls to ZFP_'s bitstream library.
- This is something to be aware of and to adhere to if you plan to contribute any code changes here.
+In the code snippet above, note the funny ``Z `` in front of calls to various methods in the ZFP_ library.
+When compiling H5Z_ZFP_ normally, that ``Z `` normally resolves to the empty string.
+But, when the code is compiled with ``-DAS_SILO_BUILTIN`` (which is supported and should be done *only* when ``H5Zzfp.c`` is being compiled *within* the Silo library and *next to* a version of ZFP_ that is embedded in Silo) that ``Z `` resolves to the name of a struct and struct-member dereferncing operator as in ``zfp.``.
+There is a similar ``B `` used for a similar purpose ahead of calls to ZFP_'s bitstream library.
+This is something to be aware of and to adhere to if you plan to contribute any code changes here.
