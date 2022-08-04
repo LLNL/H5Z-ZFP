@@ -27,7 +27,7 @@ Once you have installed both HDF5 and ZFP, you can compile H5Z-ZFP_ using a comm
 
 where ``<path-to-zfp>`` is a directory containing ZFP_ ``inc[lude]`` and ``lib`` directories and
 ``<path-to-hdf5>`` is a directory containing HDF5_ ``include`` and ``lib`` directories. Furthermore,
-``src-dir`` is the directory where the source is located and ``path-to-install` is the directory in 
+``src-dir`` is the directory where the source is located and ``path-to-install`` is the directory in 
 which the resulting *plugin* and *library* will be installed. Once cmake has finished successfully, 
 you can build and install the filter using the command...
 
