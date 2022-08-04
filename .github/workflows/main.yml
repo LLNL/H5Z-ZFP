@@ -106,8 +106,10 @@ jobs:
       - name: Download and install ZFP
         run: |
           git clone https://github.com/LLNL/zfp.git
-          mkdir -p zfp/build
-          cd zfp/build
+          cd zfp
+          git checkout 0.5.5
+          mkdir -p build
+          cd build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_UTILITIES=OFF \
