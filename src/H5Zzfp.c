@@ -125,11 +125,6 @@ int H5Z_zfp_finalize(void)
     return 1;
 }
 
-static void H5Z_zfp_final(void)
-{
-    H5Z_zfp_finalize();
-}
-
 static htri_t
 H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 {   
