@@ -20,7 +20,10 @@ endif
 
 H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
 H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_plugin.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
+ZFP_HAS_REVERSIBLE :=
+ifneq ($(ZFP_HOME),)
 ZFP_HAS_REVERSIBLE := $(shell grep zfp_stream_set_reversible $(ZFP_HOME)/include/zfp.h)
+endif
 
 # Detect system type
 PROCESSOR := $(shell uname -p | tr '[:upper:]' '[:lower:]')
