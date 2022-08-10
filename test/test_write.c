@@ -451,24 +451,19 @@ int main(int argc, char **argv)
 
     /* Advanced cases */
     HANDLE_SEP(Advanced cases)
+    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",4D w/2D chunk example);
 #if !ZFP_VERSION_LE(0,5,3,0)
-    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run 4D case);
-    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case);
+    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable example);
 #else
-    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
     HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
-    highd=sixd=0;
+    sixd=0;
 #endif
 
-#if !ZFP_VERSION_LE(0,5,3,0)
-#if ZFP_HAS_CFP
+#if !ZFP_VERSION_LE(0,5,3,0) && ZFP_HAS_CFP>0
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
-#endif
 #else
-#if ZFP_HAS_CFP
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4 with CFP enabled);
     zfparr=0;
-#endif
 #endif
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
