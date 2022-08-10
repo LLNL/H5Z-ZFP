@@ -493,6 +493,12 @@ done:
     return retval;
 }
 
+static int
+zfp_codec_version_mismatch(unsigned int cd_val_data_from_file)
+{
+    return 0; /* false */
+}
+
 static size_t
 H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     const unsigned int cd_values[], size_t nbytes,
@@ -501,7 +507,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     static char const *_funcname_ = "H5Z_filter_zfp";
     void *newbuf = 0;
     size_t retval = 0;
-    int cd_vals_zfpver = (cd_values[0]>>16)&0x0000FFFF;
+    unsigned int cd_vals_zfpver = (cd_values[0]>>16)&0x0000FFFF;
     H5T_order_t swap = H5T_ORDER_NONE;
     uint64 zfp_mode, zfp_meta;
     bitstream *bstr = 0;
@@ -518,9 +524,8 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         size_t bsize, dsize;
 
         /* Worry about zfp version mismatch only for decompression */
-        if (cd_vals_zfpver > ZFP_VERSION_NO)
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_NOSPACE, 0, "ZFP lib version, "
-                ZFP_VERSION_STRING ", too old to decompress this data");
+        if (zfp_codec_version_mismatch(cd_vals_zfpver))
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_READERROR, 0, "ZFP codec version mismatch");
 
         /* Set up the ZFP field object */
         if (0 == (zfld = Z zfp_field_alloc()))
