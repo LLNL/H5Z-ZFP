@@ -19,6 +19,28 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <strings.h>
 #include <unistd.h>
 
+#include "zfp.h"
+
+#if defined(ZFP_VERSION_TWEAK)
+#define ZFP_VERSION_LE(Maj,Min,Pat,Twk)  \
+        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH==Pat) && (ZFP_VERSION_TWEAK<=Twk)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH<=Pat)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
+          (ZFP_VERSION_MAJOR<Maj))
+#elif defined(ZFP_VERSION_RELEASE) /* versioned release */
+#define ZFP_VERSION_LE(Maj,Min,Rel,Twk)  \
+        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_RELEASE<=Rel)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
+          (ZFP_VERSION_MAJOR<Maj))
+#elif defined(ZFP_VERSION_PATCH) /* versioned release */
+#define ZFP_VERSION_LE(Maj,Min,Pat,Twk)  \
+        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH<=Pat)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
+          (ZFP_VERSION_MAJOR<Maj))
+#else 
+#error undefined ZFP library version symbols
+#endif
+
 #include "hdf5.h"
 
 #ifdef H5Z_ZFP_USE_PLUGIN
@@ -206,7 +228,11 @@ int main(int argc, char **argv)
     /* test incorrect data type */
     tid = H5Tcreate(H5T_STRING, 8);
     if (0 <= (dsid = H5Dcreate(fid, "bad_type", tid, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+#if ZFP_VERSION_LE(0,5,2,0)
+    assert(check_hdf5_error_stack_for_string("requires datatype class of H5T_FLOAT"));
+#else
     assert(check_hdf5_error_stack_for_string("requires datatype class of H5T_FLOAT or H5T_INTEGER"));
+#endif
     H5Tclose(tid);
 
     /* test invalid size of data type */
@@ -219,7 +245,11 @@ int main(int argc, char **argv)
     /* test invalid chunking on highd data */
     cpid = setup_filter(5, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
     if (0 <= (dsid = H5Dcreate(fid, "bad_chunking", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+#if ZFP_VERSION_LE(0,5,4,0)
+    assert(check_hdf5_error_stack_for_string("chunk must have only 1...3 non-unity dimensions"));
+#else
     assert(check_hdf5_error_stack_for_string("chunk must have only 1...4 non-unity dimensions"));
+#endif
     H5Pclose(cpid);
 
     /* write a compressed dataset to be corrupted later */

@@ -28,21 +28,30 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 
 #include "zfp.h"
 
-#ifdef ZFP_VERSION_MAJOR /* versioned release */
-#define ZFP_VERSION_LE(Maj,Min,Pat)  \
+#if defined(ZFP_VERSION_TWEAK)
+#define ZFP_VERSION_LE(Maj,Min,Pat,Twk)  \
+        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH==Pat) && (ZFP_VERSION_TWEAK<=Twk)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH<=Pat)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
+          (ZFP_VERSION_MAJOR<Maj))
+#elif defined(ZFP_VERSION_RELEASE) /* versioned release */
+#define ZFP_VERSION_LE(Maj,Min,Rel,Twk)  \
+        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_RELEASE<=Rel)) || \
+         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
+          (ZFP_VERSION_MAJOR<Maj))
+#elif defined(ZFP_VERSION_PATCH) /* versioned release */
+#define ZFP_VERSION_LE(Maj,Min,Pat,Twk)  \
         (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH<=Pat)) || \
          ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
-         (ZFP_VERSION_MAJOR<Maj))
-#else /* develop */
-#define ZFP_VERSION_LE(Maj,Min,Pat) 0
+          (ZFP_VERSION_MAJOR<Maj))
+#else
+#error undefined ZFP library version symbols
 #endif
 
-#if ZFP_HAS_CFP
-#if ZFP_VERSION_LE(0,5,5)
-#include "cfparrays.h"
-#else
-#include "cfparray.h"
-#endif
+#if !ZFP_VERSION_LE(0,9,9,9)
+  #include "zfp/array.h"
+#elif !ZFP_VERSION_LE(0,5,4,0)
+  #include "cfparrays.h"
 #endif
 
 #define NAME_LEN 256
@@ -68,7 +77,8 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
             A = PARSEA;                                         \
             break;                                              \
         }                                                       \
-        else if (!strncasecmp(argv[i], "help", 4))              \
+        else if (!strncmp(#A, "help", 4) &&                     \
+                  strcasestr(argv[i], "help"))                  \
         {                                                       \
             return 0;                                           \
         }                                                       \
@@ -430,14 +440,29 @@ int main(int argc, char **argv)
     HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in 1D dataset);
     HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in 1D dataset);
     HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for 1D dataset);
+#if !ZFP_VERSION_LE(0,5,0,0)
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer 1D data);
+#else
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.1);
+    doint=0;
+#endif
 
     /* Advanced cases */
     HANDLE_SEP(Advanced cases)
+#if !ZFP_VERSION_LE(0,5,3,0)
     HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run 4D case);
-    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case (requires ZFP>=0.5.4));
-#if ZFP_HAS_CFP
+    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case);
+#else
+    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
+    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
+    highd=sixd=0;
+#endif
+
+#if !ZFP_VERSION_LE(0,5,3,0)
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
+#else
+    HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
+    zfparr=0;
 #endif
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
@@ -453,6 +478,7 @@ int main(int argc, char **argv)
         read_data(ifile, (size_t) npoints, &buf);
 
     /* create integer data to write */
+
     if (doint)
         gen_data((size_t) npoints, noise*100, amp*1000000, (void**)&ibuf, TYPINT);
 
@@ -611,13 +637,13 @@ int main(int argc, char **argv)
     if (zfparr>0 && zfpmode==1 && rate>0)
     {
         int            dims[] = {38, 128};
-        /*int      chunk_dims[] = {19, 34};*/
+       /*int      chunk_dims[] = {19, 34};*/
         int      chunk_dims[] = {38, 128};
         hsize_t       hdims[] = {38, 128};
-        /*hsize_t hchunk_dims[] = {19, 34};*/
+       /*hsize_t hchunk_dims[] = {19, 34};*/
         hsize_t hchunk_dims[] = {38, 128};
         hsize_t hchunk_off[] = {0, 0};
-#if ZFP_VERSION_LE(0,5,5)
+#if ZFP_VERSION_LE(0,5,5,0)
         cfp_array2d *origarr;
 #else
         cfp_array2d origarr;

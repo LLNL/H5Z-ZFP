@@ -254,7 +254,8 @@ test-reversible: plugin test_write_plugin
 # of test_write which prints them in the header output. The values
 # here are for accuracy mode and tolerance of 0.001.
 # 
-# A bug-fix patch to h5repack_parse.c is required for this test.
+# A bug-fix patch to h5repack_parse.c is required for this test on
+# older HDF5 versions (like <= 1.8.10).
 #
 test-h5repack: plugin mesh.h5 patch
 	@env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5repack -f UD=32013,6,3,0,3539053052,1062232653,0,0 \
