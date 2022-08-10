@@ -140,10 +140,18 @@ ZFP_LIB = $(ZFP_HOME)/lib
 endif
 
 # Check if ZFP has CFP
-ifeq ($(wildcard $(ZFP_LIB)/libcfp.*),)
-ZFP_HAS_CFP = 0
+ifeq ($(wildcard $(ZFP_LIB)/libcfp.*),) # no cfp lib file
+  ZFP_HAS_CFP = 0
 else
-ZFP_HAS_CFP = 1
+  ifeq ($(wildcard $(ZFP_INC)/zfp/array.h),) # no 1.0.0 header file
+    ifeq ($(wildcard $(ZFP_INC)/cfparrays.h),) # no 0.5.5 header file
+        ZFP_HAS_CFP = 0
+    else
+        ZFP_HAS_CFP = 1
+    endif
+  else
+    ZFP_HAS_CFP = 1
+  endif
 endif
 
 # Check if specified individually the HDF5 include directory,
