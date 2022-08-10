@@ -245,7 +245,7 @@ int main(int argc, char **argv)
     /* test invalid chunking on highd data */
     cpid = setup_filter(5, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
     if (0 <= (dsid = H5Dcreate(fid, "bad_chunking", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-#if ZFP_VERSION_LE(0,5,4,0)
+#if ZFP_VERSION_LE(0,5,3,0)
     assert(check_hdf5_error_stack_for_string("chunk must have only 1...3 non-unity dimensions"));
 #else
     assert(check_hdf5_error_stack_for_string("chunk must have only 1...4 non-unity dimensions"));
