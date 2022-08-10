@@ -49,12 +49,12 @@ and calls to bitstream methods with 'B ' as in
 /* Convenient CPP logic to capture ZFP lib version numbers as compile time hex number */
 #define ZFP_VERSION_NO__(Maj,Min,Pat,Twk)  (0x ## Maj ## Min ## Pat ## Twk)
 #define ZFP_VERSION_NO_(Maj,Min,Pat,Twk)   ZFP_VERSION_NO__(Maj,Min,Pat,Twk)
-#if defined(ZFP_VERSION_RELEASE)
+#if defined(ZFP_VERSION_TWEAK)
+#define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_PATCH,ZFP_VERSION_TWEAK)
+#elif defined(ZFP_VERSION_RELEASE)
 #define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE,0)
 #elif defined(ZFP_VERSION_PATCH)
 #define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_PATCH,0)
-#elif defined(ZFP_VERSION_PATCH)
-#define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_PATCH,ZFP_VERSION_TWEAK)
 #else
 #error ZFP LIBRARY VERSION NOT DETECTED
 #endif
