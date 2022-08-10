@@ -48,10 +48,12 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #error undefined ZFP library version symbols
 #endif
 
+#if ZFP_HAS_CFP
 #if !ZFP_VERSION_LE(0,9,9,9)
   #include "zfp/array.h"
 #elif !ZFP_VERSION_LE(0,5,4,0)
   #include "cfparrays.h"
+#endif
 #endif
 
 #define NAME_LEN 256
@@ -459,10 +461,14 @@ int main(int argc, char **argv)
 #endif
 
 #if !ZFP_VERSION_LE(0,5,3,0)
+#if ZFP_HAS_CFP
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
+#endif
 #else
-    HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
+#if ZFP_HAS_CFP
+    HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4 with CFP enabled);
     zfparr=0;
+#endif
 #endif
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
