@@ -65,6 +65,10 @@ and calls to bitstream methods with 'B ' as in
 #define ZFP_VERSION_STRING             ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
 #endif
 
+#ifndef ZFP_CODEC
+#define ZFP_CODEC ((ZFP_VERSION_NO&0x00F0)>>4)
+#endif
+
 /* Convenient CPP logic to capture H5Z_ZFP Filter version numbers as string and hex number */
 #define H5Z_FILTER_ZFP_VERSION_STR__(Maj,Min,Pat) #Maj "." #Min "." #Pat
 #define H5Z_FILTER_ZFP_VERSION_STR_(Maj,Min,Pat)  H5Z_FILTER_ZFP_VERSION_STR__(Maj,Min,Pat)
@@ -310,7 +314,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         
     /* Into hdr_cd_values, we encode ZFP library and H5Z-ZFP plugin version info at
        entry 0 and use remaining entries as a tiny buffer to write ZFP native header. */
-    hdr_cd_values[0] = (unsigned int) ((ZFP_VERSION_NO<<16) | H5Z_FILTER_ZFP_VERSION_NO);
+    hdr_cd_values[0] = (unsigned int) ((ZFP_VERSION_NO<<16) | (ZFP_CODEC<<12) | H5Z_FILTER_ZFP_VERSION_NO);
     if (0 == (dummy_bstr = B stream_open(&hdr_cd_values[1], sizeof(hdr_cd_values))))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "stream_open() failed");
 
@@ -494,9 +498,36 @@ done:
 }
 
 static int
-zfp_codec_version_mismatch(unsigned int cd_val_data_from_file)
+zfp_codec_version_mismatch(
+    unsigned int zfpver_from_cd_val_data_in_file,
+    unsigned int zfpcodec_from_cd_val_data_in_file)
 {
-    return 0; /* false */
+    int writer_codec;
+    int reader_codec;
+
+    /* We switched from 3 to 4 digit hex version numbers in H5Z-ZFP
+       1.1.0 when ZFP was at version 1.0.0. So, anything we read from
+       the file that has two leading zeros needs to be shifted up 4 bits
+       to compare correctly */
+    if (zfpver_from_cd_val_data_in_file < 0x00FF)
+        zfpver_from_cd_val_data_in_file <<= 4;
+
+    if (zfpver_from_cd_val_data_in_file < 0x0500)
+        writer_codec = 4;
+    else if (zfpver_from_cd_val_data_in_file <= 0x1000)
+        writer_codec = 5;
+    else
+        writer_codec = zfpcodec_from_cd_val_data_in_file;
+
+#if ZFP_VERSION_NO < 0x04FF
+    reader_codec = 4;
+#elif ZFP_VERSION_NO < 0x1000
+    reader_codec = 5;
+#else
+    reader_codec = ZFP_CODEC;
+#endif
+
+    return writer_codec > reader_codec;
 }
 
 static size_t
@@ -508,6 +539,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     void *newbuf = 0;
     size_t retval = 0;
     unsigned int cd_vals_zfpver = (cd_values[0]>>16)&0x0000FFFF;
+    unsigned int cd_vals_zfpcodec = (cd_values[0]>>12)&0x0000000F;
     H5T_order_t swap = H5T_ORDER_NONE;
     uint64 zfp_mode, zfp_meta;
     bitstream *bstr = 0;
@@ -524,7 +556,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         size_t bsize, dsize;
 
         /* Worry about zfp version mismatch only for decompression */
-        if (zfp_codec_version_mismatch(cd_vals_zfpver))
+        if (zfp_codec_version_mismatch(cd_vals_zfpver, cd_vals_zfpcodec))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_READERROR, 0, "ZFP codec version mismatch");
 
         /* Set up the ZFP field object */
