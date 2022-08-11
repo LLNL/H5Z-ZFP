@@ -113,7 +113,9 @@ jobs:
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_UTILITIES=OFF \
-            -DBUILD_TESTING=OFF
+            -DBUILD_TESTING=OFF \
+            -DBUILD_CFP=ON \
+            -DZFP_BIT_STREAM_WORD_SIZE=8
           cmake --build . -j 3
           cmake --build . --target install
       - name: update PATH
