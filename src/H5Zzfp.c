@@ -59,14 +59,16 @@ and calls to bitstream methods with 'B ' as in
 #error ZFP LIBRARY VERSION NOT DETECTED
 #endif
 
+/* Older versions of ZFP don't define this */
 #ifndef ZFP_VERSION_STRING
 #define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
 #define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
 #define ZFP_VERSION_STRING             ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
 #endif
 
+/* Older versions of ZFP don't define this publicly */
 #ifndef ZFP_CODEC
-#define ZFP_CODEC ((ZFP_VERSION_NO&0x00F0)>>4)
+#define ZFP_CODEC ZFP_VERSION_MINOR
 #endif
 
 /* Convenient CPP logic to capture H5Z_ZFP Filter version numbers as string and hex number */
@@ -509,7 +511,7 @@ zfp_codec_version_mismatch(
        1.1.0 when ZFP was at version 1.0.0. So, anything we read from
        the file that has two leading zeros needs to be shifted up 4 bits
        to compare correctly */
-    if (zfpver_from_cd_val_data_in_file < 0x00FF)
+    if (zfpver_from_cd_val_data_in_file < 0x0100)
         zfpver_from_cd_val_data_in_file <<= 4;
 
     if (zfpver_from_cd_val_data_in_file < 0x0500)
@@ -519,7 +521,7 @@ zfp_codec_version_mismatch(
     else
         writer_codec = zfpcodec_from_cd_val_data_in_file;
 
-#if ZFP_VERSION_NO < 0x04FF
+#if ZFP_VERSION_NO < 0x0500
     reader_codec = 4;
 #elif ZFP_VERSION_NO < 0x1000
     reader_codec = 5;
