@@ -479,10 +479,10 @@ test-lib-reversible: test_write_lib test_read_lib
 	pad=$$(printf '%*s' "$(padlimit)"); \
 	pad=$${pad// /.}; \
 	x="./test_write_lib zfpmode=5"; \
-        printf "$$x"; \
+	printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	$$x 2>&1 1>/dev/null; \
-        if [[ $$? -ne 0 ]]; then \
+	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
@@ -491,53 +491,87 @@ test-lib-reversible: test_write_lib test_read_lib
 	    printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 test-int: test_write_lib test_read_lib
-	@./test_write_lib zfpmode=3 doint=1 2>&1 1>/dev/null; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_write_lib zfpmode=3 doint=1"; \
+	printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
 	./test_read_lib ret=1 max_absdiff=2 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "Integer test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "Integer test passed"
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 test-highd: test_write_lib
-	@./test_write_lib highd=1 2>&1 1>/dev/null; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_write_lib highd=1"; \
+	printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "4D test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "4D test passed"
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 test-sixd: test_write_lib
-	@./test_write_lib sixd=1 2>&1 1>/dev/null; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_write_lib sixd=1"; \
+	printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "6D, extendible test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "6D, extendible test passed"
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 test-error: test_error
-	@./test_error 2>&1 1>/dev/null; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_error"; \
+	printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-            echo "Error check test failed"; \
-            exit 1; \
-        fi; \
-        echo "Error check test passed"
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 test-zfparr: test_write_lib
-	@./test_write_lib zfparr=1 rate=10 2>&1 1>/dev/null; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_write_lib zfparr=1 rate=10"; \
+	printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "ZFP array direct write test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
 	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.01 test_zfp.h5 test_zfp.h5 zfparr_original zfparr_direct 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
-	    echo "ZFP array direct write test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED (h5diff) $(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "ZFP array direct write test passed"
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 SPECIAL_CHECK = test-int test-highd test-sixd
 ifeq ($(ZFP_HAS_CFP),1)
