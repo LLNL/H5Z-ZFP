@@ -66,7 +66,9 @@ purposes.
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define _GNU_SOURCE
 #include <string.h>
+#undef _GNU_SOURCE
 
 #include "hdf5.h"
 
