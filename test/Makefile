@@ -200,16 +200,34 @@ endif # ] ifneq ($(FC),)
 
 # Decrease bit rate and confirm compression ratio increases
 test-rate: plugin test_write_plugin
-	@for r in 32 16 8 4; do\
+	@failed=0; \
+	echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	for r in 32 16 8 4; do \
 	    expected_ratio=$$(expr 64 \/ $$r); \
-	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=1 rate=$$r 2>&1 1>/dev/null; \
+	    x="./test_write_plugin zfpmode=1 rate=$$r"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $$x 2>&1 1>/dev/null; \
+            if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+            fi; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
-	        echo "Plugin rate test failed for rate=$$r"; \
-	        exit 1; \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
 	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
-	echo "Plugin rate tests passed"
+        if [[ $$failed -ne 0 ]]; then \
+	    printf "Plugin rate tests FAILED\n"; \
+        else \
+	    printf "Plugin rate tests passed\n"; \
+        fi
 
 # Increase accuracy and test absolute error tolerance is within accuracy
 test-accuracy: plugin test_write_plugin
