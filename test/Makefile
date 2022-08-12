@@ -223,47 +223,103 @@ test-rate: plugin test_write_plugin
 	    fi; \
 	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
+	x="Plugin rate tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
-	    printf "Plugin rate tests FAILED\n"; \
-        else \
-	    printf "Plugin rate tests passed\n"; \
-        fi
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 # Increase accuracy and test absolute error tolerance is within accuracy
 test-accuracy: plugin test_write_plugin
-	@for a in 0.1 0.01 0.001 0.0001; do\
-	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=3 acc=$$a 2>&1 1>/dev/null; \
+	@failed=0; \
+	echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	for a in 0.1 0.01 0.001 0.0001; do\
+	    x="./test_write_plugin zfpmode=3 acc=$$a"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $$x 2>&1 1>/dev/null; \
+            if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp.h5 test_zfp.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	        echo "Plugin accuracy test failed for accuracy=$$a"; \
-	        exit 1; \
+	        failed=1; \
+	        continue; \
 	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
-	echo "Plugin accuracy tests passed"
+	x="Plugin accuracy tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        if [[ $$failed -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 # Increase precision and confirm diff count for given tolerance drops
 test-precision: plugin test_write_plugin
-	@ldiffcnt=0; \
+	@failed=0; \
+	echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	ldiffcnt=0; \
 	for p in 12 16 20 24; do\
-	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=2 prec=$$p 2>&1 1>/dev/null; \
+	    x="./test_write_plugin zfpmode=2 prec=$$p"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $$x 2>&1 1>/dev/null; \
+            if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
-	        echo "Plugin precision test failed for precision=$$p"; \
-		exit 1; \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+		continue; \
 	    fi; \
 	    ldiffcnt=$$diffcnt; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
-	echo "Plugin precision tests passed"
+	x="Plugin precision tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        if [[ $$failed -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 # Ensure reversible mode works
 test-reversible: plugin test_write_plugin
-	@env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) ./test_write_plugin zfpmode=5 2>&1 1>/dev/null; \
-	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
-	if [[ $$diffcnt -ne 0 ]]; then \
-	    echo "Plugin reversible test failed"; \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_write_plugin zfpmode=5"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $$x 2>&1 1>/dev/null; \
+        if [[ $$? -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "Plugin reversible tests passed"
+	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
+	if [[ $$diffcnt -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 #
 # Uses h5repack to test ZFP filter on float and int datasets in
