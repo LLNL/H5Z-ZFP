@@ -14,7 +14,7 @@ endif
 .PHONY: lib plugin check patch clean
 
 patch:
-	@echo "Make sure you have patched HDF5's repack tool"
+	@echo "If using HDF5-1.8, make sure you have patched repack"
 
 plugin:
 	cd ../src; $(MAKE) $(MAKEVARS) $@
@@ -62,7 +62,6 @@ ifneq ($(FC),) # Fortran Tests [
 
 test_rw_fortran: test_rw_fortran.o lib
 	$(FC) $(FCFLAGS) -o $@ $< $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5_fortran -lhdf5 $(ZFP_LIBS) $(LDFLAGS)
-	./test_rw_fortran
 
 %.o:%.F90
 	$(FC)  -o $@ -c $< $(FCFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
@@ -332,7 +331,13 @@ test-reversible: plugin test_write_plugin
 # older HDF5 versions (like <= 1.8.10).
 #
 test-h5repack: plugin mesh.h5 patch
-	@env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5repack -f UD=32013,6,3,0,3539053052,1062232653,0,0 \
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="h5repack -f UD=1,32013,6,3,0,3539053052,1062232653,0,0"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x \
 	     -l X,Y,Z,Indexes:CHUNK=217 \
 	     -l Indexes2:CHUNK=1517 \
 	     -l Pressure,Pressure2,Pressure3:CHUNK=10x20x5 \
@@ -344,19 +349,18 @@ test-h5repack: plugin mesh.h5 patch
 	     -l XYZ2:CHUNK=1617x1 \
 	     -l XYZ3:CHUNK=33x1 \
 	     mesh.h5 mesh_repack.h5 2>&1 1>/dev/null; \
-	if [[ $$? -ne 0 ]]; then \
-	    echo "Repack command failed."; \
-	    echo "Did you patch h5repack? See README."; \
-	    exit 1; \
-        fi; \
-	orig_size=$$(ls -l mesh.h5 | tr -s ' ' | cut -d' ' -f5); \
-	new_size=$$(ls -l mesh_repack.h5 | tr -s ' ' | cut -d' ' -f5); \
-        ratio=$$(echo "$$orig_size\n100\n*\n$$new_size\n/p\n" | dc -); \
-	if [[ $$ratio -lt 2 ]]; then \
-	    echo "ZFP Repack Test failed"; \
+        if [[ $$? -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "Repack test passed"
+	orig_size=$$(ls -l mesh.h5 | tr -s ' ' | cut -d' ' -f5); \
+	new_size=$$(ls -l mesh_repack.h5 | tr -s ' ' | cut -d' ' -f5); \
+        ratio=$$(perl -e "printf int($$orig_size*100/$$new_size)"); \
+	if [[ $$ratio -lt 200 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED (size ratio) $(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 # Diff ZFP compressed data from little endian and big endian machines
 # There is a bug in h5diff that causes it to return 0 when it can't find plugin.
@@ -364,12 +368,20 @@ test-h5repack: plugin mesh.h5 patch
 # We should test return code but h5diff's return code has been unreliable across
 # versions and so am not relying on it here.
 test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
-	@outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.00001 test_zfp_le.h5 test_zfp_be.h5 compressed compressed 2>&1); \
+	@echo " "; \
+        padlimit=80; \
+        padlength=80; \
+	pad=$$(printf '%*s' "$${padlimit}"); \
+	pad=$${pad// /.}; \
+        x="h5diff -v -d 0.00001 test_zfp_le.h5 test_zfp_be.h5 compressed compressed"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($${padlength} - $${#x} )) "$$pad"; \
+	outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x 2>&1); \
 	if [[ -z "$$(echo $$outerr | grep '0 differences found')" ]]; then \
-	    echo "Endian test failed"; \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "Endian test passed"
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
 # Test the filter as a library rather than as a plugin
 test-lib-rate: test_write_lib test_read_lib
@@ -588,7 +600,7 @@ ifneq ($(ZFP_HAS_REVERSIBLE),)
     LIB_CHECK += test-lib-reversible
 endif
 
-PLUGIN_CHECK = test-rate test-accuracy test-precision
+PLUGIN_CHECK = test-rate test-accuracy test-precision test-h5repack
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     PLUGIN_CHECK += test-reversible
 endif
