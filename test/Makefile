@@ -373,52 +373,125 @@ test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
 
 # Test the filter as a library rather than as a plugin
 test-lib-rate: test_write_lib test_read_lib
-	@for t in 32:1e-07 16:0.003 8:0.4; do\
+	@failed=0; \
+	echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	for t in 32:1e-07 16:0.003 8:0.4; do\
 	    r=$$(echo $$t | cut -d':' -f1); \
 	    d=$$(echo $$t | cut -d':' -f2); \
-	    ./test_write_lib rate=$$r zfpmode=1 2>&1 1>/dev/null; \
+	    x="./test_write_lib rate=$$r zfpmode=1"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    $$x 2>&1 1>/dev/null; \
+            if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
 	    ./test_read_lib max_absdiff=$$d max_reldiff=$$d 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
-	        echo "Library rate test failed for rate=$$r"; \
-	        exit 1; \
+	        printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
 	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
-	echo "Library rate tests passed"
-
-test-lib-accuracy: test_write_lib test_read_lib
-	@for v in 0.1:0.025 0.01:0.004 0.001:0.0006 0.0001:4e-5; do\
-	    a=$$(echo $$v | cut -d':' -f1); \
-	    d=$$(echo $$v | cut -d':' -f2); \
-	    ./test_write_lib acc=$$a zfpmode=3 2>&1 1>/dev/null; \
-	    ./test_read_lib ret=1 max_absdiff=$$d 2>&1 1>/dev/null; \
-	    if [[ $$? -ne 0 ]]; then \
-	        echo "Library accuracy test failed for acc=$$a"; \
-	        exit 1; \
-	    fi; \
-	done; \
-	echo "Library accuracy tests passed"
-
-test-lib-precision: test_write_lib test_read_lib
-	@for v in 12:0.02 16:0.0005 20:5e-5 24:1e-6; do\
-	    p=$$(echo $$v | cut -d':' -f1); \
-	    d=$$(echo $$v | cut -d':' -f2); \
-	    ./test_write_lib prec=$$p zfpmode=2 2>&1 1>/dev/null; \
-	    ./test_read_lib ret=2 max_reldiff=$$d 2>&1 1>/dev/null; \
-	    if [[ $$? -ne 0 ]]; then \
-	        echo "Library precision test failed for prec=$$p"; \
-	        exit 1; \
-	    fi; \
-	done; \
-	echo "Library precision tests passed"
-
-test-lib-reversible: test_write_lib test_read_lib
-	@./test_write_lib zfpmode=5 2>&1 1>/dev/null; \
-	./test_read_lib ret=1 max_absdiff=0 2>&1 1>/dev/null; \
-	if [[ $$? -ne 0 ]]; then \
-	    echo "Library reversible test failed"; \
+	x="Library rate tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        if [[ $$failed -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	    exit 1; \
 	fi; \
-	echo "Library reversible tests passed"
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
+
+test-lib-accuracy: test_write_lib test_read_lib
+	@failed=0; \
+	echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	for v in 0.1:0.025 0.01:0.004 0.001:0.0006 0.0001:4e-5; do\
+	    a=$$(echo $$v | cut -d':' -f1); \
+	    d=$$(echo $$v | cut -d':' -f2); \
+	    x="./test_write_lib acc=$$a zfpmode=3"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    $$x 2>&1 1>/dev/null; \
+            if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
+	    ./test_read_lib ret=1 max_absdiff=$$d 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
+	done; \
+	x="Library accuracy tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        if [[ $$failed -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
+
+test-lib-precision: test_write_lib test_read_lib
+	@failed=0; \
+	echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	for v in 12:0.02 16:0.0005 20:5e-5 24:1e-6; do\
+	    p=$$(echo $$v | cut -d':' -f1); \
+	    d=$$(echo $$v | cut -d':' -f2); \
+	    x="./test_write_lib prec=$$p zfpmode=2"; \
+            printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    $$x 2>&1 1>/dev/null; \
+            if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
+	    ./test_read_lib ret=2 max_reldiff=$$d 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
+	        failed=1; \
+	        continue; \
+	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
+	done; \
+	x="Library precision tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        if [[ $$failed -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
+
+test-lib-reversible: test_write_lib test_read_lib
+	@echo " "; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+	x="./test_write_lib zfpmode=5"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	$$x 2>&1 1>/dev/null; \
+        if [[ $$? -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	./test_read_lib ret=1 max_absdiff=0 2>&1 1>/dev/null; \
+	if [[ $$? -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 
 test-int: test_write_lib test_read_lib
 	@./test_write_lib zfpmode=3 doint=1 2>&1 1>/dev/null; \
