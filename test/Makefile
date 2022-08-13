@@ -585,7 +585,33 @@ test-zfparr: test_write_lib
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
-SPECIAL_CHECK = test-int test-highd test-sixd
+test-version-compatibility: test_read_lib
+	@echo " "; \
+	failed=0; \
+	pad=$$(printf '%*s' "$(padlimit)"); \
+	pad=$${pad// /.}; \
+        for d in test_zfp_030040.h5 test_zfp_030235.h5 test_zfp_110050.h5; do \
+	    x="./test_read_lib ifile=$$d"; \
+	    printf "$$x"; \
+	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+	    $$x max_reldiff=0.025 ret=2 2>&1 1>/dev/null; \
+	    if [[ $$? -ne 0 ]]; then \
+	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+                failed=1; \
+	        continue; \
+	    fi; \
+	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
+        done; \
+	x="Version compatibility tests"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        if [[ $$failed -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    exit 1; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
+
+SPECIAL_CHECK = test-version-compatibility test-int test-highd test-sixd
 ifeq ($(ZFP_HAS_CFP),1)
     SPECIAL_CHECK += test-zfparr
 endif
