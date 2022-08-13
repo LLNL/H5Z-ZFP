@@ -132,6 +132,9 @@ ZFP_INC = $(ZFP_HOME)/include
 else ifneq ($(wildcard $(ZFP_HOME)/inc),)
 ZFP_INC = $(ZFP_HOME)/inc
 endif
+ifeq ($(wildcard $(ZFP_INC)/zfp.h),) # no header file
+$(error "zfp.h not found")
+endif
 
 ifeq ($(wildcard $(ZFP_HOME)/lib),)
 ZFP_LIB = $(ZFP_HOME)/lib64
