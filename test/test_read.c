@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     HANDLE_ARG(max_absdiff,strtod(argv[i]+len2,0),"%g",set maximum absolute diff);
     HANDLE_ARG(max_reldiff,strtod(argv[i]+len2,0),"%g",set maximum relative diff);
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",check integer datasets instead);
-    HANDLE_ARG(ret,(int) strtol(argv[i]+len2,0,10),"%d",return count of diffs (0=all,1=abs,2=rel));
+    HANDLE_ARG(ret,(int) strtol(argv[i]+len2,0,10),"%d",return 1 if diffs (0=all,1=abs,2=rel));
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message);
 
 #ifndef H5Z_ZFP_USE_PLUGIN
@@ -199,7 +199,8 @@ int main(int argc, char **argv)
     free(cbuf);
     free(ifile);
 
+    if (ret == 0) return (num_absdiffs+num_reldiffs)>0;
     if (ret == 1) return num_absdiffs>0;
     if (ret == 2) return num_reldiffs>0;
-    return (num_absdiffs+num_reldiffs)>0;
+    return 0;
 }
