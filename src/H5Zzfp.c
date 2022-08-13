@@ -499,25 +499,44 @@ done:
     return retval;
 }
 
+/*
+Compare ZFP codec version used when data was written to what is
+currently being used to read the data. There is a challenge here
+in that earlier versions of this filter recorded only the ZFP
+library version, not the codec version. Although ZFP codec version
+was encoded as minor digit of ZFP library version, that convention
+ended with ZFP version 1.0.0. So, if an old version of this filter
+is used with newer ZFP libraries, we won't know the codec version
+used to write the data with certainty. The best we can do is guess
+it. If there becomes a version of the ZFP library for which that guess
+(currently 5) is wrong, the logic here will need to be updated to
+capture knowledge of the ZFP library version for which the codec
+version was incrimented.
+*/
+
 static int
 zfp_codec_version_mismatch(
+    unsigned int h5zfpver_from_cd_val_data_in_file,
     unsigned int zfpver_from_cd_val_data_in_file,
     unsigned int zfpcodec_from_cd_val_data_in_file)
 {
     int writer_codec;
     int reader_codec;
 
-    /* We switched from 3 to 4 digit hex version numbers in H5Z-ZFP
-       1.1.0 when ZFP was at version 1.0.0. So, anything we read from
-       the file that has two leading zeros needs to be shifted up 4 bits
-       to compare correctly */
-    if (zfpver_from_cd_val_data_in_file < 0x0100)
+    if (h5zfpver_from_cd_val_data_in_file < 0x0110)
+    {
+        /* for data written with older versions of the filter,
+           we infer codec from ZFP library version stored in the file. */
         zfpver_from_cd_val_data_in_file <<= 4;
-
-    if (zfpver_from_cd_val_data_in_file < 0x0500)
-        writer_codec = 4;
-    else if (zfpver_from_cd_val_data_in_file <= 0x1000)
-        writer_codec = 5;
+        if (zfpver_from_cd_val_data_in_file < 0x0500)
+            writer_codec = 4;
+        else if (zfpver_from_cd_val_data_in_file < 0x1000)
+            writer_codec = (zfpver_from_cd_val_data_in_file & 0x0F00)>>8;
+        else if (zfpver_from_cd_val_data_in_file == 0x1000)
+            writer_codec = 5;
+        else
+            writer_codec = 5; /* can only guess */
+    }
     else
         writer_codec = zfpcodec_from_cd_val_data_in_file;
 
@@ -540,6 +559,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     static char const *_funcname_ = "H5Z_filter_zfp";
     void *newbuf = 0;
     size_t retval = 0;
+    unsigned int cd_vals_h5zzfpver = cd_values[0]&0x0000FFFF;
     unsigned int cd_vals_zfpver = (cd_values[0]>>16)&0x0000FFFF;
     unsigned int cd_vals_zfpcodec = (cd_values[0]>>12)&0x0000000F;
     H5T_order_t swap = H5T_ORDER_NONE;
@@ -558,7 +578,7 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         size_t bsize, dsize;
 
         /* Worry about zfp version mismatch only for decompression */
-        if (zfp_codec_version_mismatch(cd_vals_zfpver, cd_vals_zfpcodec))
+        if (zfp_codec_version_mismatch(cd_vals_h5zzfpver, cd_vals_zfpver, cd_vals_zfpcodec))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_READERROR, 0, "ZFP codec version mismatch");
 
         /* Set up the ZFP field object */
