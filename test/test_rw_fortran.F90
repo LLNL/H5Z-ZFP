@@ -25,6 +25,7 @@ PROGRAM main
   REAL(dp) :: rate = 4_c_double
   REAL(dp) :: acc = 0_c_double
   integer(C_INT) :: prec = 11
+  integer(C_INT) :: dim = 0
   integer(C_INT), PARAMETER :: minbits = 0
   integer(C_INT), PARAMETER :: maxbits = 4171
   integer(C_INT), PARAMETER :: maxprec = 64
@@ -45,7 +46,9 @@ PROGRAM main
 
   REAL(dp), DIMENSION(1:DIM0,1:DIM1), TARGET :: wdata
   INTEGER(hsize_t), DIMENSION(1:2) ::  dims = (/DIM0, DIM1/)
+  INTEGER(hsize_t), DIMENSION(1:2) ::  dims1;
   INTEGER(hsize_t), DIMENSION(1:2) ::  chunk2 = (/CHUNK0, CHUNK1/)
+  INTEGER(hsize_t), DIMENSION(1:1) ::  chunk256 = (/256/)
   REAL(dp), DIMENSION(:), ALLOCATABLE, TARGET :: obuf, cbuf, cbuf1, cbuf2
   CHARACTER(LEN=180) :: ofile="test_zfp_fortran.h5"
 
@@ -98,6 +101,13 @@ PROGRAM main
            STOP 1
         END IF
         READ(arg(1:len), *) acc
+     ELSE IF (arg(1:len).EQ.'dim')THEN
+        CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
+        IF (status .NE. 0) THEN
+           WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+           STOP 1
+        END IF
+        READ(arg(1:len), *) dim
      ELSE IF (arg(1:len).EQ.'prec')THEN
         CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
         IF (status .NE. 0) THEN
@@ -114,6 +124,7 @@ PROGRAM main
         PRINT*,"rate <val>    - set rate for rate mode of filter"
         PRINT*,"acc <val>     - set accuracy for accuracy mode of filter"
         PRINT*,"prec <val>    - set PRECISION for PRECISION mode of zfp filter"
+        PRINT*,"dim <val>     - set size of 1D dataset used"
         PRINT*,"write         - only write the file"
         STOP 1
      ENDIF
@@ -122,7 +133,11 @@ PROGRAM main
 
   ! create data to write if we're not reading from an existing file 
  
-  CALL gen_data(INT(dim1*dim0, c_size_t), noise, amp, wdata)
+  IF (dim .EQ. 0) THEN
+     CALL gen_data(INT(dim1*dim0, c_size_t), noise, amp, wdata)
+  ELSE
+     CALL gen_data(INT(dim, c_size_t), noise, amp, wdata)
+  END IF
 
   CALL h5open_f(status)
   CALL check("h5open_f", status, nerr)
@@ -139,8 +154,13 @@ PROGRAM main
 
   CALL h5pcreate_f(H5P_DATASET_CREATE_F, cpid, status)
   CALL check("h5pcreate_f", status, nerr)
-  CALL h5pset_chunk_f(cpid, 2, chunk2, status)
-  CALL check("h5pset_chunk_f", status, nerr)
+  IF (dim .EQ. 0) THEN
+      CALL h5pset_chunk_f(cpid, 2, chunk2, status)
+      CALL check("h5pset_chunk_f", status, nerr)
+  ELSE
+      CALL h5pset_chunk_f(cpid, 1, chunk256, status)
+      CALL check("h5pset_chunk_f", status, nerr)
+  END IF
 
   !
   ! Check that filter is registered with the library now.
@@ -164,8 +184,14 @@ PROGRAM main
   ENDIF
 
   ! setup the 2D data space
-  CALL h5screate_simple_f(2, dims, sid, status)
-  CALL check("h5screate_simple_f", status, nerr)
+  IF (dim .EQ. 0) THEN
+     CALL h5screate_simple_f(2, dims, sid, status)
+     CALL check("h5screate_simple_f", status, nerr)
+  ELSE
+     dims1 = (/dim, 1/)
+     CALL h5screate_simple_f(1, dims1, sid, status)
+     CALL check("h5screate_simple_f", status, nerr)
+  END IF
 
   ! write the data WITHOUT compression 
   CALL h5dcreate_f(fid, "original", H5T_NATIVE_DOUBLE, sid, dsid, status)
@@ -371,6 +397,8 @@ PROGRAM main
    CALL check("H5Z_zfp_finalize", status, nerr)
 
    CALL H5close_f(status)
+
+   CALL EXIT(0)
 
 END PROGRAM main
 

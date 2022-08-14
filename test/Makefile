@@ -590,18 +590,25 @@ test-version-compatibility: test_read_lib
 	failed=0; \
 	pad=$$(printf '%*s' "$(padlimit)"); \
 	pad=$${pad// /.}; \
-        for d in test_zfp_030040.h5 test_zfp_030235.h5 test_zfp_110050.h5; do \
+	files="test_zfp_030040.h5 test_zfp_030235.h5 test_zfp_110050.h5"; \
+	if [[ -e ./test_rw_fortran ]]; then \
+	    ./test_rw_fortran write dim 1024 zfpmode 1 rate 16 2>&1 1>/dev/null; \
+	    if [[ $$? -eq 0 ]]; then \
+	        files="$$files test_zfp_fortran.h5"; \
+	    fi; \
+	fi; \
+	for d in $$files; do \
 	    x="./test_read_lib ifile=$$d"; \
 	    printf "$$x"; \
 	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	    $$x max_reldiff=0.025 ret=2 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-                failed=1; \
+	        failed=1; \
 	        continue; \
 	    fi; \
 	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
-        done; \
+	done; \
 	x="Version compatibility tests"; \
         printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
@@ -632,10 +639,11 @@ ifneq ($(ZFP_HAS_REVERSIBLE),)
 endif
 PLUGIN_CHECK += test-endian
 
-CHECK = $(LIB_CHECK) $(PLUGIN_CHECK) $(SPECIAL_CHECK)
+CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
 ifneq ($(FC),)
     CHECK += $(FORTRAN_CHECK)
 endif
+CHECK += $(SPECIAL_CHECK)
 
 check: $(CHECK)
 
