@@ -14,8 +14,8 @@
 #define H5Z_ZFP_MODE_EXPERT    4
 #define H5Z_ZFP_MODE_REVERSIBLE 5
 
-#define H5Z_ZFP_CD_NELMTS_MEM ((size_t) 6) /* used in public API to filter */
-#define H5Z_ZFP_CD_NELMTS_MAX ((size_t) 6) /* max, over all versions, used in dataset header */
+#define H5Z_ZFP_CD_NELMTS_MEM 6 /* used in public API to filter */
+#define H5Z_ZFP_CD_NELMTS_MAX 6 /* max, over all versions, used in dataset header */
 
 /* HDF5 generic cd_vals[] memory layout (6 unsigned ints) for
    controlling H5Z-ZFP behavior as a plugin. NOTE: These cd_vals
