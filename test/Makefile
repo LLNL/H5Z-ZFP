@@ -334,7 +334,7 @@ test-h5repack: plugin mesh.h5 patch
 	@echo " "; \
 	pad=$$(printf '%*s' "$(padlimit)"); \
 	pad=$${pad// /.}; \
-	x="h5repack -f UD=1,32013,6,3,0,3539053052,1062232653,0,0"; \
+	x="h5repack -f UD=32013,0,4,3,0,3539053052,1062232653"; \
         printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x \
