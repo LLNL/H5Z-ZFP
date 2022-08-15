@@ -3,6 +3,7 @@ include ../config.make
 NO_COLOR=\033[0m
 OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
+SKIP_COLOR=\033[0;34m
 padlimit=60
 padlength=60
 
@@ -80,7 +81,7 @@ test-default : test_rw_fortran
          $$x 2>&1 1>/dev/null; \
          if [[ $$status -ne 0 ]]; then \
 	     printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	     exit 1; \
+	     exit 0; \
           fi; \
 	  printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 
@@ -98,17 +99,17 @@ test-rate-f: plugin test_rw_fortran
             status=$$?; \
             if [[ $$status -ne 0 ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
             fi; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED *H5DUMP*$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
 	    fi; \
 	    actual_ratio=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5dump -H -d compressed-plugin -p test_zfp_fortran.h5 | grep COMPRESSION | cut -d':' -f1 | cut -d'(' -f2 | cut -d'.' -f1); \
 	    if [[ $$expected_ratio -ne $$actual_ratio ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED *H5DUMP*$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
 	    fi; \
 	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
@@ -126,17 +127,17 @@ test-accuracy-f: plugin test_rw_fortran
             status=$$?; \
             if [[ $$status -ne 0 ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
             fi; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
 	    fi; \
 	    env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d $$a test_zfp_fortran.h5 test_zfp_fortran.h5 compressed-plugin original 2>&1 1>/dev/null; \
 	    if [[ $$? -ne 0 ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
 	    fi; \
 	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	done; \
@@ -154,17 +155,17 @@ test-precision-f: plugin test_rw_fortran
             status=$$?; \
             if [[ $$status -ne 0 ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	        exit 1; \
+	        exit 0; \
             fi; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
-		exit 1; \
+		exit 0; \
 	    fi; \
 	    diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed-plugin original | grep 'differences found' | cut -d' ' -f1); \
 	    if [[ $$ldiffcnt -ne 0 ]] && [[ $$diffcnt -gt $$ldiffcnt ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
-		exit 1; \
+		exit 0; \
 	    fi; \
 	    printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"; \
 	 done; \
@@ -181,17 +182,17 @@ test-reversible-f: plugin test_rw_fortran
         status=$$?; \
         if [[ $$status -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-            exit 1; \
+            exit 0; \
          fi; \
 	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	if [[ $$diffcnt -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp_fortran.h5 test_zfp_fortran.h5 compressed-plugin original | grep 'differences found' | cut -d' ' -f1); \
 	if [[ $$diffcnt -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED *H5DIFF*$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n\n"; \
 
@@ -227,7 +228,7 @@ test-rate: plugin test_write_plugin
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -261,7 +262,7 @@ test-accuracy: plugin test_write_plugin
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -296,7 +297,7 @@ test-precision: plugin test_write_plugin
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -311,12 +312,12 @@ test-reversible: plugin test_write_plugin
 	env HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $$x 2>&1 1>/dev/null; \
         if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	diffcnt=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -p 0.00001 test_zfp.h5 test_zfp.h5 compressed original | grep 'differences found' | cut -d' ' -f1); \
 	if [[ $$diffcnt -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -351,14 +352,14 @@ test-h5repack: plugin mesh.h5 patch
 	     mesh.h5 mesh_repack.h5 2>&1 1>/dev/null; \
         if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	orig_size=$$(ls -l mesh.h5 | tr -s ' ' | cut -d' ' -f5); \
 	new_size=$$(ls -l mesh_repack.h5 | tr -s ' ' | cut -d' ' -f5); \
         ratio=$$(perl -e "printf int($$orig_size*100/$$new_size)"); \
 	if [[ $$ratio -lt 200 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED (size ratio) $(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -379,7 +380,7 @@ test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
 	outerr=$$(env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x 2>&1); \
 	if [[ -z "$$(echo $$outerr | grep '0 differences found')" ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -414,7 +415,7 @@ test-lib-rate: test_write_lib test_read_lib
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -448,7 +449,7 @@ test-lib-accuracy: test_write_lib test_read_lib
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -482,7 +483,7 @@ test-lib-precision: test_write_lib test_read_lib
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -496,12 +497,12 @@ test-lib-reversible: test_write_lib test_read_lib
 	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	./test_read_lib ret=1 max_absdiff=0 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -513,14 +514,18 @@ test-int: test_write_lib test_read_lib
 	printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	$$x 2>&1 1>/dev/null; \
-	if [[ $$? -ne 0 ]]; then \
+	status=$$?; \
+	if [[ $$status -eq 1 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
+	elif [[ $$status -eq 2 ]]; then \
+	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
+	    exit 0; \
 	fi; \
 	./test_read_lib ret=1 max_absdiff=2 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED (readback)$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -534,7 +539,7 @@ test-highd: test_write_lib
 	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -546,9 +551,13 @@ test-sixd: test_write_lib
 	printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	$$x 2>&1 1>/dev/null; \
-	if [[ $$? -ne 0 ]]; then \
+	status=$$?; \
+	if [[ $$status -eq 2 ]]; then \
+	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
+	    exit 0; \
+	elif [[ $$status -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -562,7 +571,7 @@ test-error: test_error
 	$$x 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -574,14 +583,18 @@ test-zfparr: test_write_lib
 	printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
 	$$x 2>&1 1>/dev/null; \
-	if [[ $$? -ne 0 ]]; then \
+	status=$$?; \
+	if [[ $$status -eq 2 ]]; then \
+	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
+	    exit 0; \
+	elif [[ $$status -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/h5diff -v -d 0.01 test_zfp.h5 test_zfp.h5 zfparr_original zfparr_direct 2>&1 1>/dev/null; \
 	if [[ $$? -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED (h5diff) $(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
@@ -614,14 +627,11 @@ test-version-compatibility: test_read_lib
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
         if [[ $$failed -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
-	    exit 1; \
+	    exit 0; \
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
-SPECIAL_CHECK = test-version-compatibility test-int test-highd test-sixd
-ifeq ($(ZFP_HAS_CFP),1)
-    SPECIAL_CHECK += test-zfparr
-endif
+SPECIAL_CHECK = test-version-compatibility test-int test-highd test-sixd test-zfparr
 
 FORTRAN_CHECK = test-default test-rate-f test-accuracy-f test-precision-f
 ifneq ($(ZFP_HAS_REVERSIBLE),)

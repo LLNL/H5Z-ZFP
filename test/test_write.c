@@ -370,6 +370,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 int main(int argc, char **argv)
 {
     int i;
+    int retval=0;
 
     /* filename variables */
     char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
@@ -427,7 +428,8 @@ int main(int argc, char **argv)
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer 1D data);
 #else
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.1);
-    doint=0;
+    if (doint) retval = 2;
+    doint = 0;
 #endif
 
     /* Advanced cases */
@@ -437,14 +439,16 @@ int main(int argc, char **argv)
     HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable example);
 #else
     HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
-    sixd=0;
+    if (sixd) retval = 2;
+    sixd = 0;
 #endif
 
 #if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x054 && ZFP_HAS_CFP>0
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
 #else
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4 with CFP enabled);
-    zfparr=0;
+    if (zfparr) retval = 2;
+    zfparr = 0;
 #endif
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
@@ -676,5 +680,5 @@ int main(int argc, char **argv)
 
     H5close();
 
-    return 0;
+    return retval;
 }
