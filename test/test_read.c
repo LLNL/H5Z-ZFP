@@ -71,7 +71,9 @@ purposes.
 
 #include "hdf5.h"
 
-#include "H5Zzfp.h"
+#ifndef H5Z_ZFP_USE_PLUGIN
+#include "H5Zzfp_lib.h"
+#endif
 
 #define NAME_LEN 256
 
