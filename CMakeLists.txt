@@ -8,13 +8,13 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
 endif ()
 
 #------------------------------------------------------------------------------#
-# Parse version number from H5Zzfp_plugin.h
+# Parse version number from H5Zzfp_version.h
 #------------------------------------------------------------------------------#
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/H5Zzfp_plugin.h" H5Z_ZFP_H REGEX "^\#define H5Z_FILTER_ZFP_VERSION_MAJOR")
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/H5Zzfp_version.h" H5Z_ZFP_H REGEX "^\#define H5Z_FILTER_ZFP_VERSION_MAJOR")
 string(REGEX REPLACE "^.*MAJOR " "" H5Z_ZFP_VERSION_MAJOR "${H5Z_ZFP_H}")
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/H5Zzfp_plugin.h" H5Z_ZFP_H REGEX "^\#define H5Z_FILTER_ZFP_VERSION_MINOR")
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/H5Zzfp_version.h" H5Z_ZFP_H REGEX "^\#define H5Z_FILTER_ZFP_VERSION_MINOR")
 string(REGEX REPLACE "^.*MINOR " "" H5Z_ZFP_VERSION_MINOR "${H5Z_ZFP_H}")
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/H5Zzfp_plugin.h" H5Z_ZFP_H REGEX "^\#define H5Z_FILTER_ZFP_VERSION_PATCH")
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/H5Zzfp_version.h" H5Z_ZFP_H REGEX "^\#define H5Z_FILTER_ZFP_VERSION_PATCH")
 string(REGEX REPLACE "^.*PATCH " "" H5Z_ZFP_VERSION_PATCH "${H5Z_ZFP_H}")
 set(H5Z_ZFP_VERSION "${H5Z_ZFP_VERSION_MAJOR}.${H5Z_ZFP_VERSION_MINOR}.${H5Z_ZFP_VERSION_PATCH}")
 

@@ -1,21 +1,7 @@
 #ifndef H5Z_ZFP_PLUGIN_H
 #define H5Z_ZFP_PLUGIN_H
 
-/* Filter ID number registered with The HDF Group */
-#define H5Z_FILTER_ZFP 32013
-
-#define H5Z_FILTER_ZFP_VERSION_MAJOR 1
-#define H5Z_FILTER_ZFP_VERSION_MINOR 1
-#define H5Z_FILTER_ZFP_VERSION_PATCH 0
-
-#define H5Z_ZFP_MODE_RATE      1
-#define H5Z_ZFP_MODE_PRECISION 2
-#define H5Z_ZFP_MODE_ACCURACY  3
-#define H5Z_ZFP_MODE_EXPERT    4
-#define H5Z_ZFP_MODE_REVERSIBLE 5
-
-#define H5Z_ZFP_CD_NELMTS_MEM 6 /* used in public API to filter */
-#define H5Z_ZFP_CD_NELMTS_MAX 6 /* max, over all versions, used in dataset header */
+#include "H5Zzfp_version.h"
 
 /* HDF5 generic cd_vals[] memory layout (6 unsigned ints) for
    controlling H5Z-ZFP behavior as a plugin. NOTE: These cd_vals
@@ -68,10 +54,10 @@ do {                                                    \
     if ((N>=6)&&(CD[0] == H5Z_ZFP_MODE_EXPERT))         \
     {                                                   \
         unsigned int *p; int *q;                        \
-        p = MiB; *p = CD[2];                            \
-        p = MaB; *p = CD[3];                            \
-        p = MaP; *p = CD[4];                            \
-        q = MiE; *q = (int) CD[5];                      \
+        p = &MiB; *p = CD[2];                           \
+        p = &MaB; *p = CD[3];                           \
+        p = &MaP; *p = CD[4];                           \
+        q = &MiE; *q = (int) CD[5];                     \
     }                                                   \
 } while(0)
 
