@@ -559,9 +559,9 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     static char const *_funcname_ = "H5Z_filter_zfp";
     void *newbuf = 0;
     size_t retval = 0;
-    unsigned int cd_vals_h5zzfpver = cd_values[0]&0x0000FFFF;
-    unsigned int cd_vals_zfpver = (cd_values[0]>>16)&0x0000FFFF;
+    unsigned int cd_vals_h5zzfpver = cd_values[0]&0x00000FFF;
     unsigned int cd_vals_zfpcodec = (cd_values[0]>>12)&0x0000000F;
+    unsigned int cd_vals_zfpver = (cd_values[0]>>16)&0x0000FFFF;
     H5T_order_t swap = H5T_ORDER_NONE;
     uint64 zfp_mode, zfp_meta;
     bitstream *bstr = 0;

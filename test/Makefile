@@ -603,19 +603,21 @@ test-version-compatibility: test_read_lib
 	failed=0; \
 	pad=$$(printf '%*s' "$(padlimit)"); \
 	pad=$${pad// /.}; \
-	files="test_zfp_030040.h5 test_zfp_030235.h5 test_zfp_110050.h5"; \
+	files="test_zfp_030040.h5:0 test_zfp_030235.h5:0 test_zfp_110050.h5:0 test_zfp_110xxx.h5:1"; \
 	if [[ -e ./test_rw_fortran ]]; then \
 	    ./test_rw_fortran write dim 1024 zfpmode 1 rate 16 2>&1 1>/dev/null; \
 	    if [[ $$? -eq 0 ]]; then \
-	        files="$$files test_zfp_fortran.h5"; \
+	        files="$$files test_zfp_fortran.h5:0"; \
 	    fi; \
 	fi; \
-	for d in $$files; do \
-	    x="./test_read_lib ifile=$$d"; \
+	for f in $$files; do \
+	    fname=$$(echo $$f | cut -d':' -f1); \
+	    xstat=$$(echo $$f | cut -d':' -f2); \
+	    x="./test_read_lib ifile=$$fname max_reldiff=0.025"; \
 	    printf "$$x"; \
 	    printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
-	    $$x max_reldiff=0.025 ret=2 2>&1 1>/dev/null; \
-	    if [[ $$? -ne 0 ]]; then \
+	    $$x ret=2 2>/dev/null 1>/dev/null; \
+	    if [[ $$? -ne $$xstat ]]; then \
 	        printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
 	        failed=1; \
 	        continue; \
