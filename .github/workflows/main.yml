@@ -53,7 +53,7 @@ jobs:
         git clone https://github.com/LLNL/zfp.git
         export HOME_DIR=$(echo ~)
         cd zfp
-        git checkout 0.5.5
+        git checkout 1.0.0
         mkdir build;cd build
         cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 -D BUILD_CFP=ON -D CMAKE_INSTALL_PREFIX=$PWD/zfp -D BUILD_TESTING=OFF -D BUILD_UTILITIES=OFF ..
         make install
@@ -107,13 +107,15 @@ jobs:
         run: |
           git clone https://github.com/LLNL/zfp.git
           cd zfp
-          git checkout 0.5.5
+          git checkout 1.0.0
           mkdir -p build
           cd build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_UTILITIES=OFF \
-            -DBUILD_TESTING=OFF
+            -DBUILD_TESTING=OFF \
+            -DBUILD_CFP=ON \
+            -DZFP_BIT_STREAM_WORD_SIZE=8
           cmake --build . -j 3
           cmake --build . --target install
       - name: update PATH

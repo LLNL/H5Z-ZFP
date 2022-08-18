@@ -8,6 +8,7 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -26,22 +27,13 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include "H5Zzfp_props.h"
 #endif
 
-#include "zfp.h"
-
-#ifdef ZFP_VERSION_MAJOR /* versioned release */
-#define ZFP_VERSION_LE(Maj,Min,Pat)  \
-        (((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR==Min) && (ZFP_VERSION_PATCH<=Pat)) || \
-         ((ZFP_VERSION_MAJOR==Maj) && (ZFP_VERSION_MINOR<Min)) || \
-         (ZFP_VERSION_MAJOR<Maj))
-#else /* develop */
-#define ZFP_VERSION_LE(Maj,Min,Pat) 0
-#endif
-
 #if ZFP_HAS_CFP
-#if ZFP_VERSION_LE(0,5,5)
-#include "cfparrays.h"
+#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x1000
+  #include "zfp/array.h"
+#elif defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x053
+  #include "cfparrays.h"
 #else
-#include "cfparray.h"
+  #error GOT HERE
 #endif
 #endif
 
@@ -68,7 +60,8 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
             A = PARSEA;                                         \
             break;                                              \
         }                                                       \
-        else if (!strncasecmp(argv[i], "help", 4))              \
+        else if (!strncmp(#A, "help", 4) &&                     \
+                  strcasestr(argv[i], "help"))                  \
         {                                                       \
             return 0;                                           \
         }                                                       \
@@ -377,6 +370,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 int main(int argc, char **argv)
 {
     int i;
+    int retval=0;
 
     /* filename variables */
     char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
@@ -430,14 +424,31 @@ int main(int argc, char **argv)
     HANDLE_ARG(noise,(double) strtod(argv[i]+len2,0),"%g",set amount of random noise in 1D dataset);
     HANDLE_ARG(amp,(double) strtod(argv[i]+len2,0),"%g",set amplitude of sinusoid in 1D dataset);
     HANDLE_ARG(chunk,(hsize_t) strtol(argv[i]+len2,0,10), "%llu",set chunk size for 1D dataset);
+#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x051
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",also do integer 1D data);
+#else
+    HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.1);
+    if (doint) retval = 2;
+    doint = 0;
+#endif
 
     /* Advanced cases */
     HANDLE_SEP(Advanced cases)
-    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",run 4D case);
-    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable case (requires ZFP>=0.5.4));
-#if ZFP_HAS_CFP
+    HANDLE_ARG(highd,(int) strtol(argv[i]+len2,0,10),"%d",4D w/2D chunk example);
+#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x054
+    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",run 6D extendable example);
+#else
+    HANDLE_ARG(sixd,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4);
+    if (sixd) retval = 2;
+    sixd = 0;
+#endif
+
+#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x054 && ZFP_HAS_CFP>0
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
+#else
+    HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4 with CFP enabled);
+    if (zfparr) retval = 2;
+    zfparr = 0;
 #endif
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
@@ -453,6 +464,7 @@ int main(int argc, char **argv)
         read_data(ifile, (size_t) npoints, &buf);
 
     /* create integer data to write */
+
     if (doint)
         gen_data((size_t) npoints, noise*100, amp*1000000, (void**)&ibuf, TYPINT);
 
@@ -611,13 +623,13 @@ int main(int argc, char **argv)
     if (zfparr>0 && zfpmode==1 && rate>0)
     {
         int            dims[] = {38, 128};
-        /*int      chunk_dims[] = {19, 34};*/
+       /*int      chunk_dims[] = {19, 34};*/
         int      chunk_dims[] = {38, 128};
         hsize_t       hdims[] = {38, 128};
-        /*hsize_t hchunk_dims[] = {19, 34};*/
+       /*hsize_t hchunk_dims[] = {19, 34};*/
         hsize_t hchunk_dims[] = {38, 128};
         hsize_t hchunk_off[] = {0, 0};
-#if ZFP_VERSION_LE(0,5,5)
+#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION<=0x055
         cfp_array2d *origarr;
 #else
         cfp_array2d origarr;
@@ -668,5 +680,5 @@ int main(int argc, char **argv)
 
     H5close();
 
-    return 0;
+    return retval;
 }
