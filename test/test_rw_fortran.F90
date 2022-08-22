@@ -67,7 +67,7 @@ PROGRAM main
      END FUNCTION real_eq
   END INTERFACE
 
-  CHARACTER(LEN=10)  :: arg
+  CHARACTER(LEN=180)  :: arg
   INTEGER :: len
   LOGICAL :: write_only = .FALSE., avail
   INTEGER     :: config_flag = 0   ! for h5zget_filter_info_f
@@ -115,6 +115,13 @@ PROGRAM main
            STOP 1
         END IF
         READ(arg(1:len), *) prec
+     ELSE IF (arg(1:len).EQ.'ofile')THEN
+        CALL GET_COMMAND_ARGUMENT(i+1,arg,len,status)
+        IF (status .NE. 0) THEN
+           WRITE (ERROR_UNIT,*) 'get_command_argument failed: status = ', status, ' arg = ', i
+           STOP 1
+        END IF
+        READ(arg(1:len), *) ofile
      ELSE IF (arg(1:len).EQ.'write')THEN
         write_only = .TRUE.
 
@@ -125,6 +132,7 @@ PROGRAM main
         PRINT*,"acc <val>     - set accuracy for accuracy mode of filter"
         PRINT*,"prec <val>    - set PRECISION for PRECISION mode of zfp filter"
         PRINT*,"dim <val>     - set size of 1D dataset used"
+        PRINT*,"ofile <val>   - set the output file"
         PRINT*,"write         - only write the file"
         STOP 1
      ENDIF

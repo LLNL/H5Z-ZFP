@@ -53,6 +53,12 @@ find_package(ZFP REQUIRED CONFIG)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 #------------------------------------------------------------------------------#
+# Add tests
+#------------------------------------------------------------------------------#
+enable_testing()
+add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+
+#------------------------------------------------------------------------------#
 # Packaging
 #------------------------------------------------------------------------------#
 # Install h5z_zfp-config.cmake and h5z_zfp-config-version.cmake
