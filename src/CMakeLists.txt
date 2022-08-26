@@ -1,6 +1,6 @@
 # Define headers.
 set(h5z_zfp_headers
-  H5Zzfp.h H5Zzfp_lib.h H5Zzfp_plugin.h H5Zzfp_props.h)
+  H5Zzfp.h H5Zzfp_lib.h H5Zzfp_plugin.h H5Zzfp_props.h H5Zzfp_version.h)
 
 #------------------------------------------------------------------------------#
 # Static library
