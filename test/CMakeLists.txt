@@ -3,6 +3,9 @@ if (ZFP_VERSION VERSION_GREATER_EQUAL 1.0.0)
   set(ZFP_LIB_VERSION ${ZFP_LIB_VERSION}${ZFP_VERSION_TWEAK})
 endif ()
 set(ZFP_HAS_CFP 0)
+if (ZFP_CFP_ENABLED)
+  set(ZFP_HAS_CFP 1)
+endif()
 
 #------------------------------------------------------------------------------#
 # Custom defined HDF5 variables
@@ -30,6 +33,9 @@ add_executable(test_write_lib test_write.c)
 target_compile_definitions(test_write_lib PRIVATE ZFP_LIB_VERSION=0x${ZFP_LIB_VERSION})
 target_compile_definitions(test_write_lib PRIVATE ZFP_HAS_CFP=${ZFP_HAS_CFP})
 target_link_libraries(test_write_lib h5z_zfp_static)
+if (ZFP_CFP_ENABLED)
+  target_link_libraries(test_write_lib zfp::cfp)
+endif ()
 
 add_executable(test_read_lib test_read.c)
 target_link_libraries(test_read_lib h5z_zfp_static)
@@ -235,7 +241,7 @@ set_tests_properties(test-lib-sixd         PROPERTIES FIXTURES_REQUIRED "lib-six
 set_tests_properties(test-lib-sixd-cleanup PROPERTIES FIXTURES_REQUIRED "lib-sixd-cleanup")
 set_tests_properties(test-lib-sixd-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-sixd")
 
-if (ZFP_HAS_CFP)
+if (ZFP_CFP_ENABLED)
   # zfparr
   add_test(NAME test-zfparr COMMAND test_write_lib zfparr=1 rate=10)
   add_test(NAME test-zfparr-diff COMMAND ${HDF5_DIFF_EXECUTABLE} -v -d 0.01 test_zfp.h5 test_zfp.h5 zfparr_original zfparr_direct)
