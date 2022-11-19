@@ -553,7 +553,6 @@ test-int: test_write_lib test_read_lib
 	    exit 0; \
 	elif [[ $$status -eq 2 ]]; then \
 	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
-	    touch check-failed; \
 	    exit 0; \
 	fi; \
 	./test_read_lib ret=1 max_absdiff=2 2>&1 1>/dev/null; \
@@ -590,7 +589,6 @@ test-sixd: test_write_lib
 	status=$$?; \
 	if [[ $$status -eq 2 ]]; then \
 	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
-	    touch check-failed; \
 	    exit 0; \
 	elif [[ $$status -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
@@ -625,7 +623,6 @@ test-zfparr: test_write_lib
 	status=$$?; \
 	if [[ $$status -eq 2 ]]; then \
 	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
-	    touch check-failed; \
 	    exit 0; \
 	elif [[ $$status -ne 0 ]]; then \
 	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
