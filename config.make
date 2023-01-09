@@ -98,6 +98,10 @@ ifneq ($(findstring gcc, $(CC)),)
     SOEXT ?= so
     SHFLAG ?= -shared
     PREPATH = -Wl,-rpath,
+else ifneq ($(findstring cc, $(CC)),)
+    CFLAGS += -fPIC
+    SOEXT ?= so
+    SHFLAG ?= -shared
 else ifneq ($(findstring clang, $(CC)),)
     SOEXT ?= dylib
     SHFLAG ?= -dynamiclib
@@ -125,6 +129,8 @@ else ifneq ($(findstring bgxlc_r, $(CC)),)
 endif
 
 ifneq ($(findstring gfortran, $(FC)),)
+    FCFLAGS += -fPIC
+else ifneq ($(findstring ftn, $(FC)),)
     FCFLAGS += -fPIC
 else ifneq ($(findstring ifort, $(FC)),)
     FCFLAGS += -fpic
