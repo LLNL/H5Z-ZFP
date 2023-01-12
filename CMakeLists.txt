@@ -44,6 +44,11 @@ if (FORTRAN_INTERFACE)
 endif ()
 find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS})
 
+# Find MPI depending on if HDF5 needs MPI.
+if (HDF5_IS_PARALLEL)
+  find_package(MPI REQUIRED COMPONENTS C)
+endif()
+
 # Find ZFP, relies on ZFP_DIR or ZFP_ROOT being set in environment.
 find_package(ZFP REQUIRED CONFIG)
 
