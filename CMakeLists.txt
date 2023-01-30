@@ -45,7 +45,7 @@ endif ()
 find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS})
 
 # Find MPI depending on if HDF5 needs MPI.
-if (HDF5_IS_PARALLEL)
+if (HDF5_IS_PARALLEL AND ("${HDF5_VERSION}" VERSION_EQUAL "1.14.0"))
   find_package(MPI REQUIRED COMPONENTS C)
 endif()
 
