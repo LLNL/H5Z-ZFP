@@ -408,6 +408,27 @@ test-endian: plugin test_zfp_le.h5 test_zfp_be.h5
 	fi; \
 	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
 
+# Test dumping a file generated on a big endian machine
+# The file was generated with:
+# yes 12345 | head -n 5000 | h5import /dev/stdin -dims 5000 -type TEXTIN -size 32 -o unpacked.h5
+# h5repack -f UD=32013,0,4,1,0,0,1074921472 unpacked.h5 bigendian.h5
+test-endian1: plugin bigendian.h5
+	@echo " "; \
+        padlimit=80; \
+        padlength=80; \
+	pad=$$(printf '%*s' "$${padlimit}"); \
+	pad=$${pad// /.}; \
+        x="h5dump bigendian.h5"; \
+        printf "$$x"; \
+	printf ' %*.*s' 0 $$(($${padlength} - $${#x} )) "$$pad"; \
+	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x | grep -q '12345, 12345, 12345, 12345,' ; \
+	if [[ $$? -ne 0 ]]; then \
+	    printf " [$(ERROR_COLOR)FAILED$(NO_COLOR)]\n"; \
+	    touch check-failed; \
+	    exit 0; \
+	fi; \
+	printf " [$(OK_COLOR)PASSED$(NO_COLOR)] \n"
+
 # Test the filter as a library rather than as a plugin
 test-lib-rate: test_write_lib test_read_lib
 	@failed=0; \
@@ -697,7 +718,7 @@ PLUGIN_CHECK = test-rate test-accuracy test-precision test-h5repack
 ifneq ($(ZFP_HAS_REVERSIBLE),)
     PLUGIN_CHECK += test-reversible
 endif
-PLUGIN_CHECK += test-endian
+PLUGIN_CHECK += test-endian test-endian1
 
 CHECK = $(LIB_CHECK) $(PLUGIN_CHECK)
 ifneq ($(FC),)
