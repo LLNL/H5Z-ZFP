@@ -4,9 +4,9 @@ name: h5z-zfp
 #Triggers the workflow on push or pull requests.
 on: 
   push:
-    branches: [ master ]
+    branches: [ feature/cmake_tests, master ]
   pull_request:
-    branches: [ master ]
+    branches: [ feature/cmake_tests, master ]
 
 # A workflow run is made up of one or more jobs that
 # can run sequentially or in parallel
@@ -42,7 +42,7 @@ jobs:
         
  # Checks-out the repository under $GITHUB_WORKSPACE so the job can access it.
     - name: Get Sources
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
 ##################################
 # INSTALL ZFP
@@ -75,7 +75,8 @@ jobs:
       run: |
         mkdir build; cd build
         cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release ..
-        make
+        sudo cmake --build . --target install
+        ctest --verbose -C Release .
       shell: bash
 
     
@@ -87,7 +88,7 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: install prerequisites
         run: |
           choco install \
@@ -98,10 +99,10 @@ jobs:
       - name: download HDF5 for Windows
         run: |
           wget --quiet \
-            https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/bin/windows/hdf5-1.12.1-Std-win10_64-vs16.zip
-          unzip hdf5-1.12.1-Std-win10_64-vs16.zip
+            https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/bin/windows/hdf5-1.14.0-Std-win10_64-vs16-clang.zip
+          unzip hdf5-1.14.0-Std-win10_64-vs16-clang.zip
       - name: Install HDF5 for Windows
-        run: msiexec /i "hdf\HDF5-1.12.1-win64.msi" /qn
+        run: msiexec /i "hdf\HDF5-1.14.0-win64.msi" /qn
         shell: cmd
       - name: Download and install ZFP
         run: |
@@ -120,14 +121,16 @@ jobs:
           cmake --build . --target install
       - name: update PATH
         run: |
-          echo "C:/Program Files/HDF_Group/HDF5/1.12.1/bin" >> $GITHUB_PATH
+          echo "C:/Program Files/HDF_Group/HDF5/1.14.0/bin" >> $GITHUB_PATH
       - name: configure cmake
         run: |
           mkdir build
           cd build
           cmake .. \
-            -DCMAKE_BUILD_TYPE=Release \
+            -G "Visual Studio 16 2019" -A "x64" \
+            -DCMAKE_BUILD_TYPE=Debug \
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . -j 3
           cmake --build . --target install
+          ctest --verbose -C Debug .

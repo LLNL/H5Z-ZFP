@@ -69,7 +69,43 @@ purposes.
 #include <stdlib.h>
 #include <string.h>
 
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <ctype.h>
+#define strncasecmp _strnicmp
+// strcasestr is not available on Windows
+char * strcasestr(s, find)
+     const char *s, *find;
+{
+  char c, sc;
+  size_t len;
+
+  if ((c = *find++) != 0) {
+    c = tolower((unsigned char)c);
+    len = strlen(find);
+    do {
+      do {
+        if ((sc = *s++) == 0)
+          return (NULL);
+      } while ((char)tolower((unsigned char)sc) != c);
+    } while (strncasecmp(s, find, len) != 0);
+    s--;
+  }
+  return ((char *)s);
+}
+
+// strndup() is not available on Windows
+char *strndup( const char *s1, size_t n)
+{
+    char *copy= (char*)malloc( n+1 );
+    memcpy( copy, s1, n );
+    copy[n] = 0;
+    return copy;
+};
+#endif
+
 #include "hdf5.h"
+
 
 #ifndef H5Z_ZFP_USE_PLUGIN
 #include "H5Zzfp_lib.h"
@@ -102,6 +138,20 @@ purposes.
 }
 
 /* convenience macro to handle errors */
+#if defined(_WIN32) || defined(_WIN64)
+
+#define ERROR(FNAME)                                              \
+do {                                                              \
+    size_t errmsglen = 94;                                        \
+    char errmsg[errmsglen];                                       \
+    strerror_s(errmsg, errmsglen, errno);                         \
+    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
+            __LINE__, errno, errno?errmsg:"ok");                  \
+    return 1;                                                     \
+} while(0)
+
+#else
+
 #define ERROR(FNAME)                                              \
 do {                                                              \
     int _errno = errno;                                           \
@@ -109,6 +159,8 @@ do {                                                              \
         __LINE__, _errno, _errno?strerror(_errno):"ok");          \
     return 1;                                                     \
 } while(0)
+
+#endif
 
 int main(int argc, char **argv)
 {
