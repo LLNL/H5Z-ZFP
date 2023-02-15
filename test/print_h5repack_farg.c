@@ -92,8 +92,6 @@ static void print_cdvals(int zfpmode, double rate, double acc, uint prec,
 
 int main(int argc, char **argv)
 {
-    int i;
-
     /* compression parameters (defaults taken from ZFP header) */
     int zfpmode = 1;
     double rate = 3.5;

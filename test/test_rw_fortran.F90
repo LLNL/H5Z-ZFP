@@ -21,15 +21,15 @@ PROGRAM main
   INTEGER(hsize_t) :: npoints
 
   ! compression parameters (defaults taken from ZFP header)
-  integer(C_INT) :: zfpmode = 3 !1=rate, 2=prec, 3=acc, 4=expert
+  INTEGER(C_INT) :: zfpmode = 3 !1=rate, 2=prec, 3=acc, 4=expert
   REAL(dp) :: rate = 4_c_double
   REAL(dp) :: acc = 0_c_double
-  integer(C_INT) :: prec = 11
-  integer(C_INT) :: dim = 0
-  integer(C_INT), PARAMETER :: minbits = 0
-  integer(C_INT), PARAMETER :: maxbits = 4171
-  integer(C_INT), PARAMETER :: maxprec = 64
-  integer(C_INT), PARAMETER :: minexp = -1074
+  INTEGER(C_INT) :: prec = 11
+  INTEGER(C_INT) :: dim = 0
+  INTEGER(C_INT), PARAMETER :: minbits = 0
+  INTEGER(C_INT), PARAMETER :: maxbits = 4171
+  INTEGER(C_INT), PARAMETER :: maxprec = 64
+  INTEGER(C_INT), PARAMETER :: minexp = -1074
 
   ! HDF5 related variables
   INTEGER(hid_t) fid, dsid, sid, cpid, dcpl_id, space_id
