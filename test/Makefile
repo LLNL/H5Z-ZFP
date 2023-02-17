@@ -359,6 +359,11 @@ test-h5repack: plugin mesh.h5 patch
 	x="h5repack -f UD=32013,0,4,3,0,3539053052,1062232653"; \
         printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        v=$$($(HDF5_BIN)/h5repack --version | tr ' ' '\n' | grep '^[0-9]' | cut -d'.' -f1,2 | tr -d '.'); \
+	if [[ $$v -lt 112 ]]; then \
+	    printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
+	    exit 0; \
+	fi; \
 	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x \
 	     -l X,Y,Z,Indexes:CHUNK=217 \
 	     -l Indexes2:CHUNK=1517 \
