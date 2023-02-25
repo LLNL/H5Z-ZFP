@@ -22,6 +22,7 @@ Contents:
    installation
    interfaces
    hdf5_chunking
+   cd_vals
    direct
    h5repack
    endian_issues

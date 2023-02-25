@@ -4,38 +4,39 @@
 HDF5_ Chunking
 ==============
 
-HDF5_'s dataset `chunking`_ feature is a way to optimize data layout on disk
-to support partial dataset reads by downstream consumers. This is all the more
-important when compression filters are applied to datasets as it frees a consumer
-from suffering the UNcompression of an entire dataset only to read a portion.
-
+HDF5_'s dataset `chunking`_ feature is a way to optimize data layout on disk to support partial dataset reads by downstream consumers.
+This is all the more important when compression filters are applied to datasets as it frees a consumer from suffering the UNcompression of an entire dataset only to read a portion.
 
 -------------
 ZFP Chunklets
 -------------
 
-When using HDF5_ `chunking`_ with ZFP_ compression, it is important to account
-for the fact that ZFP_ does its work in tiny 4\ :sup:`d` chunklets of its
-own where `d` is the dataset dimension (*rank* in HDF5_ parlance). This means
-that that whenever possible `chunking`_ dimensions you select in HDF5_ should be
-multiples of 4. When a chunk_ dimension is not a multiple of 4, ZFP_ will wind
-up with partial chunklets which it will pad with useless data reducing overall
-time and space efficiency of the results.
+When using HDF5_ `chunking`_ with ZFP_ compression, it is important to account for the fact that ZFP_ does its work in tiny 4\ :sup:`d` chunklets of its own where `d` is the dataset dimension (*rank* in HDF5_ parlance).
+This means that that whenever possible the `chunking`_ dimensions you select in HDF5_ should be multiples of 4.
+When a chunk_ dimension is not a multiple of 4, ZFP_ will wind up with partial chunklets which it will pad with useless data reducing overall time and space efficiency of the results.
 
-The degree to which this may degrade performance depends on the percentage of a
-chunk_ that is padded. Suppose we have 2D chunk of dimensions 27 x 101. ZFP_ will
-have to treat it as 28 x 104 by padding out each dimension to the next closest
-multiple of 4. The fraction of space that will wind up being wasted due to ZFP_
-chunklet padding will be (28x104-27x101) / (28x104) which is about 6.4%. On the
-other hand, consider a 3D chunk that is 1024 x 1024 x 2. ZFP_ will have to treat
-it as a 1024 x 1024 x 4 resulting in 50% waste.
+The degree to which this may degrade performance depends on the percentage of a chunk_ that is padded.
+Suppose we have 2D chunk of dimensions 27 x 101.
+ZFP_ will have to treat it as 28 x 104 by padding out each dimension to the next closest multiple of 4.
+The fraction of space that will wind up being wasted due to ZFP_ chunklet padding will be (28x104-27x101) / (28x104) which is about 6.4%.
+On the other hand, consider a 3D chunk that is 1024 x 1024 x 2.
+ZFP_ will have to treat it as a 1024 x 1024 x 4 resulting in 50% waste.
 
-The latter example is potentialy very relevant when attemping to apply ZFP_ to
-compress data long the *time* dimension in a large, 3D, simulation. Ordinarily,
-a simulation advances one time step at a time and so needs to store in memory
-only the *current* timestep. In order to give ZFP_ enough *width* in the time
-dimension to satisfy the minimum chunklet dimension size of 4, the simulation
-needs to keep in memory 4 timesteps. This is demonstrated in the example below.
+The latter example is potentialy very relevant when attemping to apply ZFP_ to compress data long the *time* dimension in a large, 3D, simulation.
+Ordinarily, a simulation advances one time step at a time and so needs to store in memory only the *current* timestep.
+In order to give ZFP_ enough *width* in the time dimension to satisfy the minimum chunklet dimension size of 4, the simulation
+needs to keep in memory 4 timesteps.
+This is demonstrated in the example below.
+
+--------------------
+Partial I/O Requests
+--------------------
+
+In any given H5Dwrite_ call, the caller has the option of writing only a portion of the data in the dataset.
+This is a *partial I/O* request.
+This is handled by the the ``file_space_id`` argument in H5Dwrite_.
+
+of the data associated with the dataset
 
 -----------------------------
 More Than 3 (or 4) Dimensions
@@ -135,9 +136,9 @@ if the application were to *restart* from this time and continue forward, this
    :start-after: 6D Example
    :end-before: End of 6D Example
 
-.. _chunking: https://support.hdfgroup.org/HDF5/doc/Advanced/Chunking/index.html
-.. _chunk: https://support.hdfgroup.org/HDF5/doc/Advanced/Chunking/index.html
-.. _H5Dwrite: https://support.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Write
+.. _chunking: https://portal.hdfgroup.org/display/HDF5/Chunking+in+HDF5
+.. _chunk: https://portal.hdfgroup.org/display/HDF5/Chunking+in+HDF5
+.. _H5Dwrite: https://docs.hdfgroup.org/hdf5/v1_14/group___h5_d.html#title37
 .. [1] The HDF5_ library currently requires dataset chunking anyways for
    any dataset that has any kind of filter applied.
 
