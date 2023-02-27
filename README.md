@@ -10,7 +10,7 @@ compression plugin for the HDF5 library using ZFP compression.
 For information about ZFP compression and the BSD-Licensed ZFP
 library, see...
 
-- https://computation.llnl.gov/projects/floating-point-compression
+- https://computing.llnl.gov/projects/zfp
 - https://github.com/LLNL/zfp
 
 For information about HDF5 filter plugins, see...
