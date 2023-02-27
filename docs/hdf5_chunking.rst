@@ -118,7 +118,7 @@ The code below iterates over 9 timesteps. Each of the first two groups of 4
 timesteps are buffered in memory in ``tbuf``. Once 4 timesteps have been buffered, we
 can issue an H5Dwrite_ call doing
 `hyperslab <https://support.hdfgroup.org/HDF5/Tutor/selectsimple.html>`_
-can issue an `H5Dwrite <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Write>`_
+can issue an H5Dwrite_
 call doing `hyperslab <https://support.hdfgroup.org/HDF5/Tutor/selectsimple.html>`_
 partial I/O on the 6D, `extendible <https://support.hdfgroup.org/HDF5/Tutor/extend.html>`_
 dataset. But, notice that the chunk_ dimensions (line 10) are such that only 4 of the
