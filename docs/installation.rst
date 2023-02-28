@@ -39,6 +39,7 @@ Manual Installation
 
 If Spack_ is not an option for you, information on *manually* installing is provided
 here.
+H5Z-ZFP_ installation supports both vanilla (gnu) Make (described below) as well as :ref:`CMake <cmake>`.
 
 ^^^^^^^^^^^^^
 Prerequisites
