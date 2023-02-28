@@ -35,9 +35,9 @@ Partial I/O Requests
 In any given H5Dwrite_ call, the caller has the option of writing (or reading) only a portion of the data in the dataset.
 This is a *partial I/O* request.
 This is handled by the ``mem_space_id`` and ``file_space_id`` arguments in an H5Dwrite_ call.
+
 An HDF5_ producer or consumer can issue partial I/O requests on *any* HDF5 dataset regardless of whether the dataset is compressed or not or whether the dataset has ``H5D_CONTIGUOUS`` layout.
-HDF5_'s `data sieving <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga24fd737955839194bf5605d5f47928ee>`__ feature does its best to optimize the actual I/O operations.
-However, when combining partial I/O with compression, chunk size and shape in relation to partial I/O request size and shape will have an impact on performance.
+When combining partial I/O with compression, chunk size and shape in relation to partial I/O request size and shape will have an impact on performance.
 
 This is particularly important in *writer* scenarios if an I/O request winds up overlapping chunks only partially.
 If the partially overlapped chunks already exist in the file (from a previous write for example), the HDF5_ library may wind up having to engage in *read-modify-write* operations for those chunks.
@@ -47,7 +47,7 @@ HDF5_'s default fill value is zero (as defined by the associated datatype).
 Data producers can choose the desired fill value (see `H5Pset_fill_value <https://docs.hdfgroup.org/hdf5/develop/group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4>`__) for a dataset but this fill value can impact the space-performance of the compression filter.
 On the other hand, if the partial chunks in one I/O request wind up getting fully filled in another, the fill value becomes irrelevant.
 
-Finally, HDF5_ manages a `chunk cache <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga034a5fc54d9b05296555544d8dd9fe89>`__ to help elleviate some of the I/O performance issues that can be encountered in these situations.
+Finally, HDF5_ manages a `chunk cache <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga034a5fc54d9b05296555544d8dd9fe89>`__ and `data sieving buffer <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga24fd737955839194bf5605d5f47928ee>`__ to help elleviate some of the I/O performance issues that can be encountered in these situations.
 
 -----------------------------
 More Than 3 (or 4) Dimensions
