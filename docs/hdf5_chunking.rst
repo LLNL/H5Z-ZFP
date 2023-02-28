@@ -45,7 +45,7 @@ If the partially overlapped chunks already exist in the file (from a previous wr
 If the partially overlapped chunks do not already exist in the file, the HDF5_ library will wind up *fill-value* padding the chunks before they are written.
 HDF5_'s default fill value is zero (as defined by the associated datatype).
 Data producers can choose the desired fill value (see `H5Pset_fill_value <https://docs.hdfgroup.org/hdf5/develop/group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4>`__) for a dataset but this fill value can impact the space-performance of the compression filter.
-On the other hand, if the partial chunks in one I/O request wind up getting fully filled in another, any fill value impacts on copressor performance are resolved.
+On the other hand, if the partial chunks in one I/O request wind up getting fully filled in another, any fill value impacts on compressor performance are resolved.
 
 Finally, HDF5_ manages a `chunk cache <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga034a5fc54d9b05296555544d8dd9fe89>`__ and `data sieving buffer <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga24fd737955839194bf5605d5f47928ee>`__ to help elleviate some of the I/O performance issues that can be encountered in these situations.
 
