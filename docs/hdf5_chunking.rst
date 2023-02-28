@@ -40,14 +40,14 @@ An HDF5_ producer or consumer can issue partial I/O requests on *any* HDF5 datas
 When combining partial I/O with compression, chunk size and shape in relation to partial I/O request size and shape will have an impact on performance.
 
 This is particularly important in *writer* scenarios if an I/O request winds up overlapping chunks only partially.
-If the partially overlapped chunks already exist in the file (from a previous write for example), the HDF5_ library may wind up having to engage in *read-modify-write* operations for those chunks.
+Suppose the partially overlapped chunks exist in the file (from a previous write, for example). In that case, the HDF5_ library may wind up having to engage in *read-modify-write* operations for those chunks.
 
-If the partially overlapped chunks do not already exist in the file, the HDF5_ library will wind up *fill-value* padding the chunks before they are written.
+If the partially overlapped chunks do not exist in the file, the HDF5_ library will wind up *fill-value* padding the chunks before they are written.
 HDF5_'s default fill value is zero (as defined by the associated datatype).
-Data producers can choose the desired fill value (see `H5Pset_fill_value <https://docs.hdfgroup.org/hdf5/develop/group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4>`__) for a dataset but this fill value can impact the space-performance of the compression filter.
+Data producers can choose the desired fill value (see `H5Pset_fill_value <https://docs.hdfgroup.org/hdf5/develop/group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4>`__) for a dataset, but this fill value can impact the space-performance of the compression filter.
 On the other hand, if the partial chunks in one I/O request wind up getting fully filled in another, any fill value impacts on compressor performance are resolved.
 
-Finally, HDF5_ manages a `chunk cache <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga034a5fc54d9b05296555544d8dd9fe89>`__ and `data sieving buffer <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga24fd737955839194bf5605d5f47928ee>`__ to help elleviate some of the I/O performance issues that can be encountered in these situations.
+Finally, HDF5_ manages a `chunk cache <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga034a5fc54d9b05296555544d8dd9fe89>`__ and `data sieving buffer <https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#ga24fd737955839194bf5605d5f47928ee>`__ to help alleviate some of the I/O performance issues that can be encountered in these situations.
 
 -----------------------------
 More Than 3 (or 4) Dimensions
@@ -99,8 +99,8 @@ tradeoffs using an example.
 Compression *Along* the *State Iteration* Dimension 
 ---------------------------------------------------
 
-By *state iteration* dimension, we are referring to the main iteration
-loop(s) of the data producer. For example, the main iteration dimension for many
+By *state iteration* dimension, we refer to the data producer's main iteration
+loop(s). For example, the main iteration dimension for many
 PDE-based simulations is *time*. But, for some *outer loop* methods, the
 main iteration dimension(s) might be some kind of parameter study including
 multiple parameters.
