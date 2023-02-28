@@ -28,7 +28,6 @@ It is impossible for command-line tools like ``h5ls`` and ``h5dump`` to display 
 
 Fortunately, the ZFP_ library has already been designed to handle these issues as part of the ZFP_'s *native* stream header.
 But, the ZFP_ library handles these issues in an endian-agnostic way. 
-This has the effect of potentially 
 Consequently, the H5Z-ZFP_ filter uses the ``cd_values`` that is persisted to a dataset's object header to store ZFP_'s stream header.
 ZFP_'s stream header is stored starting at ``&cd_values[1]``. 
 ``cd_values[0]`` is used to stored H5Z-ZFP_ filter and ZFP_ library and ZFP_ encoder version information.

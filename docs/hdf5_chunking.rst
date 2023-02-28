@@ -117,10 +117,10 @@ ZFP_'s chunklet size of 4.
 The code below iterates over 9 timesteps. Each of the first two groups of 4
 timesteps are buffered in memory in ``tbuf``. Once 4 timesteps have been buffered, we
 can issue an H5Dwrite_ call doing
-`hyperslab <https://support.hdfgroup.org/HDF5/Tutor/selectsimple.html>`_
+`hyperslab <https://docs.hdfgroup.org/hdf5/develop/_h5_d__u_g.html#subsubsec_dataset_transfer_partial>`__
 can issue an H5Dwrite_
-call doing `hyperslab <https://support.hdfgroup.org/HDF5/Tutor/selectsimple.html>`_
-partial I/O on the 6D, `extendible <https://support.hdfgroup.org/HDF5/Tutor/extend.html>`_
+call doing `hyperslab <https://docs.hdfgroup.org/hdf5/develop/_h5_d__u_g.html#subsubsec_dataset_transfer_partial>`__
+partial I/O on the 6D, `extendible <https://docs.hdfgroup.org/hdf5/develop/_l_b_ext_dset.html>`__
 dataset. But, notice that the chunk_ dimensions (line 10) are such that only 4 of the
 6 dimensions are non-unity. This means ZFP_ will only ever see something to
 compress that is essentially 4D.
