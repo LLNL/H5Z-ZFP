@@ -4,9 +4,9 @@ Interfaces
 
 There  are two  interfaces  to  control the  filter.  One uses  HDF5_'s
 *generic* interface via  an array of ``unsigned int cd_values`` as is used
-in `H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_. The other
-uses HDF5_ `properties <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#GenericPropFuncs>`_ 
-added to the `dataset creation property list <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#DatasetCreatePropFuncs>`_
+in `H5Pset_filter() <https://docs.hdfgroup.org/hdf5/develop/group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5>`__. The other
+uses HDF5_ `property lists <https://docs.hdfgroup.org/hdf5/develop/group___h5_p.html>`__
+added to the `dataset creation property list <https://docs.hdfgroup.org/hdf5/develop/group___h5_p.html>`__
 used when the dataset to be compressed is being created. You  can find examples  of writing
 HDF5_ data using both the
 `generic <https://github.com/LLNL/H5Z-ZFP/blob/master/test/test_write.c#L263>`_ 
@@ -24,9 +24,9 @@ these modes of controlling ZFP_ compression, please see the
 Finally, you should *not* attempt to combine the ZFP_ filter with any other
 *byte order altering* filter such as, for example, HDF5_'s shuffle filter.
 Space-performance will be ruined. This is in contrast to HDF5_'s
-`deflate <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetDeflate>`_
+`deflate <https://docs.hdfgroup.org/hdf5/develop/group___d_c_p_l.html#gaf1f569bfc54552bdb9317d2b63318a0d>`__
 filter which often performs *better* when used in conjunction with the
-`shuffle <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetShuffle>`_
+`shuffle <https://docs.hdfgroup.org/hdf5/develop/group___d_c_p_l.html#ga31e09cb0bf2da2893eed8a72220e6521>`__
 filter.
 
 .. _generic-interface:
@@ -53,7 +53,7 @@ the ``H5Zzfp_plugin.h`` header file::
 These  macros  utilize *type punning* to store the relevant ZFP_ parameters  into  a
 sufficiently large array (>=6) of ``unsigned int cd_values``. It is up to
 the  caller to  then call
-`H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_
+`H5Pset_filter() <https://docs.hdfgroup.org/hdf5/develop/group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5>`__
 with  the array  of cd_values constructed by one of these macros.
 
 Here is example code from
