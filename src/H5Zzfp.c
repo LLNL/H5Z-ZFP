@@ -155,18 +155,18 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
     if ((int) B stream_word_bits != 8)
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, -1,
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, FAIL,
             "ZFP lib not compiled with -DBIT_STREAM_WORD_TYPE=uint8");
 
     /* get datatype class, size and space dimensions */
     if (H5T_NO_CLASS == (dclass = H5Tget_class(type_id)))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, -1, "bad datatype class");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     if (0 == (dsize = H5Tget_size(type_id)))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, -1, "bad datatype size");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     if (0 > (ndims = H5Sget_simple_extent_dims(chunk_space_id, dims, 0)))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, -1, "bad chunk data space");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, FAIL, "bad chunk data space");
 
     /* confirm ZFP library can handle this data */
 #if ZFP_VERSION_NO < 0x0510
@@ -234,13 +234,13 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     h5z_zfp_controls_t ctrls;
 
     if (0 > (dclass = H5Tget_class(type_id)))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "not a datatype");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     if (0 == (dsize = H5Tget_size(type_id)))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "not a datatype");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     if (0 > (ndims = H5Sget_simple_extent_dims(chunk_space_id, dims, 0)))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "not a data space");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* setup zfp data type for meta header */
     if (dclass == H5T_FLOAT)
@@ -250,7 +250,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         else if (dsize == sizeof(double))
             zt = zfp_type_double;
         else
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "invalid datatype size");
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype size");
     }
     else if (dclass == H5T_INTEGER)
     {
@@ -259,7 +259,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         else if (dsize == sizeof(int64))
             zt = zfp_type_int64;
         else
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "invalid datatype size");
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype size");
     }
     else
     {
@@ -409,7 +409,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     hdr_cd_nelmts++; /* for slot 0 holding version info */
 
     if (hdr_cd_nelmts > H5Z_ZFP_CD_NELMTS_MAX)
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, -1, "buffer overrun in hdr_cd_values");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, FAIL, "buffer overrun in hdr_cd_values");
 
     /* Now, update cd_values for the filter */
     if (0 > H5Pmodify_filter(dcpl_id, H5Z_FILTER_ZFP, flags, hdr_cd_nelmts, hdr_cd_values))
