@@ -33,7 +33,7 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #elif defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x053
   #include "cfparrays.h"
 #else
-  #error GOT HERE
+  #error Unable to find ZFP array header
 #endif
 #endif
 
