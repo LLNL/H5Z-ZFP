@@ -16,4 +16,7 @@ typedef struct _h5z_zfp_controls_t {
     } details;
 } h5z_zfp_controls_t;
 
+#define SUCCESS 0
+#define FAIL (-1)
+
 #endif
