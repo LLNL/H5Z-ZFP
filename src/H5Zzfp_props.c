@@ -28,11 +28,11 @@ static herr_t H5Pset_zfp(hid_t plist, int mode, ...)
     herr_t retval;
 
     if (0 >= H5Pisa_class(plist, H5P_DATASET_CREATE))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "not a dataset creation property list class");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset creation property list class");
 
     ctrls_p = (h5z_zfp_controls_t *) malloc(ctrls_sz);
     if (0 == ctrls_p)
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, -1, "allocation failed for ZFP controls");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, FAIL, "allocation failed for ZFP controls");
 
     va_start(ap, mode);
     ctrls_p->mode = mode;
@@ -42,14 +42,14 @@ static herr_t H5Pset_zfp(hid_t plist, int mode, ...)
         {
             ctrls_p->details.rate = va_arg(ap, double);
             if (0 > ctrls_p->details.rate)
-                H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, -1, "rate out of range.");
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADVALUE, FAIL, "rate out of range.");
             break;
         }
         case H5Z_ZFP_MODE_ACCURACY:
         {
             ctrls_p->details.acc = va_arg(ap, double);
             if (0 > ctrls_p->details.acc)
-                H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, -1, "accuracy out of range.");
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADVALUE, FAIL, "accuracy out of range.");
             break;
         }
         case H5Z_ZFP_MODE_PRECISION:
@@ -71,7 +71,7 @@ static herr_t H5Pset_zfp(hid_t plist, int mode, ...)
         }
         default:
         {
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, -1, "bad ZFP mode.");
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADVALUE, FAIL, "bad ZFP mode.");
             break;
         }
     }
@@ -84,13 +84,13 @@ static herr_t H5Pset_zfp(hid_t plist, int mode, ...)
             && fid == H5Z_FILTER_ZFP)
         {
             if (0 > H5Premove_filter(plist, H5Z_FILTER_ZFP))
-                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, -1, "Unable to remove old ZFP filter from pipeline.");
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, FAIL, "Unable to remove old ZFP filter from pipeline.");
             break;
         }
     }
 
     if (0 > H5Pset_filter(plist, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, 0, 0))
-        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, -1, "Unable to put ZFP filter in pipeline.");
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, FAIL, "Unable to put ZFP filter in pipeline.");
 
     if (0 == H5Pexist(plist, "zfp_controls"))
     {
@@ -109,6 +109,175 @@ done:
         free(ctrls_p);
 
     return retval;
+}
+
+herr_t H5Pget_zfp(hid_t plist, int mode, ...)
+{
+    static char const *_funcname_ = "H5Pget_zfp";
+    static size_t ctrls_sz = sizeof(h5z_zfp_controls_t);
+    unsigned int flags, fconfig;
+    unsigned int cd_vals[10];
+    size_t cd_nelmts = sizeof(cd_vals)/sizeof(cd_vals[0]);
+    char fname[100];
+    h5z_zfp_controls_t ctrls;
+    va_list ap;
+    herr_t retval = SUCCESS;
+
+    if (0 >= H5Pisa_class(plist, H5P_DATASET_CREATE))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset creation property list class");
+
+    va_start(ap, mode);
+
+    if (0 < H5Pexist(plist, "zfp_controls"))
+    {
+        H5Pget(plist, "zfp_controls", &ctrls); /* should always succeed */
+
+        switch (mode)
+        {
+            case H5Z_ZFP_MODE_RATE:
+            {
+                double *rate = va_arg(ap, double*);
+                *rate = ctrls.details.rate;
+                break;
+            }
+            case H5Z_ZFP_MODE_ACCURACY:
+            {
+                double *acc = va_arg(ap, double*);
+                *acc = ctrls.details.acc;
+                break;
+            }
+            case H5Z_ZFP_MODE_PRECISION:
+            {
+                unsigned int *prec = va_arg(ap, unsigned int*);
+                *prec = ctrls.details.prec;
+                break;
+            }
+            case H5Z_ZFP_MODE_EXPERT:
+            {
+                unsigned int *minbits = va_arg(ap, unsigned int*);
+                *minbits = ctrls.details.expert.minbits;
+                unsigned int *maxbits = va_arg(ap, unsigned int*);
+                *maxbits = ctrls.details.expert.maxbits;
+                unsigned int *maxprec = va_arg(ap, unsigned int*);
+                *maxprec = ctrls.details.expert.maxprec;
+                int *minexp  = va_arg(ap, int*);
+                *minexp = ctrls.details.expert.minexp;
+                break;
+            }
+            case H5Z_ZFP_MODE_REVERSIBLE:
+            {
+                break;
+            }
+            default:
+            {
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADVALUE, FAIL, "bad ZFP mode.");
+                break;
+            }
+        }
+    }
+    else if (0 <= H5Pget_filter_by_id2(plist, H5Z_FILTER_ZFP, &flags, &cd_nelmts, cd_vals, sizeof(fname), fname, &fconfig))
+    {
+        /* is this property list pre- or post- modification from having been used in the filter */
+        if (cd_nelmts > 0 && cd_vals[0] <= H5Z_ZFP_MODE_REVERSIBLE)
+        {
+            switch (mode)
+            {
+                case H5Z_ZFP_MODE_RATE:
+                {
+                    double *rate = va_arg(ap, double*);
+                    *rate = H5Pget_zfp_rate_cdata(cd_nelmts, cd_vals);
+                    break;
+                }
+                case H5Z_ZFP_MODE_ACCURACY:
+                {
+                    double *acc = va_arg(ap, double*);
+                    *acc = H5Pget_zfp_accuracy_cdata(cd_nelmts, cd_vals);
+                    break;
+                }
+                case H5Z_ZFP_MODE_PRECISION:
+                {
+                    unsigned int *prec = va_arg(ap, unsigned int*);
+                    *prec = H5Pget_zfp_precision_cdata(cd_nelmts, cd_vals);
+                    break;
+                }
+                case H5Z_ZFP_MODE_EXPERT:
+                {
+                    unsigned int *minbits = va_arg(ap, unsigned int*);
+                    unsigned int *maxbits = va_arg(ap, unsigned int*);
+                    unsigned int *maxprec = va_arg(ap, unsigned int*);
+                             int *minexp  = va_arg(ap, int*);
+                    H5Pget_zfp_expert_cdata(cd_nelmts, cd_vals, (*minbits), (*maxbits), (*maxprec), (*minexp));
+                    break;
+                }
+                case H5Z_ZFP_MODE_REVERSIBLE:
+                {
+                    break;
+                }
+                default:
+                {
+                    H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADVALUE, FAIL, "bad ZFP mode.");
+                    break;
+                }
+            }
+        }
+        else /* cd_vals for post-modified by filter */
+        {
+            if (cd_nelmts != H5Z_ZFP_CD_NELMTS_MAX)
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_CANTGET, FAIL, "ZFP filter cd-vals incorrect length");
+
+#if 0
+// cd_vals contains, starting at entry index 1, the ZFP stream header. So, now, open that as a bitstream...
+bitstream *dummy_bstr = stream_open(&cd_vals[1], sizeof(cd_vals))));
+zfp_stream *dummy_zstr = zfp_stream_open(dummy_bstr);
+
+// now, query stream for info you seek...
+zfp_mode zm = zfp_stream_compression_mode(dummy_zstr);
+double rate = zfp_stream_rate(dummy_zstr, dim);
+double accuracy = zfp_stream_accuracy(dummy_zstr);
+uint precision = zfp_stream_precision(dummy_zstr);
+zfp_stream_close(dummy_zstr);
+stream_close(dummy_bstr);
+#endif
+            
+        }
+    }
+    else
+    {
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_CANTGET, FAIL, "ZFP filter properties");
+    }
+
+    va_end(ap);
+
+done:
+
+    return retval;
+}
+
+herr_t H5Pget_zfp_rate(hid_t plist, double *rate)
+{
+    return H5Pget_zfp(plist, H5Z_ZFP_MODE_RATE, rate);
+}
+
+herr_t H5Pget_zfp_precision(hid_t plist, unsigned int *prec)
+{
+    return H5Pget_zfp(plist, H5Z_ZFP_MODE_PRECISION, prec);
+}
+
+herr_t H5Pget_zfp_accuracy(hid_t plist, double *acc)
+{
+    return H5Pget_zfp(plist, H5Z_ZFP_MODE_ACCURACY, acc);
+}
+
+herr_t H5Pget_zfp_expert(hid_t plist,
+    unsigned int *minbits, unsigned int *maxbits,
+    unsigned int *maxprec, int *minexp)
+{
+    return H5Pget_zfp(plist, H5Z_ZFP_MODE_EXPERT, minbits, maxbits, maxprec, minexp);
+}
+
+herr_t H5Pget_zfp_reversible(hid_t plist)
+{
+    return H5Pget_zfp(plist, H5Z_ZFP_MODE_REVERSIBLE);
 }
 
 herr_t H5Pset_zfp_rate(hid_t plist, double rate)
