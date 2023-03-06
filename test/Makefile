@@ -1,5 +1,11 @@
-include ../config.make
+# Include config.make only if we're not making this tool
+ifneq ($(strip $(MAKECMDGOALS)),print_h5repack_farg)
+    ifneq ($(strip $(MAKECMDGOALS)),clean)
+        include ../config.make
+    endif
+endif
 
+# printf symbols for output of test results
 NO_COLOR=\033[0m
 OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
@@ -57,7 +63,7 @@ print_h5repack_farg: print_h5repack_farg.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
 print_h5repack_farg.o: print_h5repack_farg.c
-	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(HDF5_INC)
+	$(CC) -c $< -o $@ $(CFLAGS) -I../src
 
 ifneq ($(FC),) # Fortran Tests [
 

@@ -1,12 +1,12 @@
 export SHELL = /bin/bash
 
-ifeq ($(HDF5_HOME),)
-    $(warning WARNING: HDF5_HOME not specified)
-endif
-
-ifeq ($(ZFP_HOME),)
-    $(warning WARNING: ZFP_HOME not specified)
-endif
+#ifeq ($(HDF5_HOME),)
+#    $(warning WARNING: HDF5_HOME not specified)
+#endif
+#
+#ifeq ($(ZFP_HOME),)
+#    $(warning WARNING: ZFP_HOME not specified)
+#endif
 
 # disallow relative paths in HOME variables
 HOME_WORDS := $(subst /, ,$(HDF5_HOME))
