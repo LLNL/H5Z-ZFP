@@ -20,9 +20,6 @@ endif
 
 .PHONY: lib plugin check patch clean
 
-patch:
-	@echo "If using HDF5-1.8, make sure you have patched repack"
-
 plugin:
 	cd ../src; $(MAKE) $(MAKEVARS) $@
 
@@ -355,16 +352,21 @@ test-reversible: plugin test_write_plugin
 # of test_write which prints them in the header output. The values
 # here are for accuracy mode and tolerance of 0.001.
 # 
-# A bug-fix patch to h5repack_parse.c is required for this test on
-# older HDF5 versions (like <= 1.8.10).
+# 1.8 and older versions of h5repack don't handle -f argument correctly.
+# So, this test is skipped then.
 #
-test-h5repack: plugin mesh.h5 patch
+test-h5repack: plugin mesh.h5
 	@echo " "; \
 	pad=$$(printf '%*s' "$(padlimit)"); \
 	pad=$${pad// /.}; \
 	x="h5repack -f UD=32013,0,4,3,0,3539053052,1062232653"; \
         printf "$$x"; \
 	printf ' %*.*s' 0 $$(($(padlength) - $${#x} )) "$$pad"; \
+        v=$$($(HDF5_BIN)/h5repack --version | cut -d ' ' -f3 | cut -d '.' -f1,2 | tr -d '.'); \
+        if [[ $$v -le 18 ]]; then \
+            printf " [$(SKIP_COLOR)SKIPPED$(NO_COLOR)]\n"; \
+	    exit 0; \
+	fi; \
 	env LD_LIBRARY_PATH=$(HDF5_LIB):$(LD_LIBRARY_PATH) HDF5_PLUGIN_PATH=$(H5Z_ZFP_PLUGIN) $(HDF5_BIN)/$$x \
 	     -l X,Y,Z,Indexes:CHUNK=217 \
 	     -l Indexes2:CHUNK=1517 \
