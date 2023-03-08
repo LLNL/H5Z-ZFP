@@ -30,7 +30,7 @@ test_write_plugin.o: test_write.c
 	$(CC) -c $< -o $@ -DH5Z_ZFP_USE_PLUGIN -DZFP_LIB_VERSION=0x$(ZFP_LIB_VERSION) $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_write_lib.o: test_write.c
-	$(CC) -c $< -o $@ $(CFLAGS) -DZFP_HAS_CFP=$(ZFP_HAS_CFP) -DZFP_LIB_VERSION=0x$(ZFP_LIB_VERSION) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
+	$(CC) -c $< -o $@ $(CFLAGS) -DZFP_HAS_CFP=$(ZFP_HAS_CFP) -DHDF5_HAS_WRITE_CHUNK=$(HDF5_HAS_WRITE_CHUNK) -DZFP_LIB_VERSION=0x$(ZFP_LIB_VERSION) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_write_plugin: test_write_plugin.o plugin
 	$(CC) $< -o $@ $(CFLAGS) $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 $(ZFP_LIBS) -lm $(LDFLAGS)

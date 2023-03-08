@@ -444,7 +444,7 @@ int main(int argc, char **argv)
     sixd = 0;
 #endif
 
-#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x054 && ZFP_HAS_CFP>0
+#if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION>=0x054 && ZFP_HAS_CFP>0 && HDF5_HAS_WRITE_CHUNK>0
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",run ZFP array case using H5Dwrite_chunk);
 #else
     HANDLE_ARG(zfparr,(int) strtol(argv[i]+len2,0,10),"%d",requires ZFP>=0.5.4 with CFP enabled);
@@ -619,7 +619,7 @@ int main(int argc, char **argv)
     }
     /* End of 6D Example */
 
-#if ZFP_HAS_CFP
+#if ZFP_HAS_CFP>0 && HDF5_HAS_WRITE_CHUNK>0
     /* ZFP Array Example */
     if (zfparr>0 && zfpmode==1 && rate>0)
     {
