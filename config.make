@@ -213,6 +213,11 @@ else
   MAKEVARS = HDF5_HOME=$(HDF5_HOME)
 endif
 
+HDF5_HAS_WRITE_CHUNK = 1
+ifeq ($(shell grep H5Dwrite_chunk $(HDF5_INC)/*.h),)
+    HDF5_HAS_WRITE_CHUNK = 0
+endif
+
 ifeq ($(PREFIX),)
     PREFIX := $(shell pwd)/install
 endif
