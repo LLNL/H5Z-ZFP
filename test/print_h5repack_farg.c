@@ -87,7 +87,10 @@ static void print_cdvals(int zfpmode, double rate, double acc, uint prec,
     printf("    -f UD=%u,0,%u", H5Z_FILTER_ZFP, cd_nelmts);
     for (i = 0; i < cd_nelmts; i++)
         printf(",%u", cd_values[i]);
-    printf("\n");
+    printf("\n\n");
+    printf("Also, if you are h5repacking on a machine with a different numeric architecture\n");
+    printf("(e.g. endianness and/or floating point format) than where the data was generated,\n");
+    printf("you will also want to use the h5repack -x argument.\n");
 }
 
 int main(int argc, char **argv)
