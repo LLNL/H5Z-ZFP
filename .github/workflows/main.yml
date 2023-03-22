@@ -2,11 +2,13 @@ name: h5z-zfp
 
 # Controls when the action will run. 
 #Triggers the workflow on push or pull requests.
+
+# TODO: REMOVE feat-cmake_tests before merging
 on: 
   push:
-    branches: [ feature/cmake_tests, master ]
+    branches: [ feat-cmake_tests, master ] 
   pull_request:
-    branches: [ feature/cmake_tests, master ]
+    branches: [ feat-cmake_tests, master ]
 
 # A workflow run is made up of one or more jobs that
 # can run sequentially or in parallel
