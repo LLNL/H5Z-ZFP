@@ -2,7 +2,7 @@
 Using H5Z-ZFP Plugin with H5Repack
 ==================================
 A convenient way to use and play with the ZFP_ filter is a *plugin* with
-the HDF5_ `h5repack <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack>`_
+the HDF5_ `h5repack <https://portal.hdfgroup.org/display/HDF5/h5repack>`__ (**note**: the preceding link to ``h5repack`` may not render correctly from Safari)
 utility using the ``-f`` filter argument to apply ZFP to existing data in a file.
 
 -----------------
@@ -25,7 +25,7 @@ Constructing an HDF5_ cd_values array
 HDF5_'s ``h5repack`` utility uses only the *generic* interface to HDF5_ filters.
 Another challenge in using ``h5repack`` as described here is constructing the set
 ``unsigned int cd_values`` as is used in
-`H5Pset_filter() <https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFilter>`_
+`H5Pset_filter() <https://docs.hdfgroup.org/hdf5/develop/group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5>`__
 required by the *generic* HDF5_ filter interface, especially because
 of the type-punning (doubles as unsigned int) involved.
 

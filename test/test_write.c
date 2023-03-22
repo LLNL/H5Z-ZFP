@@ -371,7 +371,7 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
 
 static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     double rate, double acc, unsigned int prec,
-    unsigned int minbits, unsigned int maxbits, unsigned maxprec, int minexp)
+    unsigned int minbits, unsigned int maxbits, unsigned int maxprec, int minexp)
 {
     hid_t cpid;
 

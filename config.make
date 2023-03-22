@@ -8,6 +8,22 @@ ifeq ($(ZFP_HOME),)
     $(warning WARNING: ZFP_HOME not specified)
 endif
 
+# disallow relative paths in HOME variables
+HOME_WORDS := $(subst /, ,$(HDF5_HOME))
+FIRST_WORD := $(firstword $(HOME_WORDS))
+ifeq ($(FIRST_WORD),.)
+    $(error Please use absolute path for HDF5_HOME)
+else ifeq ($(FIRST_WORD),..)
+    $(error Please use absolute path for HDF5_HOME)
+endif
+HOME_WORDS := $(subst /, ,$(ZFP_HOME))
+FIRST_WORD := $(firstword $(HOME_WORDS))
+ifeq ($(FIRST_WORD),.)
+    $(error Please use absolute path for ZFP_HOME)
+else ifeq ($(FIRST_WORD),..)
+    $(error Please use absolute path for ZFP_HOME)
+endif
+
 # Construct version variable depending on what dir we're in
 PWD_BASE = $(shell basename $$(pwd))
 ifeq ($(PWD_BASE),src)

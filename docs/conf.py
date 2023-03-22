@@ -47,8 +47,8 @@ project = u'H5Z-ZFP'
 copyright = u'2016, LLNL-CODE-707197'
 
 rst_epilog = """
-.. _ZFP: https://computation.llnl.gov/projects/floating-point-compression 
-.. _HDF5: https://support.hdfgroup.org/HDF5/doc/index.html
+.. _ZFP: https://computing.llnl.gov/projects/zfp
+.. _HDF5: https://docs.hdfgroup.org/hdf5/develop/
 .. _H5Z-ZFP: https://github.com/LLNL/H5Z-ZFP
 .. _Spack: https://spack.io
 """

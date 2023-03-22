@@ -39,13 +39,14 @@ Manual Installation
 
 If Spack_ is not an option for you, information on *manually* installing is provided
 here.
+H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <cmake>`.
 
 ^^^^^^^^^^^^^
 Prerequisites
 ^^^^^^^^^^^^^
 
-* `ZFP Library <http://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.0.tar.gz>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
-* `HDF5 Library <https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz>`_
+* `ZFP Library <https://github.com/LLNL/zfp/releases>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
+* `HDF5 Library <https://portal.hdfgroup.org/display/support/Downloads>`_
 * `H5Z-ZFP filter plugin <https://github.com/LLNL/H5Z-ZFP>`_
 
 ^^^^^^^^^^^^^
