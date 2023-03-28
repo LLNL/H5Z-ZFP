@@ -16,6 +16,7 @@ if (EXISTS ${HDF5_BIN_DIR}/h5repack-shared)
   set(HDF5_REPACK_EXECUTABLE ${HDF5_BIN_DIR}/h5repack-shared)
 endif ()
 set(HDF5_DUMP_EXECUTABLE ${HDF5_BIN_DIR}/h5dump)
+get_target_property(HDF5_PLUGIN_PATH h5z_zfp_shared RUNTIME_OUTPUT_DIRECTORY)
 
 #------------------------------------------------------------------------------#
 # Plugin and library write & read tests (No check implemented)
@@ -57,7 +58,10 @@ foreach (IRATE RANGE ${NRATES})
   add_test(NAME test-rate-write-${RATE}   COMMAND test_write_plugin zfpmode=1 rate=${RATE} ofile=test_zfp-rate-${RATE}.h5)
   add_test(NAME test-rate-read-${RATE}    COMMAND test_read_plugin max_absdiff=${DIFF} max_reldiff=${DIFF} ifile=test_zfp-rate-${RATE}.h5)
   add_test(NAME test-rate-cleanup-${RATE} COMMAND ${CMAKE_COMMAND} -E remove test_zfp-rate-${RATE}.h5)
-  set_property(TEST test-rate-write-${RATE} test-rate-read-${RATE} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+  set_property(TEST test-rate-write-${RATE} test-rate-read-${RATE} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+  if (MSVC)
+    set_property(TEST test-rate-write-${RATE} test-rate-read-${RATE} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+  endif ()
   set_tests_properties(test-rate-write-${RATE}   PROPERTIES FIXTURES_SETUP    "rate-read-${RATE};rate-cleanup-${RATE}")
   set_tests_properties(test-rate-write-${RATE}   PROPERTIES FIXTURES_REQUIRED "rate-write-${RATE}")
   set_tests_properties(test-rate-read-${RATE}    PROPERTIES FIXTURES_REQUIRED "rate-read-${RATE}")
@@ -73,7 +77,7 @@ foreach (IRATE RANGE ${NRATES})
   set_tests_properties(test-lib-rate-cleanup-${RATE} PROPERTIES FIXTURES_REQUIRED "lib-rate-cleanup-${RATE}")
   set_tests_properties(test-lib-rate-cleanup-${RATE} PROPERTIES FIXTURES_CLEANUP  "lib-rate-write-${RATE};lib-rate-read-${RATE}")
 
-  if (FORTRAN_INTERFACE)
+  if (NOT MSVC AND FORTRAN_INTERFACE)
     add_test(NAME test-rate-write-${RATE}-f   COMMAND test_rw_fortran zfpmode 1 rate ${RATE} ofile test_zfp_fortran-rate-${RATE}.h5)
     add_test(NAME test-rate-info1-${RATE}-f   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/h5dump-rate.bsh ${HDF5_DUMP_EXECUTABLE} test_zfp_fortran-rate-${RATE}.h5 compressed ${RATE})
     add_test(NAME test-rate-info2-${RATE}-f   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/h5dump-rate.bsh ${HDF5_DUMP_EXECUTABLE} test_zfp_fortran-rate-${RATE}.h5 compressed-plugin ${RATE})
@@ -101,7 +105,10 @@ foreach (IACC RANGE ${NACCS})
   add_test(NAME test-accuracy-write-${NUMBER}   COMMAND test_write_plugin zfpmode=3 acc=${ACC} ofile=test_zfp-acc-${NUMBER}.h5)
   add_test(NAME test-accuracy-read-${NUMBER}    COMMAND test_read_plugin ret=1 max_absdiff=${DIFF} ifile=test_zfp-acc-${NUMBER}.h5)
   add_test(NAME test-accuracy-cleanup-${NUMBER} COMMAND ${CMAKE_COMMAND} -E remove test_zfp-acc-${NUMBER}.h5)
-  set_property(TEST test-accuracy-write-${NUMBER} test-accuracy-read-${NUMBER} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+  set_property(TEST test-accuracy-write-${NUMBER} test-accuracy-read-${NUMBER} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+  if (MSVC)
+    set_property(TEST test-accuracy-write-${NUMBER} test-accuracy-read-${NUMBER} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+  endif ()
   set_tests_properties(test-accuracy-write-${NUMBER}   PROPERTIES FIXTURES_SETUP    "accuracy-read-${NUMBER};accuracy-cleanup-${NUMBER}")
   set_tests_properties(test-accuracy-write-${NUMBER}   PROPERTIES FIXTURES_REQUIRED "accuracy-write-${NUMBER}")
   set_tests_properties(test-accuracy-read-${NUMBER}    PROPERTIES FIXTURES_REQUIRED "accuracy-read-${NUMBER}")
@@ -122,7 +129,10 @@ foreach (IACC RANGE ${NACCS})
     add_test(NAME test-accuracy-diff1-${NUMBER}-f   COMMAND ${HDF5_DIFF_EXECUTABLE} -v -d ${ACC} test_zfp_fortran-acc-${NUMBER}.h5 test_zfp_fortran-acc-${NUMBER}.h5 compressed original)
     add_test(NAME test-accuracy-diff2-${NUMBER}-f   COMMAND ${HDF5_DIFF_EXECUTABLE} -v -d ${ACC} test_zfp_fortran-acc-${NUMBER}.h5 test_zfp_fortran-acc-${NUMBER}.h5 compressed-plugin original)
     add_test(NAME test-accuracy-cleanup-${NUMBER}-f COMMAND ${CMAKE_COMMAND} -E remove test_zfp_fortran-acc-${NUMBER}.h5)
-    set_property(TEST test-accuracy-diff1-${NUMBER}-f test-accuracy-diff2-${NUMBER}-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+    set_property(TEST test-accuracy-diff1-${NUMBER}-f test-accuracy-diff2-${NUMBER}-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+    if (MSVC)
+      set_property(TEST test-accuracy-diff1-${NUMBER}-f test-accuracy-diff2-${NUMBER}-f APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+    endif ()
     set_tests_properties(test-accuracy-write-${NUMBER}-f   PROPERTIES FIXTURES_SETUP    "accuracy-diff1-${NUMBER}-f;accuracy-diff2-${NUMBER}-f;accuracy-cleanup-${NUMBER}-f")
     set_tests_properties(test-accuracy-write-${NUMBER}-f   PROPERTIES FIXTURES_REQUIRED "accuracy-write-${NUMBER}-f")
     set_tests_properties(test-accuracy-diff1-${NUMBER}-f   PROPERTIES FIXTURES_REQUIRED "accuracy-diff1-${NUMBER}-f")
@@ -144,7 +154,10 @@ foreach (IPREC RANGE ${NPRECS})
   add_test(NAME test-precision-write-${PREC}   COMMAND test_write_plugin zfpmode=2 prec=${PREC} ofile=test_zfp-prec-${PREC}.h5)
   add_test(NAME test-precision-read-${PREC}    COMMAND test_read_plugin ret=2 max_reldiff=${DIFF} ifile=test_zfp-prec-${PREC}.h5)
   add_test(NAME test-precision-cleanup-${PREC} COMMAND ${CMAKE_COMMAND} -E remove test_zfp-prec-${PREC}.h5)
-  set_property(TEST test-precision-write-${PREC} test-precision-read-${PREC} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+  set_property(TEST test-precision-write-${PREC} test-precision-read-${PREC} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+  if (MSVC)
+    set_property(TEST test-precision-write-${PREC} test-precision-read-${PREC} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+  endif ()
   set_tests_properties(test-precision-write-${PREC}   PROPERTIES FIXTURES_SETUP    "precision-read-${PREC};precision-cleanup-${PREC}")
   set_tests_properties(test-precision-write-${PREC}   PROPERTIES FIXTURES_REQUIRED "precision-write-${PREC}")
   set_tests_properties(test-precision-read-${PREC}    PROPERTIES FIXTURES_REQUIRED "precision-read-${PREC}")
@@ -168,7 +181,10 @@ foreach (IPREC RANGE ${NPRECS})
     add_test(NAME test-precision-diff1-${PREC}-f   COMMAND ls)
     add_test(NAME test-precision-diff2-${PREC}-f   COMMAND ls)
     add_test(NAME test-precision-cleanup-${PREC}-f COMMAND ${CMAKE_COMMAND} -E remove test_zfp_fortran-prec-${PREC}.h5)
-    set_property(TEST test-precision-diff1-${PREC}-f test-precision-diff2-${PREC}-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+    set_property(TEST test-precision-diff1-${PREC}-f test-precision-diff2-${PREC}-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+    if (MSVC)
+      set_property(TEST test-precision-diff1-${PREC}-f test-precision-diff2-${PREC}-f APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+    endif ()
     set_tests_properties(test-precision-write-${PREC}-f   PROPERTIES FIXTURES_SETUP    "precision-diff1-${PREC}-f;precision-diff2-${PREC}-f;precision-cleanup-${PREC}-f")
     set_tests_properties(test-precision-write-${PREC}-f   PROPERTIES FIXTURES_REQUIRED "precision-write-${PREC}-f")
     set_tests_properties(test-precision-diff1-${PREC}-f   PROPERTIES FIXTURES_REQUIRED "precision-diff1-${PREC}-f")
@@ -182,7 +198,10 @@ endforeach ()
 add_test(NAME test-reversible COMMAND test_write_plugin zfpmode=5 ofile=test_zfp-reversible.h5)
 add_test(NAME test-reversible-diff COMMAND test_read_plugin ret=1 max_absdiff=0 ifile=test_zfp-reversible.h5)
 add_test(NAME test-reversible-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp-reversible.h5)
-set_property(TEST test-reversible test-reversible-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+set_property(TEST test-reversible test-reversible-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+if (MSVC)
+  set_property(TEST test-reversible test-reversible-diff APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+endif ()
 set_tests_properties(test-reversible         PROPERTIES FIXTURES_SETUP    "reversible-diff;reversible-cleanup")
 set_tests_properties(test-reversible         PROPERTIES FIXTURES_REQUIRED "reversible")
 set_tests_properties(test-reversible-diff    PROPERTIES FIXTURES_REQUIRED "reversible-diff")
@@ -203,7 +222,10 @@ if (FORTRAN_INTERFACE)
   add_test(NAME test-reversible-diff1-f   COMMAND ${HDF5_DIFF_EXECUTABLE} -v -p 0.00001 test_zfp_fortran-reversible.h5 test_zfp_fortran-reversible.h5 compressed original)
   add_test(NAME test-reversible-diff2-f   COMMAND ${HDF5_DIFF_EXECUTABLE} -v -p 0.00001 test_zfp_fortran-reversible.h5 test_zfp_fortran-reversible.h5 compressed-plugin original)
   add_test(NAME test-reversible-cleanup-f COMMAND ${CMAKE_COMMAND} -E remove test_zfp_fortran-reversible.h5)
-  set_property(TEST test-reversible-diff1-f test-reversible-diff2-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+  set_property(TEST test-reversible-diff1-f test-reversible-diff2-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+  if (MSVC)
+    set_property(TEST test-reversible-diff1-f test-reversible-diff2-f APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+  endif ()
   set_tests_properties(test-reversible-write-f   PROPERTIES FIXTURES_SETUP    "reversible-diff1-f;reversible-diff2-f;reversible-cleanup-f")
   set_tests_properties(test-reversible-write-f   PROPERTIES FIXTURES_REQUIRED "reversible-write-f")
   set_tests_properties(test-reversible-diff1-f   PROPERTIES FIXTURES_REQUIRED "reversible-diff1-f")
@@ -248,13 +270,19 @@ if (ZFP_CFP_ENABLED)
 
   set_tests_properties(test-zfparr      PROPERTIES FIXTURES_SETUP    "zfparr-diff")
   set_tests_properties(test-zfparr-diff PROPERTIES FIXTURES_REQUIRED "zfparr-diff")
-  set_property(TEST test-zfparr-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+  set_property(TEST test-zfparr-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+  if (MSVC)
+    set_property(TEST test-zfparr-diff APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+  endif ()
 endif ()
 
 # Endian
 # FIXME: fails due to datatype difference -> return code 2
 #add_test(NAME test-endian COMMAND ${HDF5_DIFF_EXECUTABLE} -v -d 0.00001 ${CMAKE_CURRENT_SOURCE_DIR}/test_zfp_le.h5 ${CMAKE_CURRENT_SOURCE_DIR}/test_zfp_be.h5 compressed compressed)
-#set_property(TEST test-endian APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
+#set_property(TEST test-endian APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+#if (MSVC)
+#  set_property(TEST test-endian APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+#endif ()
 
 #------------------------------------------------------------------------------#
 # Errors tests
@@ -276,26 +304,31 @@ set_tests_properties(test-error-cleanup PROPERTIES FIXTURES_CLEANUP  "error")
 add_executable(print_h5repack_farg print_h5repack_farg.c)
 target_link_libraries(print_h5repack_farg h5z_zfp_shared)
 
-add_test(NAME test-h5repack COMMAND ${HDF5_REPACK_EXECUTABLE} -f UD=32013,0,4,3,0,3539053052,1062232653
-                                    -l X,Y,Z,Indexes:CHUNK=217
-	                            -l Indexes2:CHUNK=1517
-	                            -l Pressure,Pressure2,Pressure3:CHUNK=10x20x5
-	                            -l Pressure_2D:CHUNK=10x20
-	                            -l Stress,Velocity,Stress2,Velocity2,Stress3,Velocity3,VelocityZ,VelocityZ2,VelocityZ3:CHUNK=11x21x1x1
-	                            -l VelocityX_2D:CHUNK=21x31
-	                            -l XY:CHUNK=651x1
-	                            -l XYZ:CHUNK=217x1
-	                            -l XYZ2:CHUNK=1617x1
-	                            -l XYZ3:CHUNK=33x1
-	                            ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h5 mesh_repack.h5)
-add_test(NAME test-h5repack-filesizes COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/h5repack-filesizes.bsh ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h5 mesh_repack.h5)
-add_test(NAME test-h5repack-cleanup   COMMAND ${CMAKE_COMMAND} -E rm mesh_repack.h5)
-set_property(TEST test-h5repack APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
-set_tests_properties(test-h5repack           PROPERTIES FIXTURES_SETUP    "h5repack-filesizes;h5repack-cleanup")
-set_tests_properties(test-h5repack           PROPERTIES FIXTURES_REQUIRED "h5repack")
-set_tests_properties(test-h5repack-filesizes PROPERTIES FIXTURES_REQUIRED "h5repack-filesizes")
-set_tests_properties(test-h5repack-cleanup   PROPERTIES FIXTURES_REQUIRED "h5repack-cleanup")
-set_tests_properties(test-h5repack-cleanup   PROPERTIES FIXTURES_CLEANUP  "h5repack;h5repack-filesizes")
+if (NOT MSVC)
+  add_test(NAME test-h5repack COMMAND ${HDF5_REPACK_EXECUTABLE} -f UD=32013,0,4,3,0,3539053052,1062232653
+                                      -l X,Y,Z,Indexes:CHUNK=217
+  	                            -l Indexes2:CHUNK=1517
+  	                            -l Pressure,Pressure2,Pressure3:CHUNK=10x20x5
+  	                            -l Pressure_2D:CHUNK=10x20
+  	                            -l Stress,Velocity,Stress2,Velocity2,Stress3,Velocity3,VelocityZ,VelocityZ2,VelocityZ3:CHUNK=11x21x1x1
+  	                            -l VelocityX_2D:CHUNK=21x31
+  	                            -l XY:CHUNK=651x1
+  	                            -l XYZ:CHUNK=217x1
+  	                            -l XYZ2:CHUNK=1617x1
+  	                            -l XYZ3:CHUNK=33x1
+  	                            ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h5 mesh_repack.h5)
+  add_test(NAME test-h5repack-filesizes COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/h5repack-filesizes.bsh ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h5 mesh_repack.h5)
+  add_test(NAME test-h5repack-cleanup   COMMAND ${CMAKE_COMMAND} -E rm mesh_repack.h5)
+  set_property(TEST test-h5repack APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
+  if (MSVC)
+    set_property(TEST test-h5repack APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
+  endif ()
+  set_tests_properties(test-h5repack           PROPERTIES FIXTURES_SETUP    "h5repack-filesizes;h5repack-cleanup")
+  set_tests_properties(test-h5repack           PROPERTIES FIXTURES_REQUIRED "h5repack")
+  set_tests_properties(test-h5repack-filesizes PROPERTIES FIXTURES_REQUIRED "h5repack-filesizes")
+  set_tests_properties(test-h5repack-cleanup   PROPERTIES FIXTURES_REQUIRED "h5repack-cleanup")
+  set_tests_properties(test-h5repack-cleanup   PROPERTIES FIXTURES_CLEANUP  "h5repack;h5repack-filesizes")
+endif ()
 
 #------------------------------------------------------------------------------#
 # Version compatibility tests

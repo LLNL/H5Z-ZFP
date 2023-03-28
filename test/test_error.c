@@ -8,7 +8,9 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE /* ahead of ALL headers to take proper effect */
+#endif
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
