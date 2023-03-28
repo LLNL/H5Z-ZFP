@@ -180,7 +180,7 @@ endforeach ()
 
 # Reversible
 add_test(NAME test-reversible COMMAND test_write_plugin zfpmode=5 ofile=test_zfp-reversible.h5)
-add_test(NAME test-reversible-diff COMMAND test_read ret=1 max_absdiff=0 ifile=test_zfp-reversible.h5)
+add_test(NAME test-reversible-diff COMMAND test_read_plugin ret=1 max_absdiff=0 ifile=test_zfp-reversible.h5)
 add_test(NAME test-reversible-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp-reversible.h5)
 set_property(TEST test-reversible test-reversible-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/src)
 set_tests_properties(test-reversible         PROPERTIES FIXTURES_SETUP    "reversible-diff;reversible-cleanup")

@@ -12,11 +12,58 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+#define _USE_MATH_DEFINES
+#include <math.h>
+#define j0 _j0
+#include <io.h>
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#define read _read
+#define open _open
+#define close _close
+#define srandom(X) srand(X)
+#define random rand
+
+// strcasestr is not available on Windows
+#include <ctype.h>
+char * strcasestr(s, find)
+     const char *s, *find;
+{
+  char c, sc;
+  size_t len;
+
+  if ((c = *find++) != 0) {
+    c = tolower((unsigned char)c);
+    len = strlen(find);
+    do {
+      do {
+        if ((sc = *s++) == 0)
+          return (NULL);
+      } while ((char)tolower((unsigned char)sc) != c);
+    } while (strncasecmp(s, find, len) != 0);
+    s--;
+  }
+  return ((char *)s);
+}
+
+// strndup() is not available on Windows
+char *strndup( const char *s1, size_t n)
+{
+    char *copy= (char*)malloc( n+1 );
+    memcpy( copy, s1, n );
+    copy[n] = 0;
+    return copy;
+};
+
+#else
+#include <math.h>
 #include <unistd.h>
+#endif
 
 #include "hdf5.h"
 
@@ -72,6 +119,20 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 
 
 /* convenience macro to handle errors */
+#if defined(_WIN32) || defined(_WIN64)
+
+#define ERROR(FNAME)                                              \
+do {                                                              \
+    size_t errmsglen = 94;                                        \
+    char errmsg[errmsglen];                                       \
+    strerror_s(errmsg, errmsglen, errno);                         \
+    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
+            __LINE__, errno, errno?errmsg:"ok");                  \
+    return 1;                                                     \
+} while(0)
+
+#else
+
 #define ERROR(FNAME)                                              \
 do {                                                              \
     int _errno = errno;                                           \
@@ -80,6 +141,8 @@ do {                                                              \
     return 1;                                                     \
 } while(0)
 
+#endif
+                                    \
 /* Generate a simple, 1D sinusioidal data array with some noise */
 #define TYPINT 1
 #define TYPDBL 2
@@ -307,19 +370,20 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
 }
 
 static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
-    double rate, double acc, uint prec,
-    uint minbits, uint maxbits, uint maxprec, int minexp)
+    double rate, double acc, unsigned int prec,
+    unsigned int minbits, unsigned int maxbits, unsigned maxprec, int minexp)
 {
     hid_t cpid;
-    unsigned int cd_values[10];
-    int i;
-    size_t cd_nelmts = 10;
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
     if (0 > H5Pset_chunk(cpid, n, chunk)) ERROR(H5Pset_chunk);
 
 #ifdef H5Z_ZFP_USE_PLUGIN
+
+    unsigned int cd_values[10];
+    size_t cd_nelmts = 10;
+
     /* setup zfp filter via generic (cd_values) interface */
     if (zfpmode == H5Z_ZFP_MODE_RATE)
         H5Pset_zfp_rate_cdata(rate, cd_nelmts, cd_values);
@@ -336,7 +400,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 
     /* print cd-values array used for filter */
     printf("%d cd_values= ", (int) cd_nelmts);
-    for (i = 0; i < (int) cd_nelmts; i++)
+    for (int i = 0; i < (int) cd_nelmts; i++)
         printf("%u,", cd_values[i]);
     printf("\n");
 
@@ -369,7 +433,6 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 
 int main(int argc, char **argv)
 {
-    int i;
     int retval=0;
 
     /* filename variables */
@@ -390,10 +453,10 @@ int main(int argc, char **argv)
     int zfpmode = H5Z_ZFP_MODE_RATE;
     double rate = 4;
     double acc = 0;
-    uint prec = 11;
-    uint minbits = 0;
-    uint maxbits = 4171;
-    uint maxprec = 64;
+    unsigned int prec = 11;
+    unsigned int minbits = 0;
+    unsigned int maxbits = 4171;
+    unsigned int maxprec = 64;
     int minexp = -1074;
     int *ibuf = 0;
     double *buf = 0;
@@ -412,10 +475,10 @@ int main(int argc, char **argv)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
-    HANDLE_ARG(prec,(uint) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
-    HANDLE_ARG(minbits,(uint) strtol(argv[i]+len2,0,10),"%u",set minbits for expert mode);
-    HANDLE_ARG(maxbits,(uint) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode);
-    HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode);
+    HANDLE_ARG(prec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
+    HANDLE_ARG(minbits,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set minbits for expert mode);
+    HANDLE_ARG(maxbits,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode);
+    HANDLE_ARG(maxprec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode);
     HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode);
 
     /* 1D dataset arguments */
@@ -506,7 +569,7 @@ int main(int argc, char **argv)
     if (highd)
     {
      /* dimension indices 0   1   2  3 */
-        int fd, dims[] = {256,128,32,16};
+        int dims[] = {256,128,32,16};
         int ucdims[]={1,3}; /* UNcorrleted dimensions indices */
         hsize_t hdims[] = {256,128,32,16};
         hsize_t hchunk[] = {256,1,32,1};
@@ -543,9 +606,9 @@ int main(int argc, char **argv)
     if (sixd)
     {
         void *tbuf;
-        int t, fd, dims[] = {31,31,31,3,3}; /* a single time instance */
+        int t, dims[] = {31,31,31,3,3}; /* a single time instance */
         int ucdims[]={3,4}; /* indices of UNcorrleted dimensions in dims (tensor components) */
-        hsize_t  hdims[] = {31,31,31,3,3,H5S_UNLIMITED};
+        hsize_t hdims[] = {31,31,31,3,3,H5S_UNLIMITED};
         hsize_t hchunk[] = {31,31,31,1,1,4}; /* 4 non-unity, requires >= ZFP 0.5.4 */
         hsize_t hwrite[] = {31,31,31,3,3,4}; /* size/shape of any given H5Dwrite */
 

@@ -16,8 +16,39 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
+#if defined(_WIN32) || defined(_WIN64)
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <io.h>
+#define strncasecmp _strnicmp
+
+#include <ctype.h>
+char * strcasestr(s, find)
+     const char *s, *find;
+{
+  char c, sc;
+  size_t len;
+
+  if ((c = *find++) != 0) {
+    c = tolower((unsigned char)c);
+    len = strlen(find);
+    do {
+      do {
+        if ((sc = *s++) == 0)
+          return (NULL);
+      } while ((char)tolower((unsigned char)sc) != c);
+    } while (strncasecmp(s, find, len) != 0);
+    s--;
+  }
+  return ((char *)s);
+}
+
+#define srandom(X) srand(X)
+#define random rand
+#else
+#include <math.h>
 #include <unistd.h>
+#endif
 
 #include "hdf5.h"
 
@@ -62,6 +93,20 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 
 
 /* convenience macro to handle errors */
+#if defined(_WIN32) || defined(_WIN64)
+
+#define ERROR(FNAME)                                              \
+do {                                                              \
+    size_t errmsglen = 94;                                        \
+    char errmsg[errmsglen];                                       \
+    strerror_s(errmsg, errmsglen, errno);                         \
+    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
+            __LINE__, errno, errno?errmsg:"ok");                  \
+    return 1;                                                     \
+} while(0)
+
+#else
+
 #define ERROR(FNAME)                                              \
 do {                                                              \
     int _errno = errno;                                           \
@@ -69,6 +114,8 @@ do {                                                              \
         __LINE__, _errno, _errno?strerror(_errno):"ok");          \
     return 1;                                                     \
 } while(0)
+
+#endif
 
 /* Generate a simple, 1D sinusioidal data array with some noise */
 #define TYPINT 1
@@ -102,12 +149,10 @@ static int gen_data(size_t npoints, double noise, double amp, void **_buf, int t
 }
 
 static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
-    double rate, double acc, uint prec,
-    uint minbits, uint maxbits, uint maxprec, int minexp)
+    double rate, double acc, unsigned int prec,
+    unsigned int minbits, unsigned int maxbits, unsigned int maxprec, int minexp)
 {
     hid_t cpid;
-    unsigned int cd_values[10];
-    int i, cd_nelmts = 10;
 
     /* setup dataset creation properties */
     if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
@@ -154,7 +199,7 @@ static int check_hdf5_error_stack_for_string(char const *str)
 
 int main(int argc, char **argv)
 {
-    int i, fd, ndiffs;
+    int i, ndiffs;
     unsigned corrupt[4] = {0xDeadBeef,0xBabeFace, 0xDeadBabe, 0xBeefFace};
     double d = 1.0, *buf = 0, rbuf[DSIZE];
     hsize_t chunk[] = {DSIZE,16,16,16,16};
@@ -162,7 +207,7 @@ int main(int argc, char **argv)
     hsize_t siz;
 
     /* HDF5 related variables */
-    hid_t fid, tid, dsid, idsid, sid, cpid;
+    hid_t fid, tid, dsid, sid, cpid;
 
     int help = 0;
 
@@ -170,10 +215,10 @@ int main(int argc, char **argv)
     int zfpmode = H5Z_ZFP_MODE_ACCURACY;
     double rate = 4;
     double acc = 0.1;
-    uint prec = 11;
-    uint minbits = 0;
-    uint maxbits = 4171;
-    uint maxprec = 64;
+    unsigned int prec = 11;
+    unsigned int minbits = 0;
+    unsigned int maxbits = 4171;
+    unsigned int maxprec = 64;
     int minexp = -1074;
 
     /* ZFP filter arguments */
@@ -181,10 +226,10 @@ int main(int argc, char **argv)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
-    HANDLE_ARG(prec,(uint) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
-    HANDLE_ARG(minbits,(uint) strtol(argv[i]+len2,0,10),"%u",set minbits for expert mode);
-    HANDLE_ARG(maxbits,(uint) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode);
-    HANDLE_ARG(maxprec,(uint) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode);
+    HANDLE_ARG(prec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
+    HANDLE_ARG(minbits,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set minbits for expert mode);
+    HANDLE_ARG(maxbits,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set maxbits for expert mode);
+    HANDLE_ARG(maxprec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set maxprec for expert mode);
     HANDLE_ARG(minexp,(int) strtol(argv[i]+len2,0,10),"%d",set minexp for expert mode);
 
     cpid = setup_filter(1, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
@@ -253,9 +298,20 @@ int main(int argc, char **argv)
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
     /* Use raw file I/O to corrupt the dataset named corrupted_data */
+
+#if defined(_WIN32) || defined(_WIN64)
+    FILE *fp;
+    errno_t err  = fopen_s( &fp, FNAME, "rb+");
+    if(err != 0) ERROR(fopen_s);
+    fseek(fp, (off_t) off + (off_t) siz / 3, SEEK_SET);
+    fwrite(corrupt, 1 , sizeof(corrupt), fp);
+    fclose(fp);
+#else
+    int fd;
     fd = open(FNAME, O_RDWR);
     pwrite(fd, corrupt, sizeof(corrupt), (off_t) off + (off_t) siz / 3);
     close(fd);
+#endif
 
     /* Now, open the file with the nans_and_infs and corrupted datasets and try to read them */
     if (0 > (fid = H5Fopen(FNAME, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
