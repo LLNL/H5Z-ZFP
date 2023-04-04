@@ -62,7 +62,9 @@ LLC,  and shall  not be  used for  advertising or  product endorsement
 purposes.
 */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
