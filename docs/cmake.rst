@@ -23,7 +23,7 @@ Once you have installed both HDF5 and ZFP, you can compile H5Z-ZFP_ using a comm
 
 ::
 
-    export HDF_DIR=<path-to_hdf5>
+    export HDF5_DIR=<path-to_hdf5>
     export ZFP_DIR=<path-to-zfp>
     CC=<C-compiler> FC=<Fortran-compiler> cmake -DCMAKE_INSTALL_PREFIX=<path-to-install> <src-dir>
 
