@@ -7,6 +7,22 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
     "separate from the source directory")
 endif ()
 
+if (POLICY CMP0074)
+  # find_package() uses <PackageName>_ROOT variables.
+  cmake_policy (SET CMP0074 NEW)
+endif ()
+
+if (POLICY CMP0083)
+  # To control generation of Position Independent Executable (PIE) or not,
+  # some flags are required at link time.
+  cmake_policy (SET CMP0083 NEW)
+endif ()
+
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 #------------------------------------------------------------------------------#
 # Parse version number from H5Zzfp_version.h
 #------------------------------------------------------------------------------#
@@ -42,7 +58,11 @@ set(COMPONENTS C)
 if (FORTRAN_INTERFACE)
   list(APPEND COMPONENTS Fortran)
 endif ()
+# By default static will be returned unless only shared is available
 find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS})
+if (NOT HDF5_FOUND)
+  message (FATAL_ERROR " HDF5 is Required for h5z_zfp")
+endif ()
 
 # Find MPI depending on if HDF5 needs MPI.
 if (HDF5_IS_PARALLEL AND ("${HDF5_VERSION}" VERSION_EQUAL "1.14.0"))
@@ -51,11 +71,30 @@ endif()
 
 # Find ZFP, relies on ZFP_DIR or ZFP_ROOT being set in environment.
 find_package(ZFP REQUIRED CONFIG)
+if (NOT ZFP_FOUND)
+  message (FATAL_ERROR " ZFP is Required for h5z_zfp")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Dashboard and Testing Settings
+#-----------------------------------------------------------------------------
+option (BUILD_TESTING "Build h5z-zfp Unit Testing" OFF)
+if (BUILD_TESTING)
+  set (DART_TESTING_TIMEOUT 1200 CACHE STRING
+       "Timeout in seconds for each test (default 1200=20minutes)")
+  enable_testing ()
+  include (CTest)
+  #include (${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
+endif ()
 
 #------------------------------------------------------------------------------#
 # Add source
 #------------------------------------------------------------------------------#
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+
+if (BUILD_TESTING)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+endif ()
 
 #------------------------------------------------------------------------------#
 # Packaging

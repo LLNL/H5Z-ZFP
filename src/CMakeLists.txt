@@ -46,6 +46,7 @@ target_include_directories(h5z_zfp_shared
 target_link_libraries(h5z_zfp_shared PUBLIC zfp::zfp ${HDF5_LIBRARIES})
 set_target_properties(h5z_zfp_shared PROPERTIES OUTPUT_NAME h5zzfp)
 install(TARGETS h5z_zfp_shared
+  RUNTIME DESTINATION plugin
   ARCHIVE DESTINATION plugin
   LIBRARY DESTINATION plugin)
 
