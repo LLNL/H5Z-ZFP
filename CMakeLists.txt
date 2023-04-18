@@ -54,14 +54,23 @@ set(CMAKE_INSTALL_CMAKEDIR lib/cmake/h5z_zfp)
 # Required packages
 #------------------------------------------------------------------------------#
 # Find HDF5, relies on HDF5_DIR or HDF5_ROOT being set in environment.
-set(COMPONENTS C)
+set(COMPONENTS C shared)
 if (FORTRAN_INTERFACE)
   list(APPEND COMPONENTS Fortran)
 endif ()
 # By default static will be returned unless only shared is available
-find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS})
+find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS} CONFIG)
 if (NOT HDF5_FOUND)
   message (FATAL_ERROR " HDF5 is Required for h5z_zfp")
+endif ()
+set (HDF5_LIBRARIES ${HDF5_C_SHARED_LIBRARY})
+set (HDF5_LIBRARY_PATH ${PACKAGE_PREFIX_DIR}/lib)
+set (HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
+message (STATUS "HDF5 C libs:${HDF5_FOUND} include:${HDF5_INCLUDE_DIRS} and shared:${HDF5_LIBRARIES}")
+if (FORTRAN_INTERFACE)
+  set (HDF5_FORTRAN_INCLUDE_DIRS ${HDF5_INCLUDE_DIR_FORTRAN})
+  set (HDF5_FORTRAN_LIBRARIES ${HDF5_FORTRAN_SHARED_LIBRARY})
+  message (STATUS "HDF5 Fortran libs: include:${HDF5_FORTRAN_INCLUDE_DIRS} and shared:${HDF5_FORTRAN_LIBRARIES}")
 endif ()
 
 # Find MPI depending on if HDF5 needs MPI.
@@ -84,7 +93,6 @@ if (BUILD_TESTING)
        "Timeout in seconds for each test (default 1200=20minutes)")
   enable_testing ()
   include (CTest)
-  #include (${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
 endif ()
 
 #------------------------------------------------------------------------------#
