@@ -445,7 +445,7 @@ if (NOT MSVC)
           -P "${CMAKE_CURRENT_SOURCE_DIR}/h5repack-filesizes.cmake"
   )
 
-  add_test(NAME test-h5repack-cleanup COMMAND ${CMAKE_COMMAND} -E echo skip)#remove mesh_repack.h5)
+  add_test(NAME test-h5repack-cleanup COMMAND ${CMAKE_COMMAND} -E remove mesh_repack.h5)
 
   set_tests_properties(test-h5repack PROPERTIES FIXTURES_SETUP    "h5repack-filesizes;h5repack-cleanup")
   set_tests_properties(test-h5repack PROPERTIES FIXTURES_REQUIRED "h5repack")
