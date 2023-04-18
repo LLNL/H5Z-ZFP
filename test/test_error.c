@@ -98,9 +98,8 @@ char * strcasestr(s, find)
 
 #define ERROR(FNAME)                                              \
 do {                                                              \
-    size_t errmsglen = 94;                                        \
-    char errmsg[errmsglen];                                       \
-    strerror_s(errmsg, errmsglen, errno);                         \
+    char errmsg[94];                                              \
+    strerror_s(errmsg, 94, errno);                                \
     fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
             __LINE__, errno, errno?errmsg:"ok");                  \
     return 1;                                                     \
