@@ -37,7 +37,11 @@ else ()
   set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
   set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
 endif()
-set (HDF5_PLUGIN_PATH ${CMAKE_BINARY_DIR}/src)
+if (MSVC)
+  set (HDF5_PLUGIN_PATH ${CMAKE_BINARY_DIR}/src/${CMAKE_BUILD_TYPE})
+else ()
+  set (HDF5_PLUGIN_PATH ${CMAKE_BINARY_DIR}/src)
+endif()
 
 #------------------------------------------------------------------------------#
 # Plugin and library write & read tests (No check implemented)
@@ -65,10 +69,17 @@ target_link_libraries(test_read_lib h5z_zfp_static)
 if (FORTRAN_INTERFACE)
   add_executable(test_rw_fortran test_rw_fortran.F90)
   target_link_libraries(test_rw_fortran h5z_zfp_static)
-  set_target_properties (test_rw_fortran PROPERTIES
-    LINKER_LANGUAGE Fortran
-    Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/src
-  )
+  if (MSVC)
+    set_target_properties (test_rw_fortran PROPERTIES
+        LINKER_LANGUAGE Fortran
+        Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/src/${CMAKE_BUILD_TYPE}
+    )
+  else ()
+    set_target_properties (test_rw_fortran PROPERTIES
+        LINKER_LANGUAGE Fortran
+        Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/src
+    )
+  endif()
 endif ()
 
 # Rate
@@ -80,12 +91,12 @@ foreach (IRATE RANGE ${NRATES})
   list(GET RATE_RATE ${IRATE} RATE)
   list(GET RATE_DIFF ${IRATE} DIFF)
 
-  add_test(NAME test-rate-write-${RATE} COMMAND test_write_plugin zfpmode=1 rate=${RATE} ofile=test_zfp-rate-${RATE}.h5)
+  add_test(NAME test-rate-write-${RATE} COMMAND $<TARGET_FILE:test_write_plugin> zfpmode=1 rate=${RATE} ofile=test_zfp-rate-${RATE}.h5)
   set_property(TEST test-rate-write-${RATE} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
     set_property(TEST test-rate-write-${RATE} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
   endif ()
-  add_test(NAME test-rate-read-${RATE} COMMAND test_read_plugin max_absdiff=${DIFF} max_reldiff=${DIFF} ifile=test_zfp-rate-${RATE}.h5)
+  add_test(NAME test-rate-read-${RATE} COMMAND $<TARGET_FILE:test_read_plugin> max_absdiff=${DIFF} max_reldiff=${DIFF} ifile=test_zfp-rate-${RATE}.h5)
   set_property(TEST test-rate-read-${RATE} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
     set_property(TEST test-rate-read-${RATE} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
@@ -100,8 +111,8 @@ foreach (IRATE RANGE ${NRATES})
   set_tests_properties(test-rate-cleanup-${RATE} PROPERTIES FIXTURES_REQUIRED "rate-cleanup-${RATE}")
   set_tests_properties(test-rate-cleanup-${RATE} PROPERTIES FIXTURES_CLEANUP  "rate-write-${RATE};rate-read-${RATE}")
 
-  add_test(NAME test-lib-rate-write-${RATE} COMMAND test_write_lib zfpmode=1 rate=${RATE} ofile=test_zfp-lib-rate-${RATE}.h5)
-  add_test(NAME test-lib-rate-read-${RATE} COMMAND test_read_lib max_absdiff=${DIFF} max_reldiff=${DIFF} ifile=test_zfp-lib-rate-${RATE}.h5)
+  add_test(NAME test-lib-rate-write-${RATE} COMMAND $<TARGET_FILE:test_write_lib> zfpmode=1 rate=${RATE} ofile=test_zfp-lib-rate-${RATE}.h5)
+  add_test(NAME test-lib-rate-read-${RATE} COMMAND $<TARGET_FILE:test_read_lib> max_absdiff=${DIFF} max_reldiff=${DIFF} ifile=test_zfp-lib-rate-${RATE}.h5)
   add_test(NAME test-lib-rate-cleanup-${RATE} COMMAND ${CMAKE_COMMAND} -E remove test_zfp-lib-rate-${RATE}.h5)
 
   set_tests_properties(test-lib-rate-write-${RATE} PROPERTIES FIXTURES_SETUP    "lib-rate-read-${RATE};lib-rate-cleanup-${RATE}")
@@ -113,7 +124,7 @@ foreach (IRATE RANGE ${NRATES})
   set_tests_properties(test-lib-rate-cleanup-${RATE} PROPERTIES FIXTURES_CLEANUP  "lib-rate-write-${RATE};lib-rate-read-${RATE}")
 
   if (NOT MSVC AND FORTRAN_INTERFACE)
-    add_test(NAME test-rate-write-${RATE}-f COMMAND test_rw_fortran zfpmode 1 rate ${RATE} ofile test_zfp_fortran-rate-${RATE}.h5)
+    add_test(NAME test-rate-write-${RATE}-f COMMAND $<TARGET_FILE:test_rw_fortran> zfpmode 1 rate ${RATE} ofile test_zfp_fortran-rate-${RATE}.h5)
     add_test(NAME test-rate-info1-${RATE}-f
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${HDF5_DUMP_EXECUTABLE}"
@@ -157,12 +168,12 @@ foreach (IACC RANGE ${NACCS})
   list(GET ACC_ACC ${IACC} ACC)
   list(GET ACC_DIFF ${IACC} DIFF)
 
-  add_test(NAME test-accuracy-write-${NUMBER} COMMAND test_write_plugin zfpmode=3 acc=${ACC} ofile=test_zfp-acc-${NUMBER}.h5)
+  add_test(NAME test-accuracy-write-${NUMBER} COMMAND $<TARGET_FILE:test_write_plugin> zfpmode=3 acc=${ACC} ofile=test_zfp-acc-${NUMBER}.h5)
   set_property(TEST test-accuracy-write-${NUMBER} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
     set_property(TEST test-accuracy-write-${NUMBER} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
   endif ()
-  add_test(NAME test-accuracy-read-${NUMBER} COMMAND test_read_plugin ret=1 max_absdiff=${DIFF} ifile=test_zfp-acc-${NUMBER}.h5)
+  add_test(NAME test-accuracy-read-${NUMBER} COMMAND $<TARGET_FILE:test_read_plugin> ret=1 max_absdiff=${DIFF} ifile=test_zfp-acc-${NUMBER}.h5)
   set_property(TEST test-accuracy-read-${NUMBER} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
     set_property(TEST test-accuracy-read-${NUMBER} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
@@ -177,8 +188,8 @@ foreach (IACC RANGE ${NACCS})
   set_tests_properties(test-accuracy-cleanup-${NUMBER} PROPERTIES FIXTURES_REQUIRED "accuracy-cleanup-${NUMBER}")
   set_tests_properties(test-accuracy-cleanup-${NUMBER} PROPERTIES FIXTURES_CLEANUP  "accuracy-write-${NUMBER};accuracy-read-${NUMBER}")
 
-  add_test(NAME test-lib-accuracy-write-${NUMBER} COMMAND test_write_lib zfpmode=3 acc=${ACC} ofile=test_zfp-lib-acc-${NUMBER}.h5)
-  add_test(NAME test-lib-accuracy-read-${NUMBER} COMMAND test_read_lib ret=1 max_absdiff=${DIFF} ifile=test_zfp-lib-acc-${NUMBER}.h5)
+  add_test(NAME test-lib-accuracy-write-${NUMBER} COMMAND $<TARGET_FILE:test_write_lib> zfpmode=3 acc=${ACC} ofile=test_zfp-lib-acc-${NUMBER}.h5)
+  add_test(NAME test-lib-accuracy-read-${NUMBER} COMMAND $<TARGET_FILE:test_read_lib> ret=1 max_absdiff=${DIFF} ifile=test_zfp-lib-acc-${NUMBER}.h5)
   add_test(NAME test-lib-accuracy-cleanup-${NUMBER} COMMAND ${CMAKE_COMMAND} -E remove test_zfp-lib-acc-${NUMBER}.h5)
 
   set_tests_properties(test-lib-accuracy-write-${NUMBER} PROPERTIES FIXTURES_SETUP    "lib-accuracy-read-${NUMBER};lib-accuracy-cleanup-${NUMBER}")
@@ -190,7 +201,7 @@ foreach (IACC RANGE ${NACCS})
   set_tests_properties(test-lib-accuracy-cleanup-${NUMBER} PROPERTIES FIXTURES_CLEANUP  "lib-accuracy-write-${NUMBER};lib-accuracy-read-${NUMBER}")
 
   if (FORTRAN_INTERFACE)
-    add_test(NAME test-accuracy-write-${NUMBER}-f COMMAND test_rw_fortran zfpmode 3 acc ${ACC} ofile test_zfp_fortran-acc-${NUMBER}.h5 write)
+    add_test(NAME test-accuracy-write-${NUMBER}-f COMMAND $<TARGET_FILE:test_rw_fortran> zfpmode 3 acc ${ACC} ofile test_zfp_fortran-acc-${NUMBER}.h5 write)
     add_test(NAME test-accuracy-diff1-${NUMBER}-f COMMAND ${HDF5_DIFF_EXECUTABLE} -v -d ${ACC} test_zfp_fortran-acc-${NUMBER}.h5 test_zfp_fortran-acc-${NUMBER}.h5 compressed original)
     set_property(TEST test-accuracy-diff1-${NUMBER}-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
     if (MSVC)
@@ -224,12 +235,12 @@ foreach (IPREC RANGE ${NPRECS})
   list(GET PREC_PREC ${IPREC} PREC)
   list(GET PREC_DIFF ${IPREC} DIFF)
 
-  add_test(NAME test-precision-write-${PREC} COMMAND test_write_plugin zfpmode=2 prec=${PREC} ofile=test_zfp-prec-${PREC}.h5)
+  add_test(NAME test-precision-write-${PREC} COMMAND $<TARGET_FILE:test_write_plugin> zfpmode=2 prec=${PREC} ofile=test_zfp-prec-${PREC}.h5)
   set_property(TEST test-precision-write-${PREC} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
     set_property(TEST test-precision-write-${PREC} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
   endif ()
-  add_test(NAME test-precision-read-${PREC} COMMAND test_read_plugin ret=2 max_reldiff=${DIFF} ifile=test_zfp-prec-${PREC}.h5)
+  add_test(NAME test-precision-read-${PREC} COMMAND $<TARGET_FILE:test_read_plugin> ret=2 max_reldiff=${DIFF} ifile=test_zfp-prec-${PREC}.h5)
   set_property(TEST test-precision-read-${PREC} APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
     set_property(TEST test-precision-read-${PREC} APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
@@ -244,8 +255,8 @@ foreach (IPREC RANGE ${NPRECS})
   set_tests_properties(test-precision-cleanup-${PREC} PROPERTIES FIXTURES_REQUIRED "precision-cleanup-${PREC}")
   set_tests_properties(test-precision-cleanup-${PREC} PROPERTIES FIXTURES_CLEANUP  "precision-write-${PREC};precision-read-${PREC}")
 
-  add_test(NAME test-lib-precision-write-${PREC} COMMAND test_write_lib zfpmode=2 prec=${PREC} ofile=test_zfp-lib-prec-${PREC}.h5)
-  add_test(NAME test-lib-precision-read-${PREC} COMMAND test_read_lib ret=2 max_reldiff=${DIFF} ifile=test_zfp-lib-prec-${PREC}.h5)
+  add_test(NAME test-lib-precision-write-${PREC} COMMAND $<TARGET_FILE:test_write_lib> zfpmode=2 prec=${PREC} ofile=test_zfp-lib-prec-${PREC}.h5)
+  add_test(NAME test-lib-precision-read-${PREC} COMMAND $<TARGET_FILE:test_read_lib> ret=2 max_reldiff=${DIFF} ifile=test_zfp-lib-prec-${PREC}.h5)
   add_test(NAME test-lib-precision-cleanup-${PREC} COMMAND ${CMAKE_COMMAND} -E remove test_zfp-lib-prec-${PREC}.h5)
 
   set_tests_properties(test-lib-precision-write-${PREC} PROPERTIES FIXTURES_SETUP    "lib-precision-read-${PREC};lib-precision-cleanup-${PREC}")
@@ -257,7 +268,7 @@ foreach (IPREC RANGE ${NPRECS})
   set_tests_properties(test-lib-precision-cleanup-${PREC} PROPERTIES FIXTURES_CLEANUP  "lib-precision-write-${PREC};lib-precision-read-${PREC}")
 
   if (FORTRAN_INTERFACE)
-    add_test(NAME test-precision-write-${PREC}-f COMMAND test_rw_fortran zfpmode 2 prec ${PREC} ofile test_zfp_fortran-prec-${PREC}.h5 write)
+    add_test(NAME test-precision-write-${PREC}-f COMMAND $<TARGET_FILE:test_rw_fortran> zfpmode 2 prec ${PREC} ofile test_zfp_fortran-prec-${PREC}.h5 write)
     # FIXME: Currently, replaced the difference tests because the relative difference between the two datasets is tricky in this case.
     add_test(NAME test-precision-diff1-${PREC}-f COMMAND echo ${HDF5_DIFF_EXECUTABLE} -v -p 0.00001 test_zfp_fortran-prec-${PREC}.h5 test_zfp_fortran-prec-${PREC}.h5 compressed original)
     set_property(TEST test-precision-diff1-${PREC}-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
@@ -284,12 +295,12 @@ foreach (IPREC RANGE ${NPRECS})
 endforeach ()
 
 # Reversible
-add_test(NAME test-reversible COMMAND test_write_plugin zfpmode=5 ofile=test_zfp-reversible.h5)
+add_test(NAME test-reversible COMMAND $<TARGET_FILE:test_write_plugin> zfpmode=5 ofile=test_zfp-reversible.h5)
 set_property(TEST test-reversible APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
 if (MSVC)
   set_property(TEST test-reversible APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
 endif ()
-add_test(NAME test-reversible-diff COMMAND test_read_plugin ret=1 max_absdiff=0 ifile=test_zfp-reversible.h5)
+add_test(NAME test-reversible-diff COMMAND $<TARGET_FILE:test_read_plugin> ret=1 max_absdiff=0 ifile=test_zfp-reversible.h5)
 set_property(TEST test-reversible-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
 if (MSVC)
   set_property(TEST test-reversible-diff APPEND PROPERTY ENVIRONMENT "PATH=$ENV{PATH}\;${HDF5_PLUGIN_PATH}")
@@ -304,8 +315,8 @@ set_tests_properties(test-reversible-diff PROPERTIES FIXTURES_REQUIRED "reversib
 set_tests_properties(test-reversible-cleanup PROPERTIES FIXTURES_REQUIRED "reversible-cleanup")
 set_tests_properties(test-reversible-cleanup PROPERTIES FIXTURES_CLEANUP  "reversible;reversible-diff")
 
-add_test(NAME test-lib-reversible COMMAND test_write_lib zfpmode=5 ofile=test_zfp-lib-reversible.h5)
-add_test(NAME test-lib-reversible-diff COMMAND test_read_lib ret=1 max_absdiff=0 ifile=test_zfp-lib-reversible.h5)
+add_test(NAME test-lib-reversible COMMAND $<TARGET_FILE:test_write_lib> zfpmode=5 ofile=test_zfp-lib-reversible.h5)
+add_test(NAME test-lib-reversible-diff COMMAND $<TARGET_FILE:test_read_lib> ret=1 max_absdiff=0 ifile=test_zfp-lib-reversible.h5)
 add_test(NAME test-lib-reversible-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp-lib-reversible.h5)
 
 set_tests_properties(test-lib-reversible PROPERTIES FIXTURES_SETUP    "lib-reversible-diff;lib-reversible-cleanup")
@@ -317,7 +328,7 @@ set_tests_properties(test-lib-reversible-cleanup PROPERTIES FIXTURES_REQUIRED "l
 set_tests_properties(test-lib-reversible-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-reversible;lib-reversible-diff")
 
 if (FORTRAN_INTERFACE)
-  add_test(NAME test-reversible-write-f COMMAND test_rw_fortran zfpmode 5 ofile test_zfp_fortran-reversible.h5 write)
+  add_test(NAME test-reversible-write-f COMMAND $<TARGET_FILE:test_rw_fortran> zfpmode 5 ofile test_zfp_fortran-reversible.h5 write)
   add_test(NAME test-reversible-diff1-f COMMAND ${HDF5_DIFF_EXECUTABLE} -v -p 0.00001 test_zfp_fortran-reversible.h5 test_zfp_fortran-reversible.h5 compressed original)
   set_property(TEST test-reversible-diff1-f APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
@@ -345,8 +356,8 @@ endif ()
 # Misc tests
 #------------------------------------------------------------------------------#
 # Integer
-add_test(NAME test-lib-int-write COMMAND test_write_lib zfpmode=3 doint=1 ofile=test_zfp-int.h5)
-add_test(NAME test-lib-int-read COMMAND test_read_lib ret=1 max_absdiff=2 ifile=test_zfp-int.h5)
+add_test(NAME test-lib-int-write COMMAND $<TARGET_FILE:test_write_lib> zfpmode=3 doint=1 ofile=test_zfp-int.h5)
+add_test(NAME test-lib-int-read COMMAND $<TARGET_FILE:test_read_lib> ret=1 max_absdiff=2 ifile=test_zfp-int.h5)
 add_test(NAME test-lib-int-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp-int.h5)
 
 set_tests_properties(test-lib-int-write PROPERTIES FIXTURES_SETUP    "lib-int-read;lib-int-cleanup")
@@ -358,7 +369,7 @@ set_tests_properties(test-lib-int-cleanup PROPERTIES FIXTURES_REQUIRED "lib-int-
 set_tests_properties(test-lib-int-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-int-write;lib-int-read")
 
 # Highd
-add_test(NAME test-lib-highd COMMAND test_write_lib highd=1 ofile=test_zfp-highd.h5)
+add_test(NAME test-lib-highd COMMAND $<TARGET_FILE:test_write_lib> highd=1 ofile=test_zfp-highd.h5)
 add_test(NAME test-lib-highd-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp-highd.h5)
 
 set_tests_properties(test-lib-highd PROPERTIES FIXTURES_SETUP    "lib-highd-cleanup")
@@ -368,7 +379,7 @@ set_tests_properties(test-lib-highd-cleanup PROPERTIES FIXTURES_REQUIRED "lib-hi
 set_tests_properties(test-lib-highd-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-highd")
 
 # Sixd
-add_test(NAME test-lib-sixd COMMAND test_write_lib sixd=1 ofile=test_zfp-sixd.h5)
+add_test(NAME test-lib-sixd COMMAND $<TARGET_FILE:test_write_lib> sixd=1 ofile=test_zfp-sixd.h5)
 add_test(NAME test-lib-sixd-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp-sixd.h5)
 
 set_tests_properties(test-lib-sixd PROPERTIES FIXTURES_SETUP    "lib-sixd-cleanup")
@@ -379,7 +390,7 @@ set_tests_properties(test-lib-sixd-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-six
 
 if (ZFP_CFP_ENABLED)
   # zfparr
-  add_test(NAME test-zfparr COMMAND test_write_lib zfparr=1 rate=10)
+  add_test(NAME test-zfparr COMMAND $<TARGET_FILE:test_write_lib> zfparr=1 rate=10)
   add_test(NAME test-zfparr-diff COMMAND ${HDF5_DIFF_EXECUTABLE} -v -d 0.01 test_zfp.h5 test_zfp.h5 zfparr_original zfparr_direct)
   set_property(TEST test-zfparr-diff APPEND PROPERTY ENVIRONMENT HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH})
   if (MSVC)
@@ -406,7 +417,7 @@ add_executable(test_error test_error.c)
 target_compile_definitions(test_write_lib PRIVATE ZFP_LIB_VERSION=0x${ZFP_LIB_VERSION})
 target_link_libraries(test_error h5z_zfp_static)
 
-add_test(NAME test-error COMMAND test_error)
+add_test(NAME test-error COMMAND $<TARGET_FILE:test_error>)
 add_test(NAME test-error-cleanup COMMAND ${CMAKE_COMMAND} -E remove test_zfp_errors.h5)
 
 set_tests_properties(test-error PROPERTIES FIXTURES_SETUP    "error-cleanup")
