@@ -37,11 +37,7 @@ else ()
   set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
   set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
 endif()
-if (MSVC)
-  set (HDF5_PLUGIN_PATH ${CMAKE_BINARY_DIR}/src/${CMAKE_BUILD_TYPE})
-else ()
-  set (HDF5_PLUGIN_PATH ${CMAKE_BINARY_DIR}/src)
-endif()
+set (HDF5_PLUGIN_PATH ${CMAKE_TEST_OUTPUT_DIRECTORY})
 
 #------------------------------------------------------------------------------#
 # Plugin and library write & read tests (No check implemented)
@@ -69,17 +65,9 @@ target_link_libraries(test_read_lib h5z_zfp_static)
 if (FORTRAN_INTERFACE)
   add_executable(test_rw_fortran test_rw_fortran.F90)
   target_link_libraries(test_rw_fortran h5z_zfp_static)
-  if (MSVC)
-    set_target_properties (test_rw_fortran PROPERTIES
+  set_target_properties (test_rw_fortran PROPERTIES
         LINKER_LANGUAGE Fortran
-        Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/src/${CMAKE_BUILD_TYPE}
-    )
-  else ()
-    set_target_properties (test_rw_fortran PROPERTIES
-        LINKER_LANGUAGE Fortran
-        Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/src
-    )
-  endif()
+  )
 endif ()
 
 # Rate
