@@ -84,7 +84,7 @@ endif ()
 # By default static will be returned unless only shared is available
 find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS} CONFIG)
 if (NOT HDF5_FOUND)
-  message (FATAL_ERROR " HDF5 is Required for h5z_zfp")
+  message (FATAL_ERROR "HDF5 is Required for h5z_zfp")
 endif ()
 set (HDF5_LIBRARIES ${HDF5_C_SHARED_LIBRARY})
 set (HDF5_LIBRARY_PATH ${PACKAGE_PREFIX_DIR}/lib)
@@ -104,7 +104,7 @@ endif()
 # Find ZFP, relies on ZFP_DIR or ZFP_ROOT being set in environment.
 find_package(ZFP REQUIRED CONFIG)
 if (NOT ZFP_FOUND)
-  message (FATAL_ERROR " ZFP is Required for h5z_zfp")
+  message (FATAL_ERROR "ZFP is Required for h5z_zfp")
 endif ()
 
 #-----------------------------------------------------------------------------
