@@ -123,19 +123,21 @@ macro (HDF5_SUPPORT)
     else ()
       find_package (HDF5) # Legacy find
       #Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
-      set(HDF5_TOOLS_DIR ${HDF5_LIBRARY_DIRS}/../bin)
-      #Legacy find_package does not set HDF5_BUILD_SHARED_LIBS, so we set it here
-      if (NOT EXISTS "${HDF5_LIBRARY_DIRS}/libhdf5.so")
-        set (HDF5_FOUND 0)
-      else ()
+      get_filename_component(HDF5_BIN_DIR ${HDF5_DIFF_EXECUTABLE} DIRECTORY)
+      set(HDF5_TOOLS_DIR ${HDF5_BIN_DIR})
+      if (HDF5_DUMP_EXECUTABLE AND NOT TARGET hdf5::h5dump)
         add_executable (${HDF5_NAMESPACE}h5dump IMPORTED)
         set_property (TARGET ${HDF5_NAMESPACE}h5dump PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump")
         set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump>)
+      endif ()
 
+      if (HDF5_DIFF_EXECUTABLE AND NOT TARGET hdf5::h5diff)
         add_executable (${HDF5_NAMESPACE}h5diff IMPORTED)
         set_property (TARGET ${HDF5_NAMESPACE}h5diff PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5diff")
         set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
+      endif ()
 
+      if (HDF5_REPACK_EXECUTABLE AND NOT TARGET hdf5::h5repack)
         add_executable (${HDF5_NAMESPACE}h5repack IMPORTED)
         set_property (TARGET ${HDF5_NAMESPACE}h5repack PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5repack")
         set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
