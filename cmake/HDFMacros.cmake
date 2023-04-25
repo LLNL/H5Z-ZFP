@@ -122,6 +122,10 @@ macro (HDF5_SUPPORT)
       endif ()
     else ()
       find_package (HDF5) # Legacy find
+      if (FORTRAN_INTERFACE AND NOT HDF5_Fortran_FOUND)
+        set (FORTRAN_INTERFACE OFF CACHE BOOL "Build FORTRAN support" FORCE)
+        message (STATUS "HDF5 Fortran libs not found - disable build of Fortran support")
+      endif ()
       #Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
       get_filename_component(HDF5_BIN_DIR ${HDF5_DIFF_EXECUTABLE} DIRECTORY)
       set(HDF5_TOOLS_DIR ${HDF5_BIN_DIR})
