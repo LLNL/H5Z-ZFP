@@ -37,27 +37,8 @@ set(H5Z_ZFP_VERSION "${H5Z_ZFP_VERSION_MAJOR}.${H5Z_ZFP_VERSION_MINOR}.${H5Z_ZFP
 project(H5Z_ZFP VERSION ${H5Z_ZFP_VERSION} LANGUAGES C)
 
 # setup common output folders
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
-    ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
-)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
-    ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
-)
-set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-    ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
-)
-set (CMAKE_Fortran_MODULE_DIRECTORY
-    ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
-)
-get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(_isMultiConfig)
-  set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
-  set (CMAKE_PDB_OUTPUT_DIRECTORY
-      ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
-  )
-else ()
-  set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-endif ()
+include (cmake/HDFMacros.cmake)
+DEFAULT_FOLDERS()
 
 #------------------------------------------------------------------------------#
 # Compile options.
@@ -77,23 +58,9 @@ set(CMAKE_INSTALL_CMAKEDIR lib/cmake/h5z_zfp)
 # Required packages
 #------------------------------------------------------------------------------#
 # Find HDF5, relies on HDF5_DIR or HDF5_ROOT being set in environment.
-set(COMPONENTS C shared)
-if (FORTRAN_INTERFACE)
-  list(APPEND COMPONENTS Fortran)
-endif ()
-# By default static will be returned unless only shared is available
-find_package(HDF5 REQUIRED COMPONENTS ${COMPONENTS} CONFIG)
+HDF5_SUPPORT ()
 if (NOT HDF5_FOUND)
   message (FATAL_ERROR "HDF5 is Required for h5z_zfp")
-endif ()
-set (HDF5_LIBRARIES ${HDF5_C_SHARED_LIBRARY})
-set (HDF5_LIBRARY_PATH ${PACKAGE_PREFIX_DIR}/lib)
-set (HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
-message (STATUS "HDF5 C libs:${HDF5_FOUND} include:${HDF5_INCLUDE_DIRS} and shared:${HDF5_LIBRARIES}")
-if (FORTRAN_INTERFACE)
-  set (HDF5_FORTRAN_INCLUDE_DIRS ${HDF5_INCLUDE_DIR_FORTRAN})
-  set (HDF5_FORTRAN_LIBRARIES ${HDF5_FORTRAN_SHARED_LIBRARY})
-  message (STATUS "HDF5 Fortran libs: include:${HDF5_FORTRAN_INCLUDE_DIRS} and shared:${HDF5_FORTRAN_LIBRARIES}")
 endif ()
 
 # Find MPI depending on if HDF5 needs MPI.
