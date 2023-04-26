@@ -43,7 +43,7 @@ char * strcasestr(s, find)
 }
 #endif
 #include <Shlwapi.h>
-#define istrstr StrStrIA
+#define strcasestr StrStrIA
 #pragma comment(lib, "Shlwapi.lib")
 //#include <shlwapi.h> /* For StrStrIA */
 //#define strcasestr StrStrIA
