@@ -8,51 +8,7 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE /* ahead of ALL headers to take proper effect */
-#endif
-#include <assert.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#if defined(_WIN32) || defined(_WIN64)
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <io.h>
-#define strncasecmp _strnicmp
-
-#include <ctype.h>
-char * strcasestr(s, find)
-     const char *s, *find;
-{
-  char c, sc;
-  size_t len;
-
-  if ((c = *find++) != 0) {
-    c = tolower((unsigned char)c);
-    len = strlen(find);
-    do {
-      do {
-        if ((sc = *s++) == 0)
-          return (NULL);
-      } while ((char)tolower((unsigned char)sc) != c);
-    } while (strncasecmp(s, find, len) != 0);
-    s--;
-  }
-  return ((char *)s);
-}
-
-#define srandom(X) srand(X)
-#define random rand
-#else
-#include <math.h>
-#include <unistd.h>
-#endif
-
-#include "hdf5.h"
+#include "test_common.h"
 
 #ifdef H5Z_ZFP_USE_PLUGIN
 #include "H5Zzfp_plugin.h"
@@ -60,95 +16,6 @@ char * strcasestr(s, find)
 #include "H5Zzfp_lib.h"
 #include "H5Zzfp_props.h"
 #endif
-
-#define NAME_LEN 256
-
-/* convenience macro to handle command-line args and help */
-#define HANDLE_SEP(SEPSTR)                                      \
-{                                                               \
-    char tmpstr[64];                                            \
-    int len = snprintf(tmpstr, sizeof(tmpstr), "\n%s...", #SEPSTR);\
-    printf("    %*s\n",60-len,tmpstr);                          \
-}
-
-#define HANDLE_ARG(A,PARSEA,PRINTA,HELPSTR)                     \
-{                                                               \
-    int i;                                                      \
-    char tmpstr[64];                                            \
-    int len;                                                    \
-    int len2 = strlen(#A)+1;                                    \
-    for (i = 0; i < argc; i++)                                  \
-    {                                                           \
-        if (!strncmp(argv[i], #A"=", len2))                     \
-        {                                                       \
-            A = PARSEA;                                         \
-            break;                                              \
-        }                                                       \
-        else if (!strncasecmp(argv[i], "help", 4))              \
-        {                                                       \
-            return 0;                                           \
-        }                                                       \
-    }                                                           \
-    len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A);\
-    printf("    %s%*s\n",tmpstr,60-len,#HELPSTR);               \
-}
-
-
-/* convenience macro to handle errors */
-#if defined(_WIN32) || defined(_WIN64)
-
-#define ERROR(FNAME)                                              \
-do {                                                              \
-    size_t errmsglen = 94;                                        \
-    char errmsg[errmsglen];                                       \
-    strerror_s(errmsg, errmsglen, errno);                         \
-    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
-            __LINE__, errno, errno?errmsg:"ok");                  \
-    return 1;                                                     \
-} while(0)
-
-#else
-
-#define ERROR(FNAME)                                              \
-do {                                                              \
-    int _errno = errno;                                           \
-    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
-        __LINE__, _errno, _errno?strerror(_errno):"ok");          \
-    return 1;                                                     \
-} while(0)
-
-#endif
-
-/* Generate a simple, 1D sinusioidal data array with some noise */
-#define TYPINT 1
-#define TYPDBL 2
-static int gen_data(size_t npoints, double noise, double amp, void **_buf, int typ)
-{
-    size_t i;
-    double *pdbl = 0;
-    int *pint = 0;
-
-    /* create data buffer to write */
-    if (typ == TYPINT)
-        pint = (int *) malloc(npoints * sizeof(int));
-    else
-        pdbl = (double *) malloc(npoints * sizeof(double));
-    srandom(0xDeadBeef);
-    for (i = 0; i < npoints; i++)
-    {
-        double x = 2 * M_PI * (double) i / (double) (npoints-1);
-        double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
-        if (typ == TYPINT)
-            pint[i] = (int) (amp * (1 + sin(x)) + n);
-        else
-            pdbl[i] = (double) (amp * (1 + sin(x)) + n);
-    }
-    if (typ == TYPINT)
-        *_buf = pint;
-    else
-        *_buf = pdbl;
-    return 0;
-}
 
 static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     double rate, double acc, unsigned int prec,
@@ -300,20 +167,12 @@ int main(int argc, char **argv)
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
     /* Use raw file I/O to corrupt the dataset named corrupted_data */
-
-#if defined(_WIN32) || defined(_WIN64)
     FILE *fp;
-    errno_t err  = fopen_s( &fp, FNAME, "rb+");
-    if(err != 0) ERROR(fopen_s);
+    fp = fopen(FNAME, "rb+");
+    if(fp == NULL) ERROR(fopen);
     fseek(fp, (off_t) off + (off_t) siz / 3, SEEK_SET);
     fwrite(corrupt, 1 , sizeof(corrupt), fp);
     fclose(fp);
-#else
-    int fd;
-    fd = open(FNAME, O_RDWR);
-    pwrite(fd, corrupt, sizeof(corrupt), (off_t) off + (off_t) siz / 3);
-    close(fd);
-#endif
 
     /* Now, open the file with the nans_and_infs and corrupted datasets and try to read them */
     if (0 > (fid = H5Fopen(FNAME, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
