@@ -42,8 +42,9 @@ char * strcasestr(s, find)
   return ((char *)s);
 }
 #endif
-__stdcall const char* StrStrIA(const char* lpFirst, const char* lpSrch);
-#define strcasestr StrStrIA
+#include <Shlwapi.h>
+#define istrstr StrStrIA
+#pragma comment(lib, "Shlwapi.lib")
 //#include <shlwapi.h> /* For StrStrIA */
 //#define strcasestr StrStrIA
 #define srandom(X) srand(X)
