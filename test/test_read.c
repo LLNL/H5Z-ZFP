@@ -62,106 +62,10 @@ LLC,  and shall  not be  used for  advertising or  product endorsement
 purposes.
 */
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-
-#if defined(_WIN32) || defined(_WIN64)
-#include <ctype.h>
-#define strncasecmp _strnicmp
-// strcasestr is not available on Windows
-char * strcasestr(s, find)
-     const char *s, *find;
-{
-  char c, sc;
-  size_t len;
-
-  if ((c = *find++) != 0) {
-    c = tolower((unsigned char)c);
-    len = strlen(find);
-    do {
-      do {
-        if ((sc = *s++) == 0)
-          return (NULL);
-      } while ((char)tolower((unsigned char)sc) != c);
-    } while (strncasecmp(s, find, len) != 0);
-    s--;
-  }
-  return ((char *)s);
-}
-
-// strndup() is not available on Windows
-char *strndup( const char *s1, size_t n)
-{
-    char *copy= (char*)malloc( n+1 );
-    memcpy( copy, s1, n );
-    copy[n] = 0;
-    return copy;
-};
-#endif
-
-#include "hdf5.h"
-
+#include "test_common.h"
 
 #ifndef H5Z_ZFP_USE_PLUGIN
 #include "H5Zzfp_lib.h"
-#endif
-
-#define NAME_LEN 256
-
-/* convenience macro to handle command-line args */
-#define HANDLE_ARG(A,PARSEA,PRINTA,HELPSTR)                     \
-{                                                               \
-    int i;                                                      \
-    char tmpstr[64];                                            \
-    int len;                                                    \
-    int len2 = strlen(#A)+1;                                    \
-    for (i = 0; i < argc; i++)                                  \
-    {                                                           \
-        if (!strncmp(argv[i], #A"=", len2))                     \
-        {                                                       \
-            A = PARSEA;                                         \
-            break;                                              \
-        }                                                       \
-        else if (!strncmp(#A, "help", 4) &&                     \
-                  strcasestr(argv[i], "help"))                  \
-        {                                                       \
-            return 0;                                           \
-        }                                                       \
-    }                                                           \
-    len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A);\
-    printf("    %s%*s\n",tmpstr,60-len,#HELPSTR);               \
-}
-
-/* convenience macro to handle errors */
-#if defined(_WIN32) || defined(_WIN64)
-
-#define ERROR(FNAME)                                              \
-do {                                                              \
-    size_t errmsglen = 94;                                        \
-    char errmsg[errmsglen];                                       \
-    strerror_s(errmsg, errmsglen, errno);                         \
-    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
-            __LINE__, errno, errno?errmsg:"ok");                  \
-    return 1;                                                     \
-} while(0)
-
-#else
-
-#define ERROR(FNAME)                                              \
-do {                                                              \
-    int _errno = errno;                                           \
-    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
-        __LINE__, _errno, _errno?strerror(_errno):"ok");          \
-    return 1;                                                     \
-} while(0)
-
 #endif
 
 int main(int argc, char **argv)

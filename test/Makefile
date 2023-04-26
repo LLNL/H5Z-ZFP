@@ -42,10 +42,10 @@ test_read_lib.o: test_read.c
 	$(CC) -c $< -o $@ $(CFLAGS) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
 
 test_read_plugin: test_read_plugin.o plugin
-	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 $(ZFP_LIBS) $(LDFLAGS)
+	$(CC) $< -o $@ $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L$(HDF5_LIB) -L$(ZFP_LIB) -lhdf5 $(ZFP_LIBS) -lm $(LDFLAGS)
 
 test_read_lib: test_read_lib.o lib
-	$(CC) $< -o $@ $(CFLAGS) $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 $(ZFP_LIBS) $(LDFLAGS)
+	$(CC) $< -o $@ $(CFLAGS) $(PREPATH)$(HDF5_LIB) $(PREPATH)$(ZFP_LIB) -L../src -L$(HDF5_LIB) -L$(ZFP_LIB) -lh5zzfp -lhdf5 $(ZFP_LIBS) -lm $(LDFLAGS)
 
 test_error.o: test_error.c
 	$(CC) -c $< -o $@ $(CFLAGS) -DZFP_LIB_VERSION=0x$(ZFP_LIB_VERSION) -I$(H5Z_ZFP_BASE) -I$(ZFP_INC) -I$(HDF5_INC)
