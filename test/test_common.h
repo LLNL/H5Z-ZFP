@@ -20,6 +20,7 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <io.h>
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
+#if 0
 #include <ctype.h>
 char * strcasestr(s, find)
      const char *s, *find;
@@ -40,6 +41,9 @@ char * strcasestr(s, find)
   }
   return ((char *)s);
 }
+#endif
+__stdcall const char* StrStrIA(const char* lpFirst, const char* lpSrch);
+#define strcasestr StrStrIA
 //#include <shlwapi.h> /* For StrStrIA */
 //#define strcasestr StrStrIA
 #define srandom(X) srand(X)
