@@ -14,14 +14,14 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_DEPRECATE
-#include<shlwapi.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #define j0 _j0
 #include <io.h>
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
-#define strcasestr(X,Y) StrStrIA(X,Y)
+#include <shlwapi.h>
+#define strcasestr StrStrIA
 #define srandom(X) srand(X)
 #define random rand
 #define read _read
