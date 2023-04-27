@@ -6,7 +6,7 @@ The HDF5_ library uses an array of values, named ``cd_values`` in formal argumen
 Instances of this ``cd_values`` array are used in two subtly different ways within HDF5.
 
 The first use is in *passing* auxiliary data for a filter from the caller to the library when initially creating a dataset.
-This happens when using the *generic* interface in an ``H5Pset_filter()`` (`see here <https://docs.hdfgroup.org/hdf5/develop/group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5>`_) call.
+This happens *directly* in an ``H5Pset_filter()`` (`see here <https://docs.hdfgroup.org/hdf5/develop/group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5>`_) call.
 
 The second use is in *persisting* auxiliary data for a filter to the dataset's object *header* in a file.
 This happens *indirectly* as part of an ``H5Dcreate()`` call.
@@ -22,7 +22,7 @@ Furthermore, regardless of `endianness <https://en.wikipedia.org/wiki/Endianness
 Nonetheless, if the persisted ``cd_values`` data is ever retrieved (e.g. via ``H5Pget_filter_by_id()`` (`see here <https://docs.hdfgroup.org/hdf5/develop/group___o_c_p_l.html#title7>`__), the HDF5_ library ensures the data is returned to callers with proper endianness.
 When command-line tools like ``h5ls`` and ``h5dump`` print ``cd_values``, the data will be displayed correctly.
 
-Handling of double precision auxiliary data via ``cd_values`` is still more complicated because a single double precision value will in almost all cases span multiple entries in ``cd_values``.
+Handling double precision auxiliary data via ``cd_values`` is still more complicated because a single double precision value will span multiple entries in ``cd_values`` in almost all cases.
 Setting aside the possibility of differing floating point formats between the producer and consumers, any endianness handling the HDF5_ library does for the 4-byte entries in ``cd_values`` will certainly not ensure proper endianness handling of larger values.
 It is impossible for command-line tools like ``h5ls`` and ``h5dump`` to display such data correctly.
 
@@ -32,5 +32,5 @@ Consequently, the H5Z-ZFP_ filter uses the ``cd_values`` that is persisted to a 
 ZFP_'s stream header is stored starting at ``&cd_values[1]``. 
 ``cd_values[0]`` is used to stored H5Z-ZFP_ filter and ZFP_ library and ZFP_ encoder version information.
 
-This also means that H5Z-ZFP_ avoids the overhead of duplicating ZFP_ stream header in each dataset chunk.
+This also means that H5Z-ZFP_ avoids the overhead of duplicating the ZFP_ stream header in each dataset chunk.
 For larger chunks, these savings are probably not too terribly significant.
