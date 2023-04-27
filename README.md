@@ -17,7 +17,7 @@ For information about HDF5 filter plugins, see...
 
 - https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
 
-This H5Z-ZFP plugin supports ZFP versions 0.5.0 through 0.5.5.
+This H5Z-ZFP plugin supports ZFP versions 0.5.0 through 1.0.0.
 
 This plugin uses the [*registered*](https://portal.hdfgroup.org/display/support/Filters#Filters-32013)
 HDF5 plugin filter id 32013
@@ -28,7 +28,7 @@ package  due  to  the  likely  broad  appeal  and  utility  of the ZFP
 compression library.
 
 This plugin supports all modes of the ZFP compression library, *rate*,
-*accuracy*, *precision*, *expert* and *lossless*. It supports 1, 2, 3 and
+*accuracy*, *precision*, *expert* and *reversible*. It supports 1, 2, 3 and
 4 dimensional datasets (for ZFP version 0.5.5 and newer) of single and double
 precision integer and floating point data. It can be applied to HDF5 datasets
 of more than 3 dimensions (or 4 dimensions for ZFP versions 0.5.5 and newer)
