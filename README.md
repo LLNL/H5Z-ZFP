@@ -17,7 +17,7 @@ For information about HDF5 filter plugins, see...
 
 - https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters
 
-This H5Z-ZFP plugin supports ZFP versions 0.5.0 through 1.0.0.
+This H5Z-ZFP plugin supports ZFP versions 0.5.0 and newer.
 
 This plugin uses the [*registered*](https://portal.hdfgroup.org/display/support/Filters#Filters-32013)
 HDF5 plugin filter id 32013
