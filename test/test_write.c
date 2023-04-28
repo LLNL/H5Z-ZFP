@@ -5,18 +5,67 @@ Written by Mark C. Miller, miller86@llnl.gov
 LLNL-CODE-707197. All rights reserved.
 
 This file is part of H5Z-ZFP. Please also read the BSD license
-https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
+https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 */
 
-#define _GNU_SOURCE
+#if !defined(_WIN32) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE /* ahead of ALL headers to take proper effect */
+#endif
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_WIN32)
+#define _USE_MATH_DEFINES
+#include <math.h>
+#define j0 _j0
+#include <io.h>
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#define read _read
+#define open _open
+#define close _close
+#define srandom(X) srand(X)
+#define random rand
+
+// strcasestr is not available on Windows
+#include <ctype.h>
+char * strcasestr(s, find)
+     const char *s, *find;
+{
+  char c, sc;
+  size_t len;
+
+  if ((c = *find++) != 0) {
+    c = tolower((unsigned char)c);
+    len = strlen(find);
+    do {
+      do {
+        if ((sc = *s++) == 0)
+          return (NULL);
+      } while ((char)tolower((unsigned char)sc) != c);
+    } while (strncasecmp(s, find, len) != 0);
+    s--;
+  }
+  return ((char *)s);
+}
+
+// strndup() is not available on Windows
+char *strndup( const char *s1, size_t n)
+{
+    char *copy= (char*)malloc( n+1 );
+    memcpy( copy, s1, n );
+    copy[n] = 0;
+    return copy;
+};
+
+#else
+#include <math.h>
 #include <unistd.h>
+#endif
 
 #include "hdf5.h"
 
@@ -72,6 +121,19 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 
 
 /* convenience macro to handle errors */
+#if defined(_WIN32)
+
+#define ERROR(FNAME)                                              \
+do {                                                              \
+    char errmsg[94];                                              \
+    strerror_s(errmsg, 94, errno);                                \
+    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
+            __LINE__, errno, errno?errmsg:"ok");                  \
+    return 1;                                                     \
+} while(0)
+
+#else
+
 #define ERROR(FNAME)                                              \
 do {                                                              \
     int _errno = errno;                                           \
@@ -79,6 +141,8 @@ do {                                                              \
         __LINE__, _errno, _errno?strerror(_errno):"ok");          \
     return 1;                                                     \
 } while(0)
+
+#endif
 
 /* Generate a simple, 1D sinusioidal data array with some noise */
 #define TYPINT 1
@@ -195,11 +259,11 @@ static void *
 gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, int const *ucdims)
 {
     int i, n;
-    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double)); 
+    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double));
     unsigned char *buf, *buf0;
     int m[10]; /* subspace multipliers */
     int *dimindx[10];
-   
+
     assert(ndims <= 10);
 
     /* Set up total size and sub-space multipliers */
@@ -211,7 +275,7 @@ gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, in
 
     /* allocate buffer of suitable size (doubles or ints) */
     buf0 = buf = (unsigned char*) malloc(n * nbyt);
-    
+
     /* set up dimension identity indexing (e.g. Idx[i]==i) so that
        we can randomize those dimenions we wish to have UNcorrelated */
     for (i = 0; i < ndims; i++)
@@ -286,7 +350,7 @@ buffer_time_step(void *tbuf, void *data, int typ, int ndims, int const *dims, in
 {
     int i, n;
     int k = t % 4;
-    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double)); 
+    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double));
 
     for (i = 0, n = 1; i < ndims; i++)
         n *= dims[i];
@@ -344,7 +408,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     /* Add filter to the pipeline via generic interface */
     if (0 > H5Pset_filter(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values)) ERROR(H5Pset_filter);
 
-#else 
+#else
 
     /* When filter is used as a library, we need to init it */
     H5Z_zfp_initialize();
@@ -370,7 +434,6 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 
 int main(int argc, char **argv)
 {
-    int i;
     int retval=0;
 
     /* filename variables */
@@ -410,7 +473,7 @@ int main(int argc, char **argv)
 
     /* ZFP filter arguments */
     HANDLE_SEP(ZFP compression paramaters)
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible));
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
     HANDLE_ARG(prec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
@@ -454,7 +517,7 @@ int main(int argc, char **argv)
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
-    /* Put this after setup_filter to permit printing of otherwise hard to 
+    /* Put this after setup_filter to permit printing of otherwise hard to
        construct cd_values to facilitate manual invokation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
@@ -568,7 +631,7 @@ int main(int argc, char **argv)
         tbuf = malloc(31*31*31*3*3*4*sizeof(double));
 
         /* Iterate, writing 9 timesteps by buffering in time 4x. The last
-           write will contain just one timestep causing ZFP to wind up 
+           write will contain just one timestep causing ZFP to wind up
            padding all those blocks by 3x along the time dimension.  */
         for (t = 1; t < 10; t++)
         {
@@ -581,7 +644,7 @@ int main(int argc, char **argv)
             modulate_by_time(buf, TYPDBL, 5, dims, t);
 
             /* Buffer this timestep in memory. Since chunk size in time dimension is 4,
-               we need to buffer up 4 time steps before we can issue any writes */ 
+               we need to buffer up 4 time steps before we can issue any writes */
             buffer_time_step(tbuf, buf, TYPDBL, 5, dims, t);
 
             /* If the buffer isn't full, just continue updating it */
@@ -660,7 +723,7 @@ int main(int argc, char **argv)
         /* write the data direct from compressed array using H5Dwrite_chunk calls */
         if (0 > (dsid = H5Dcreate(fid, "zfparr_direct", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
         if (0 > H5Dwrite_chunk(dsid, H5P_DEFAULT, 0, hchunk_off, cfp.array2d.compressed_size(origarr), cfp.array2d.compressed_data(origarr))) ERROR(H5Dwrite_chunk);
-         
+
         if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
 
         free(buf);
