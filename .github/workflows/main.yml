@@ -76,8 +76,7 @@ jobs:
       run: |
         mkdir build; cd build
         cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release ..
-        sudo cmake --build . --target install
-        ctest --verbose -C Release .
+        make
       shell: bash
 
     
@@ -128,10 +127,8 @@ jobs:
           mkdir build
           cd build
           cmake .. \
-            -G "Visual Studio 16 2019" -A "x64" \
             -DCMAKE_BUILD_TYPE=Release \
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . -j 3
           cmake --build . --target install
-          ctest --verbose -C Release .

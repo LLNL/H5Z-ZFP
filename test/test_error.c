@@ -5,51 +5,19 @@ Written by Mark C. Miller, miller86@llnl.gov
 LLNL-CODE-707197. All rights reserved.
 
 This file is part of H5Z-ZFP. Please also read the BSD license
-https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
+https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
-#if !defined(_WIN32) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE /* ahead of ALL headers to take proper effect */
-#endif
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if defined(_WIN32)
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <io.h>
-#define strncasecmp _strnicmp
-
-#include <ctype.h>
-char * strcasestr(s, find)
-     const char *s, *find;
-{
-  char c, sc;
-  size_t len;
-
-  if ((c = *find++) != 0) {
-    c = tolower((unsigned char)c);
-    len = strlen(find);
-    do {
-      do {
-        if ((sc = *s++) == 0)
-          return (NULL);
-      } while ((char)tolower((unsigned char)sc) != c);
-    } while (strncasecmp(s, find, len) != 0);
-    s--;
-  }
-  return ((char *)s);
-}
-
-#define srandom(X) srand(X)
-#define random rand
-#else
-#include <math.h>
+#include <strings.h>
 #include <unistd.h>
-#endif
 
 #include "hdf5.h"
 
@@ -94,19 +62,6 @@ char * strcasestr(s, find)
 
 
 /* convenience macro to handle errors */
-#if defined(_WIN32)
-
-#define ERROR(FNAME)                                              \
-do {                                                              \
-    char errmsg[94];                                              \
-    strerror_s(errmsg, 94, errno);                                \
-    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
-            __LINE__, errno, errno?errmsg:"ok");                  \
-    return 1;                                                     \
-} while(0)
-
-#else
-
 #define ERROR(FNAME)                                              \
 do {                                                              \
     int _errno = errno;                                           \
@@ -114,8 +69,6 @@ do {                                                              \
         __LINE__, _errno, _errno?strerror(_errno):"ok");          \
     return 1;                                                     \
 } while(0)
-
-#endif
 
 /* Generate a simple, 1D sinusioidal data array with some noise */
 #define TYPINT 1
@@ -180,7 +133,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 typedef struct client_data {char const *str; int has_str;} client_data_t;
 
 static int walk_hdf5_error_stack_cb(unsigned int n, H5E_error_t const *err_desc, void *_cd)
-{
+{   
     client_data_t *cd  = (client_data_t *) _cd;
     if (n > 0) return 0;
     cd->has_str = strcasestr(err_desc->desc, cd->str) != 0;
@@ -199,7 +152,7 @@ static int check_hdf5_error_stack_for_string(char const *str)
 
 int main(int argc, char **argv)
 {
-    int i, ndiffs;
+    int i, fd, ndiffs;
     unsigned corrupt[4] = {0xDeadBeef,0xBabeFace, 0xDeadBabe, 0xBeefFace};
     double d = 1.0, *buf = 0, rbuf[DSIZE];
     hsize_t chunk[] = {DSIZE,16,16,16,16};
@@ -223,7 +176,7 @@ int main(int argc, char **argv)
 
     /* ZFP filter arguments */
     HANDLE_SEP(ZFP compression paramaters)
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible));
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
     HANDLE_ARG(prec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
@@ -234,7 +187,7 @@ int main(int argc, char **argv)
 
     cpid = setup_filter(1, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
-    /* Put this after setup_filter to permit printing of otherwise hard to
+    /* Put this after setup_filter to permit printing of otherwise hard to 
        construct cd_values to facilitate manual invokation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
@@ -298,20 +251,9 @@ int main(int argc, char **argv)
     if (0 > H5Fclose(fid)) ERROR(H5Fclose);
 
     /* Use raw file I/O to corrupt the dataset named corrupted_data */
-
-#if defined(_WIN32)
-    FILE *fp;
-    errno_t err  = fopen_s( &fp, FNAME, "rb+");
-    if(err != 0) ERROR(fopen_s);
-    fseek(fp, (off_t) off + (off_t) siz / 3, SEEK_SET);
-    fwrite(corrupt, 1 , sizeof(corrupt), fp);
-    fclose(fp);
-#else
-    int fd;
     fd = open(FNAME, O_RDWR);
     pwrite(fd, corrupt, sizeof(corrupt), (off_t) off + (off_t) siz / 3);
     close(fd);
-#endif
 
     /* Now, open the file with the nans_and_infs and corrupted datasets and try to read them */
     if (0 > (fid = H5Fopen(FNAME, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);

@@ -12,10 +12,6 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if defined(_WIN32) || defined(_WIN64)
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
-#endif
 
 typedef unsigned int uint;
 
@@ -52,6 +48,16 @@ typedef unsigned int uint;
     len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A);\
     printf("    %s%*s\n",tmpstr,60-len,#HELPSTR);               \
 }
+
+
+/* convenience macro to handle errors */
+#define ERROR(FNAME)                                              \
+do {                                                              \
+    int _errno = errno;                                           \
+    fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
+        __LINE__, _errno, _errno?strerror(_errno):"ok");          \
+    return 1;                                                     \
+} while(0)
 
 static void print_cdvals(int zfpmode, double rate, double acc, uint prec,
     uint minbits, uint maxbits, uint maxprec, int minexp)
