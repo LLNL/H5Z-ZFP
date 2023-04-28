@@ -21,10 +21,8 @@ target_include_directories(h5z_zfp_static
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    ${HDF5_INCLUDE_DIRS}
-    $<$<BOOL:${FORTRAN_INTERFACE}>:${HDF5_FORTRAN_INCLUDE_DIRS}>
-)
-target_link_libraries(h5z_zfp_static PUBLIC zfp::zfp ${HDF5_LIBRARIES} $<$<BOOL:${FORTRAN_INTERFACE}>:${HDF5_FORTRAN_LIBRARIES}>)
+    ${HDF5_INCLUDE_DIRS})
+target_link_libraries(h5z_zfp_static PUBLIC zfp::zfp ${HDF5_LIBRARIES})
 set_target_properties(h5z_zfp_static PROPERTIES POSITION_INDEPENDENT_CODE 1)
 set_target_properties(h5z_zfp_static PROPERTIES OUTPUT_NAME h5zzfp)
 install(TARGETS h5z_zfp_static
@@ -48,7 +46,6 @@ target_include_directories(h5z_zfp_shared
 target_link_libraries(h5z_zfp_shared PUBLIC zfp::zfp ${HDF5_LIBRARIES})
 set_target_properties(h5z_zfp_shared PROPERTIES OUTPUT_NAME h5zzfp)
 install(TARGETS h5z_zfp_shared
-  RUNTIME DESTINATION plugin
   ARCHIVE DESTINATION plugin
   LIBRARY DESTINATION plugin)
 
