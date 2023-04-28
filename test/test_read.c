@@ -91,7 +91,7 @@ int main(int argc, char **argv)
     int num_reldiffs = 0;
     int doint = 0;
     int ret = 0;
-    
+
     /* file arguments */
     strcpy(ifile, "test_zfp.h5");
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     if (0 == (obuf = (double *) malloc(npoints * sizeof(double)))) ERROR(malloc);
     if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, obuf)) ERROR(H5Dread);
     if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
-    
+
     /* read the compressed dataset */
     if (0 > (dsid = H5Dopen(fid, doint?"int_compressed":"compressed", H5P_DEFAULT))) ERROR(H5Dopen);
     if (0 == (cbuf = (double *) malloc(npoints * sizeof(double)))) ERROR(malloc);

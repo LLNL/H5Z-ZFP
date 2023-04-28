@@ -5,7 +5,7 @@ Written by Mark C. Miller, miller86@llnl.gov
 LLNL-CODE-707197. All rights reserved.
 
 This file is part of H5Z-ZFP. Please also read the BSD license
-https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
+https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 */
 
 #include "test_common.h"
@@ -111,11 +111,11 @@ static void *
 gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, int const *ucdims)
 {
     int i, n;
-    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double)); 
+    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double));
     unsigned char *buf, *buf0;
     int m[10]; /* subspace multipliers */
     int *dimindx[10];
-   
+
     assert(ndims <= 10);
 
     /* Set up total size and sub-space multipliers */
@@ -127,7 +127,7 @@ gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, in
 
     /* allocate buffer of suitable size (doubles or ints) */
     buf0 = buf = (unsigned char*) malloc(n * nbyt);
-    
+
     /* set up dimension identity indexing (e.g. Idx[i]==i) so that
        we can randomize those dimenions we wish to have UNcorrelated */
     for (i = 0; i < ndims; i++)
@@ -202,7 +202,7 @@ buffer_time_step(void *tbuf, void *data, int typ, int ndims, int const *dims, in
 {
     int i, n;
     int k = t % 4;
-    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double)); 
+    int nbyt = (int) (typ == TYPINT ? sizeof(int) : sizeof(double));
 
     for (i = 0, n = 1; i < ndims; i++)
         n *= dims[i];
@@ -260,7 +260,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     /* Add filter to the pipeline via generic interface */
     if (0 > H5Pset_filter(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values)) ERROR(H5Pset_filter);
 
-#else 
+#else
 
     /* When filter is used as a library, we need to init it */
     H5Z_zfp_initialize();
@@ -325,7 +325,7 @@ int main(int argc, char **argv)
 
     /* ZFP filter arguments */
     HANDLE_SEP(ZFP compression paramaters)
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible));
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
     HANDLE_ARG(prec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
 
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
-    /* Put this after setup_filter to permit printing of otherwise hard to 
+    /* Put this after setup_filter to permit printing of otherwise hard to
        construct cd_values to facilitate manual invokation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
@@ -483,7 +483,7 @@ int main(int argc, char **argv)
         tbuf = malloc(31*31*31*3*3*4*sizeof(double));
 
         /* Iterate, writing 9 timesteps by buffering in time 4x. The last
-           write will contain just one timestep causing ZFP to wind up 
+           write will contain just one timestep causing ZFP to wind up
            padding all those blocks by 3x along the time dimension.  */
         for (t = 1; t < 10; t++)
         {
@@ -496,7 +496,7 @@ int main(int argc, char **argv)
             modulate_by_time(buf, TYPDBL, 5, dims, t);
 
             /* Buffer this timestep in memory. Since chunk size in time dimension is 4,
-               we need to buffer up 4 time steps before we can issue any writes */ 
+               we need to buffer up 4 time steps before we can issue any writes */
             buffer_time_step(tbuf, buf, TYPDBL, 5, dims, t);
 
             /* If the buffer isn't full, just continue updating it */
@@ -575,7 +575,7 @@ int main(int argc, char **argv)
         /* write the data direct from compressed array using H5Dwrite_chunk calls */
         if (0 > (dsid = H5Dcreate(fid, "zfparr_direct", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
         if (0 > H5Dwrite_chunk(dsid, H5P_DEFAULT, 0, hchunk_off, cfp.array2d.compressed_size(origarr), cfp.array2d.compressed_data(origarr))) ERROR(H5Dwrite_chunk);
-         
+
         if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
 
         free(buf);

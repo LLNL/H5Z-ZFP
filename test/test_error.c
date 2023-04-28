@@ -5,7 +5,7 @@ Written by Mark C. Miller, miller86@llnl.gov
 LLNL-CODE-707197. All rights reserved.
 
 This file is part of H5Z-ZFP. Please also read the BSD license
-https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
+https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 */
 
 #include "test_common.h"
@@ -49,7 +49,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 typedef struct client_data {char const *str; int has_str;} client_data_t;
 
 static int walk_hdf5_error_stack_cb(unsigned int n, H5E_error_t const *err_desc, void *_cd)
-{   
+{
     client_data_t *cd  = (client_data_t *) _cd;
     if (n > 0) return 0;
     cd->has_str = strcasestr(err_desc->desc, cd->str) != 0;
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 
     /* ZFP filter arguments */
     HANDLE_SEP(ZFP compression paramaters)
-    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible)); 
+    HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible));
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
     HANDLE_ARG(prec,(unsigned int) strtol(argv[i]+len2,0,10),"%u",set precision for precision mode);
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 
     cpid = setup_filter(1, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
-    /* Put this after setup_filter to permit printing of otherwise hard to 
+    /* Put this after setup_filter to permit printing of otherwise hard to
        construct cd_values to facilitate manual invokation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 

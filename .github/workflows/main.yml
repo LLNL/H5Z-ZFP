@@ -131,9 +131,9 @@ jobs:
           cd build
           cmake .. \
             -G "Visual Studio 16 2019" -A "x64" \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=Debug \ #FIXME: change back to release
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . -j 3
           cmake --build . --target install
-          ctest --verbose -C Debug .
+          ctest --verbose -C Debug . #FIXME: change back to release

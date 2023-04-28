@@ -22,8 +22,10 @@ target_include_directories(h5z_zfp_static
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    ${HDF5_INCLUDE_DIRS})
-target_link_libraries(h5z_zfp_static PUBLIC zfp::zfp ${HDF5_LIBRARIES})
+    ${HDF5_INCLUDE_DIRS}
+    $<$<BOOL:${FORTRAN_INTERFACE}>:${HDF5_FORTRAN_INCLUDE_DIRS}>
+)
+target_link_libraries(h5z_zfp_static PUBLIC zfp::zfp ${HDF5_LIBRARIES} $<$<BOOL:${FORTRAN_INTERFACE}>:${HDF5_FORTRAN_LIBRARIES}>)
 set_target_properties(h5z_zfp_static PROPERTIES POSITION_INDEPENDENT_CODE 1)
 set_target_properties(h5z_zfp_static PROPERTIES
   OUTPUT_NAME h5zzfp
