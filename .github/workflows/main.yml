@@ -138,4 +138,6 @@ jobs:
             -TClangCL
           cmake --build . -j 3
           cmake --build . --target install
-          ctest --verbose -C Debug . #FIXME: change back to release
+          dir C:\Program Files\HDF_Group\HDF5\1.14.0\lib\
+          dir C:\Program Files\HDF_Group\HDF5\1.14.0\lib\plugin
+          ctest --verbose -C Debug . 
