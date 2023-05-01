@@ -44,7 +44,9 @@ DEFAULT_FOLDERS()
 # Compile options.
 #------------------------------------------------------------------------------#
 option(FORTRAN_INTERFACE "Enable the Fortran interface" ON)
+message(status "option(FORTRAN_INTERFACE")
 if (FORTRAN_INTERFACE)
+  message(status "enable_language(Fortran)")
   enable_language(Fortran)
 endif ()
 message(status "after FORTRAN_INTERFACE")
