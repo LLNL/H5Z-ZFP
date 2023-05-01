@@ -70,6 +70,6 @@ install(FILES ${h5z_zfp_headers}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 if (FORTRAN_INTERFACE)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/h5zzfp_props_f.mod
+  install(FILES ${CMAKE_BINARY_DIR}/bin/h5zzfp_props_f.mod
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif ()

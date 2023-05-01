@@ -37,7 +37,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -qq libhdf5-dev
         sudo apt-get install -qq hdf5-tools
-        echo  "HDF5_HOME=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        echo "HDF5_HOME=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        echo "HDF5_DIR=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        echo "HDF5_ROOT=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
         # Set env vars
         echo "CC=gcc" >> $GITHUB_ENV
         echo "FC=gfortran" >> $GITHUB_ENV

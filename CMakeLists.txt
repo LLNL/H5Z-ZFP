@@ -47,13 +47,14 @@ option(FORTRAN_INTERFACE "Enable the Fortran interface" ON)
 if (FORTRAN_INTERFACE)
   enable_language(Fortran)
 endif ()
-
+message(status "after FORTRAN_INTERFACE")
 #------------------------------------------------------------------------------#
 # Some boilerplate to setup nice output directories
 #------------------------------------------------------------------------------#
 set(CMAKE_INSTALL_INCLUDEDIR include)
 set(CMAKE_INSTALL_CMAKEDIR lib/cmake/h5z_zfp)
 
+message(status "after CMAKE_INSTALL_CMAKEDIR")
 #------------------------------------------------------------------------------#
 # Required packages
 #------------------------------------------------------------------------------#
@@ -63,6 +64,7 @@ if (NOT HDF5_FOUND)
   message (FATAL_ERROR "HDF5 is Required for h5z_zfp")
 endif ()
 
+message(status "after HDF5_SUPPORT")
 # Find MPI depending on if HDF5 needs MPI.
 if (HDF5_IS_PARALLEL AND ("${HDF5_VERSION}" VERSION_EQUAL "1.14.0"))
   find_package(MPI REQUIRED COMPONENTS C)
