@@ -136,6 +136,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
-          #cmake --build . -j 3
-          #cmake --build . --target install
-          #ctest --verbose -C Debug . #FIXME: change back to release
+          cmake --build . -j 3
+          cmake --build . --target install
+          ctest --verbose -C Debug . #FIXME: change back to release
