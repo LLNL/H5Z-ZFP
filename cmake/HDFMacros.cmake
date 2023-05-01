@@ -121,7 +121,10 @@ macro (HDF5_SUPPORT)
         endif ()
       endif ()
     else ()
-      find_package (HDF5 COMPONENTS Fortran) # Legacy find
+     if (FORTRAN_INTERFACE)
+        set(FORTRAN_COMP "Fortran")
+      endif()
+      find_package (HDF5 COMPONENTS ${FORTRAN_COMP}) # Legacy find
       if (FORTRAN_INTERFACE AND NOT HDF5_Fortran_FOUND)
         set (FORTRAN_INTERFACE OFF CACHE BOOL "Build FORTRAN support" FORCE)
         message (STATUS "HDF5 Fortran libs not found - disable build of Fortran support")
