@@ -38,7 +38,21 @@ jobs:
         sudo apt-get install -qq libhdf5-dev
         sudo apt-get install -qq hdf5-tools
         ls /usr/include/hdf5/serial
-        ls /usr/lib/x86_64-linux-gnu/hdf5/serialFP
+        ls /usr/lib/x86_64-linux-gnu/hdf5/serial
+        echo "HDF5_HOME=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        #echo "HDF5_DIR=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        #echo "HDF5_ROOT=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+        # Set env vars
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+        echo "CXX=g++"  >> $GITHUB_ENV
+        
+ # Checks-out the repository under $GITHUB_WORKSPACE so the job can access it.
+    - name: Get Sources
+      uses: actions/checkout@v3
+
+##################################
+# INSTALL ZFP
 ##################################
                  
     - name: install ZFP
