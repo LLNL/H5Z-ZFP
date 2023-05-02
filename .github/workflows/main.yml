@@ -139,6 +139,7 @@ jobs:
           cmake --build . -j 3
           cmake --build . --target install
           set "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin/"
+          set "PATH=C:\Program Files\HDF_Group\HDF5\1.14.0\bin;C:\Program Files\HDF_Group\HDF5\1.14.0\lib;C:\Program Files (x86)\ZFP\lib;C:\Program Files (x86)\ZFP\bin"
           #dir "C:\Program Files\HDF_Group\HDF5\1.14.0\lib"
           #dir "C:\Program Files\HDF_Group\HDF5\1.14.0\lib\plugin"
           ctest --verbose -C Debug . 
