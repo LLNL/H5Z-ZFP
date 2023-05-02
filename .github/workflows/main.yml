@@ -138,8 +138,8 @@ jobs:
             -TClangCL
           cmake --build . -j 3
           cmake --build . --target install
-          "dir C:/Program Files/H5Z_ZFP/plugin/"
-          "dir C:/Program Files/HDF_Group/HDF5/1.14.0/bin"
-          "dir C:/Program Files (x86)/ZFP/lib"
+          #"dir C:/Program Files/H5Z_ZFP/plugin/"
+          #"dir C:/Program Files/HDF_Group/HDF5/1.14.0/bin"
+          #"dir C:/Program Files (x86)/ZFP/lib"
           echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin/" >> $GITHUB_ENV
           ctest --verbose -C Debug . 
