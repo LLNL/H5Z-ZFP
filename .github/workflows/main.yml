@@ -138,6 +138,7 @@ jobs:
             -TClangCL
           cmake --build . -j 3
           cmake --build . --target install
+          "dir D:\a\H5Z-ZFP\H5Z-ZFP\build\src\plugin"
           #$env:HDF5_PLUGIN_PATH="C:\Program Files\H5Z_ZFP\plugin"
           #echo $Env:HDF5_PLUGIN_PATH
           #"dir C:\Program Files\H5Z_ZFP\plugin\"
