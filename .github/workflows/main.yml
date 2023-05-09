@@ -74,10 +74,10 @@ jobs:
         make check
       shell: bash
 
-    - name: build (cmake)
+    - name: build (cmake) and test
       run: |
         mkdir build; cd build
-        cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release ..
+        cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
         sudo cmake --build . --target install
         ctest --verbose -C Release .
       shell: bash
@@ -115,37 +115,33 @@ jobs:
           mkdir -p build
           cd build
           cmake .. \
-            -DCMAKE_BUILD_TYPE=Release \
+            -G "Visual Studio 16 2019" -A "x64" \
+            -DCMAKE_CONFIGURATION_TYPES=Release \
             -DBUILD_UTILITIES=OFF \
             -DBUILD_TESTING=OFF \
             -DBUILD_CFP=ON \
             -DZFP_BIT_STREAM_WORD_SIZE=8
-          cmake --build . -j 3
-          cmake --build . --target install
-      - name: update PATH
+          cmake --build . --config Release -j 3
+          cmake --build . --config Release --target install
+      - name: Set build and test variables
         run: |
-          echo "C:/Program Files/HDF_Group/HDF5/1.14.0/bin;C:/Program Files (x86)/ZFP/lib;C:/Program Files (x86)/ZFP/bin;C:/Users/brtnfld/Desktop/Work/H5Z-ZFP/build/h5z-zfp/plugin;%PATH%" >> $GITHUB_PATH
+          echo "C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_PATH
+          echo "C:/Program Files/ZFP/bin" >> $GITHUB_PATH
+          echo "C:/Program Files/ZFP/lib" >> $GITHUB_PATH
+          echo "C:/Program Files/HDF_Group/HDF5/1.14.0/bin" >> $GITHUB_PATH
+          echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
           echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.0" >> $GITHUB_ENV
           echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.0" >> $GITHUB_ENV
-          echo "ZFP_DIR=C:/Program Files (x86)/ZFP" >> $GITHUB_ENV
-      - name: configure cmake
+          echo "ZFP_DIR=C:/Program Files/ZFP" >> $GITHUB_ENV
+      - name: Build H5Z-ZFP (CMake) and test
         run: |
           mkdir build
           cd build
           cmake .. \
             -G "Visual Studio 16 2019" -A "x64" \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CONFIGURATION_TYPES=Release \
+            -DBUILD_TESTING=ON \
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
-          #cmake --build . -j
-          cmake --build . --target install
-          #cmake --build . --target install
-          "D:\a\H5Z-ZFP\H5Z-ZFP\build\bin\Debug\test_write_plugin.exe" "zfpmode=1" "rate=32" "ofile=test_zfp-rate-32.h5"
-          #"dir D:\a\H5Z-ZFP\H5Z-ZFP\build\src\plugin"
-          #$env:HDF5_PLUGIN_PATH="C:\Program Files\H5Z_ZFP\plugin"
-          #echo $Env:HDF5_PLUGIN_PATH
-          #"dir C:\Program Files\H5Z_ZFP\plugin\"
-          #"dir C:\Program Files\HDF_Group\HDF5\1.14.0\bin"
-          #"dir C:\Program Files (x86)\ZFP\lib"
-          #echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
-          #ctest --verbose -C Debug . 
+          cmake --build . --config Release --target install
+          ctest --verbose -C Release .

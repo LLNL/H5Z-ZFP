@@ -23,6 +23,8 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
     cmake_policy(SET CMP0135 NEW)
 endif()
 
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 #------------------------------------------------------------------------------#
 # Parse version number from H5Zzfp_version.h
 #------------------------------------------------------------------------------#
@@ -73,6 +75,11 @@ if (NOT ZFP_FOUND)
   message (FATAL_ERROR "ZFP is Required for h5z_zfp")
 endif ()
 
+#------------------------------------------------------------------------------#
+# Add source
+#------------------------------------------------------------------------------#
+add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
@@ -82,22 +89,9 @@ if (BUILD_TESTING)
        "Timeout in seconds for each test (default 1200=20minutes)")
   enable_testing ()
   include (CTest)
-endif ()
 
-#------------------------------------------------------------------------------#
-# Add source
-#------------------------------------------------------------------------------#
-add_subdirectory(${CMAKE_SOURCE_DIR}/src)
-
-if (BUILD_TESTING)
   add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 endif ()
-
-#------------------------------------------------------------------------------#
-# Add tests
-#------------------------------------------------------------------------------#
-enable_testing()
-add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 
 #------------------------------------------------------------------------------#
 # Packaging
