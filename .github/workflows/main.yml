@@ -124,9 +124,9 @@ jobs:
           cmake --build . --target install
       - name: update PATH
         run: |
-          echo "C:\Program Files\HDF_Group\HDF5\1.14.0\bin;C:\Program Files (x86)\ZFP\lib;C:\Program Files (x86)\ZFP\bin;C:\Users\brtnfld\Desktop\Work\H5Z-ZFP\build\h5z-zfp\plugin;%PATH%" >> $GITHUB_PATH
-          echo "HDF5_DIR=C:\Program Files\HDF_Group\HDF5\1.14.0" >> $GITHUB_ENV
-          echo "HDF5_ROOT=C:\Program Files\HDF_Group\HDF5\1.14.0" >> $GITHUB_ENV
+          echo "C:/Program Files/HDF_Group/HDF5/1.14.0/bin;C:/Program Files (x86)/ZFP/lib;C:/Program Files (x86)/ZFP/bin;C:/Users/brtnfld/Desktop/Work/H5Z-ZFP/build/h5z-zfp/plugin;%PATH%" >> $GITHUB_PATH
+          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.0" >> $GITHUB_ENV
+          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.0" >> $GITHUB_ENV
           echo "ZFP_DIR=C:/Program Files (x86)/ZFP" >> $GITHUB_ENV
       - name: configure cmake
         run: |
