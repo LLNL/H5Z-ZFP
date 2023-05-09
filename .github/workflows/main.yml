@@ -125,8 +125,9 @@ jobs:
       - name: update PATH
         run: |
           echo "C:\Program Files\HDF_Group\HDF5\1.14.0\bin;C:\Program Files (x86)\ZFP\lib;C:\Program Files (x86)\ZFP\bin;C:\Users\brtnfld\Desktop\Work\H5Z-ZFP\build\h5z-zfp\plugin;%PATH%" >> $GITHUB_PATH
-          echo "HDF5_DIR=C:\Program Files\HDF_Group\HDF5" >> $GITHUB_ENV
-          echo "HDF5_ROOT=C:\Program Files\HDF_Group\HDF5" >> $GITHUB_ENV
+          echo "HDF5_DIR=C:\Program Files\HDF_Group\HDF5\1.14.0" >> $GITHUB_ENV
+          echo "HDF5_ROOT=C:\Program Files\HDF_Group\HDF5\1.14.0" >> $GITHUB_ENV
+          echo "ZFP_DIR=C:/Program Files (x86)/ZFP" >> $GITHUB_ENV
       - name: configure cmake
         run: |
           mkdir build
@@ -138,7 +139,7 @@ jobs:
             -TClangCL
           #cmake --build . -j
           cmake --build . --target install
-          cmake --build . --target install
+          #cmake --build . --target install
           "D:\a\H5Z-ZFP\H5Z-ZFP\build\bin\Debug\test_write_plugin.exe" "zfpmode=1" "rate=32" "ofile=test_zfp-rate-32.h5"
           #"dir D:\a\H5Z-ZFP\H5Z-ZFP\build\src\plugin"
           #$env:HDF5_PLUGIN_PATH="C:\Program Files\H5Z_ZFP\plugin"
