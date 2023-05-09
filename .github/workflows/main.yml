@@ -138,7 +138,8 @@ jobs:
             -TClangCL
           #cmake --build . -j
           cmake --build . --target install
-          C:/Users/brtnfld/Desktop/Work/H5Z-ZFP/build/bin/Debug/test_write_plugin.exe "zfpmode=1" "rate=32" "ofile=test_zfp-rate-32.h5"
+          cmake --build . --target install
+          C:/Program Files/H5Z_ZFP/bin/Debug/test_write_plugin.exe "zfpmode=1" "rate=32" "ofile=test_zfp-rate-32.h5"
           #"dir D:\a\H5Z-ZFP\H5Z-ZFP\build\src\plugin"
           #$env:HDF5_PLUGIN_PATH="C:\Program Files\H5Z_ZFP\plugin"
           #echo $Env:HDF5_PLUGIN_PATH
