@@ -124,7 +124,7 @@ jobs:
           cmake --build . --target install
       - name: update PATH
         run: |
-          echo "C:\Program Files\HDF_Group\HDF5\1.14.0\bin;C:\Program Files (x86)\ZFP\lib;C:\Program Files (x86)\ZFP\bin" >> $GITHUB_PATH
+          echo "C:\Program Files\HDF_Group\HDF5\1.14.0\bin;C:\Program Files (x86)\ZFP\lib;C:\Program Files (x86)\ZFP\bin;C:\Users\brtnfld\Desktop\Work\H5Z-ZFP\build\h5z-zfp\plugin;%PATH%" >> $GITHUB_PATH
           echo "HDF5_DIR=C:\Program Files\HDF_Group\HDF5" >> $GITHUB_ENV
           echo "HDF5_ROOT=C:\Program Files\HDF_Group\HDF5" >> $GITHUB_ENV
       - name: configure cmake
@@ -133,16 +133,17 @@ jobs:
           cd build
           cmake .. \
             -G "Visual Studio 16 2019" -A "x64" \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=Release \
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
-          cmake --build . -j 3
+          #cmake --build . -j
           cmake --build . --target install
-          "dir D:\a\H5Z-ZFP\H5Z-ZFP\build\src\plugin"
+          C:/Users/brtnfld/Desktop/Work/H5Z-ZFP/build/bin/Debug/test_write_plugin.exe "zfpmode=1" "rate=32" "ofile=test_zfp-rate-32.h5"
+          #"dir D:\a\H5Z-ZFP\H5Z-ZFP\build\src\plugin"
           #$env:HDF5_PLUGIN_PATH="C:\Program Files\H5Z_ZFP\plugin"
           #echo $Env:HDF5_PLUGIN_PATH
           #"dir C:\Program Files\H5Z_ZFP\plugin\"
           #"dir C:\Program Files\HDF_Group\HDF5\1.14.0\bin"
           #"dir C:\Program Files (x86)\ZFP\lib"
-          echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
-          ctest --verbose -C Debug . 
+          #echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
+          #ctest --verbose -C Debug . 
