@@ -24,8 +24,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     hid_t cpid;
 
     /* setup dataset creation properties */
-    if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
-    if (0 > H5Pset_chunk(cpid, n, chunk)) ERROR(H5Pset_chunk);
+    if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) SET_ERROR(H5Pcreate);
+    if (0 > H5Pset_chunk(cpid, n, chunk)) SET_ERROR(H5Pset_chunk);
 
     /* When filter is used as a library, we need to init it */
     H5Z_zfp_initialize();
@@ -112,14 +112,14 @@ int main(int argc, char **argv)
     H5Eset_auto(H5E_DEFAULT, 0, 0);
 
     /* setup the 1D data space */
-    if (0 > (sid = H5Screate_simple(1, chunk, 0))) ERROR(H5Screate_simple);
+    if (0 > (sid = H5Screate_simple(1, chunk, 0))) SET_ERROR(H5Screate_simple);
 
     /* create HDF5 file */
-    if (0 > (fid = H5Fcreate(FNAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Fcreate);
+    if (0 > (fid = H5Fcreate(FNAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))) SET_ERROR(H5Fcreate);
 
     /* test incorrect data type */
     tid = H5Tcreate(H5T_STRING, 8);
-    if (0 <= (dsid = H5Dcreate(fid, "bad_type", tid, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+    if (0 <= (dsid = H5Dcreate(fid, "bad_type", tid, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
 #if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION<=0x052
     assert(check_hdf5_error_stack_for_string("requires datatype class of H5T_FLOAT"));
 #else
@@ -130,13 +130,13 @@ int main(int argc, char **argv)
     /* test invalid size of data type */
     tid = H5Tcopy(H5T_NATIVE_DOUBLE);
     H5Tset_size(tid, 9);
-    if (0 <= (dsid = H5Dcreate(fid, "bad_type_size", tid, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+    if (0 <= (dsid = H5Dcreate(fid, "bad_type_size", tid, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
     assert(check_hdf5_error_stack_for_string("requires datatype size of 4 or 8"));
     H5Tclose(tid);
 
     /* test invalid chunking on highd data */
     cpid = setup_filter(5, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
-    if (0 <= (dsid = H5Dcreate(fid, "bad_chunking", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+    if (0 <= (dsid = H5Dcreate(fid, "bad_chunking", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
 #if defined(ZFP_LIB_VERSION) && ZFP_LIB_VERSION<=0x053
     assert(check_hdf5_error_stack_for_string("chunk must have only 1...3 non-unity dimensions"));
 #else
@@ -146,57 +146,57 @@ int main(int argc, char **argv)
 
     /* write a compressed dataset to be corrupted later */
     cpid = setup_filter(1, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
-    if (0 > (dsid = H5Dcreate(fid, "corrupted_data", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
+    if (0 > (dsid = H5Dcreate(fid, "corrupted_data", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
     off = 3496; // H5Dget_offset(dsid);
     siz = H5Dget_storage_size(dsid);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
-    if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
+    if (0 > H5Pclose(cpid)) SET_ERROR(H5Pclose);
 
     /* write a compressed dataset with some nans and infs */
     cpid = setup_filter(1, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
-    if (0 > (dsid = H5Dcreate(fid, "nans_and_infs", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
+    if (0 > (dsid = H5Dcreate(fid, "nans_and_infs", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
     memcpy(rbuf, buf, sizeof(rbuf));
     for (i = 7; i < 7+4; i++)
         rbuf[i] = d/(d-1.0);
     rbuf[42] = sqrt((double)-1.0);
     rbuf[42+1] = sqrt((double)-1.0);
-    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)) ERROR(H5Dwrite);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
-    if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
-    if (0 > H5Fclose(fid)) ERROR(H5Fclose);
+    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)) SET_ERROR(H5Dwrite);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
+    if (0 > H5Pclose(cpid)) SET_ERROR(H5Pclose);
+    if (0 > H5Fclose(fid)) SET_ERROR(H5Fclose);
 
     /* Use raw file I/O to corrupt the dataset named corrupted_data */
     FILE *fp;
     fp = fopen(FNAME, "rb+");
-    if(fp == NULL) ERROR(fopen);
+    if(fp == NULL) SET_ERROR(fopen);
     fseek(fp, (off_t) off + (off_t) siz / 3, SEEK_SET);
     fwrite(corrupt, 1 , sizeof(corrupt), fp);
     fclose(fp);
 
     /* Now, open the file with the nans_and_infs and corrupted datasets and try to read them */
-    if (0 > (fid = H5Fopen(FNAME, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
-    if (0 > (dsid = H5Dopen(fid, "nans_and_infs", H5P_DEFAULT))) ERROR(H5Dopen);
-    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)) ERROR(H5Dread);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (0 > (fid = H5Fopen(FNAME, H5F_ACC_RDONLY, H5P_DEFAULT))) SET_ERROR(H5Fopen);
+    if (0 > (dsid = H5Dopen(fid, "nans_and_infs", H5P_DEFAULT))) SET_ERROR(H5Dopen);
+    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)) SET_ERROR(H5Dread);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
     for (i = 0, ndiffs = 0; i < DSIZE; i++)
     {
         double d = fabs(rbuf[i] - buf[i]);
         if (d > acc) ndiffs++;
     }
     assert(ndiffs == 10);
-    if (0 > (dsid = H5Dopen(fid, "corrupted_data", H5P_DEFAULT))) ERROR(H5Dopen);
-    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)) ERROR(H5Dread);
+    if (0 > (dsid = H5Dopen(fid, "corrupted_data", H5P_DEFAULT))) SET_ERROR(H5Dopen);
+    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)) SET_ERROR(H5Dread);
     for (i = 0, ndiffs = 0; i < DSIZE; i++)
     {
         double d = fabs(rbuf[i] - buf[i]);
         if (d > acc) ndiffs++;
     }
     assert(ndiffs == 1408);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
     free(buf);
-    if (0 > H5Fclose(fid)) ERROR(H5Fclose);
+    if (0 > H5Fclose(fid)) SET_ERROR(H5Fclose);
     H5close();
 
     return 0;

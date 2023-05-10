@@ -106,25 +106,25 @@ int main(int argc, char **argv)
 #endif
 
     /* open the HDF5 file */
-    if (0 > (fid = H5Fopen(ifile, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
+    if (0 > (fid = H5Fopen(ifile, H5F_ACC_RDONLY, H5P_DEFAULT))) SET_ERROR(H5Fopen);
 
     /* read the original dataset */
-    if (0 > (dsid = H5Dopen(fid, doint?"int_original":"original", H5P_DEFAULT))) ERROR(H5Dopen);
-    if (0 > (space_id = H5Dget_space(dsid))) ERROR(H5Dget_space);
-    if (0 == (npoints = H5Sget_simple_extent_npoints(space_id))) ERROR(H5Sget_simple_extent_npoints);
-    if (0 > H5Sclose(space_id)) ERROR(H5Sclose);
-    if (0 == (obuf = (double *) malloc(npoints * sizeof(double)))) ERROR(malloc);
-    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, obuf)) ERROR(H5Dread);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (0 > (dsid = H5Dopen(fid, doint?"int_original":"original", H5P_DEFAULT))) SET_ERROR(H5Dopen);
+    if (0 > (space_id = H5Dget_space(dsid))) SET_ERROR(H5Dget_space);
+    if (0 == (npoints = H5Sget_simple_extent_npoints(space_id))) SET_ERROR(H5Sget_simple_extent_npoints);
+    if (0 > H5Sclose(space_id)) SET_ERROR(H5Sclose);
+    if (0 == (obuf = (double *) malloc(npoints * sizeof(double)))) SET_ERROR(malloc);
+    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, obuf)) SET_ERROR(H5Dread);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
     /* read the compressed dataset */
-    if (0 > (dsid = H5Dopen(fid, doint?"int_compressed":"compressed", H5P_DEFAULT))) ERROR(H5Dopen);
-    if (0 == (cbuf = (double *) malloc(npoints * sizeof(double)))) ERROR(malloc);
-    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuf)) ERROR(H5Dread);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (0 > (dsid = H5Dopen(fid, doint?"int_compressed":"compressed", H5P_DEFAULT))) SET_ERROR(H5Dopen);
+    if (0 == (cbuf = (double *) malloc(npoints * sizeof(double)))) SET_ERROR(malloc);
+    if (0 > H5Dread(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuf)) SET_ERROR(H5Dread);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
     /* clean up */
-    if (0 > H5Fclose(fid)) ERROR(H5Fclose);
+    if (0 > H5Fclose(fid)) SET_ERROR(H5Fclose);
 
     /* compare original to compressed */
     for (i = 0; i < npoints; i++)

@@ -8,6 +8,9 @@ This file is part of H5Z-ZFP. Please also read the BSD license
 https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE 
 */
 
+#ifndef test_common_H
+#define test_common_H
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE /* ahead of ALL headers to take proper effect */
 #endif
@@ -85,7 +88,7 @@ char *strndup( const char *s1, size_t n)
 /* convenience macro to handle errors */
 #ifdef _MSC_VER
 
-#define ERROR(FNAME)                                              \
+#define SET_ERROR(FNAME)                                              \
 do {                                                              \
     size_t errmsglen = 94;                                        \
     char errmsg[errmsglen];                                       \
@@ -97,7 +100,7 @@ do {                                                              \
 
 #else
 
-#define ERROR(FNAME)                                              \
+#define SET_ERROR(FNAME)                                              \
 do {                                                              \
     int _errno = errno;                                           \
     fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
@@ -137,3 +140,4 @@ static int gen_data(size_t npoints, double noise, double amp, void **_buf, int t
         *_buf = pdbl;
     return 0;
 }
+#endif /* test_common_H */

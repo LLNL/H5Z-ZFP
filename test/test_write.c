@@ -215,10 +215,10 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
     size_t const nbytes = npoints * sizeof(double);
     int fd;
 
-    if (0 > (fd = open(fname, O_RDONLY))) ERROR(open);
-    if (0 == (*_buf = (double *) malloc(nbytes))) ERROR(malloc);
-    if (nbytes != read(fd, *_buf, nbytes)) ERROR(read);
-    if (0 != close(fd)) ERROR(close);
+    if (0 > (fd = open(fname, O_RDONLY))) SET_ERROR(open);
+    if (0 == (*_buf = (double *) malloc(nbytes))) SET_ERROR(malloc);
+    if (nbytes != read(fd, *_buf, nbytes)) SET_ERROR(read);
+    if (0 != close(fd)) SET_ERROR(close);
     return 0;
 }
 
@@ -229,8 +229,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     hid_t cpid;
 
     /* setup dataset creation properties */
-    if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) ERROR(H5Pcreate);
-    if (0 > H5Pset_chunk(cpid, n, chunk)) ERROR(H5Pset_chunk);
+    if (0 > (cpid = H5Pcreate(H5P_DATASET_CREATE))) SET_ERROR(H5Pcreate);
+    if (0 > H5Pset_chunk(cpid, n, chunk)) SET_ERROR(H5Pset_chunk);
 
 #ifdef H5Z_ZFP_USE_PLUGIN
 
@@ -258,7 +258,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     printf("\n");
 
     /* Add filter to the pipeline via generic interface */
-    if (0 > H5Pset_filter(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values)) ERROR(H5Pset_filter);
+    if (0 > H5Pset_filter(cpid, H5Z_FILTER_ZFP, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values)) SET_ERROR(H5Pset_filter);
 
 #else
 
@@ -385,36 +385,36 @@ int main(int argc, char **argv)
         gen_data((size_t) npoints, noise*100, amp*1000000, (void**)&ibuf, TYPINT);
 
     /* create HDF5 file */
-    if (0 > (fid = H5Fcreate(ofile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Fcreate);
+    if (0 > (fid = H5Fcreate(ofile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))) SET_ERROR(H5Fcreate);
 
     /* setup the 1D data space */
-    if (0 > (sid = H5Screate_simple(1, &npoints, 0))) ERROR(H5Screate_simple);
+    if (0 > (sid = H5Screate_simple(1, &npoints, 0))) SET_ERROR(H5Screate_simple);
 
     /* write the data WITHOUT compression */
-    if (0 > (dsid = H5Dcreate(fid, "original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
-    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (0 > (dsid = H5Dcreate(fid, "original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
     if (doint)
     {
-        if (0 > (idsid = H5Dcreate(fid, "int_original", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite(idsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf)) ERROR(H5Dwrite);
-        if (0 > H5Dclose(idsid)) ERROR(H5Dclose);
+        if (0 > (idsid = H5Dcreate(fid, "int_original", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite(idsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf)) SET_ERROR(H5Dwrite);
+        if (0 > H5Dclose(idsid)) SET_ERROR(H5Dclose);
     }
 
     /* write the data with requested compression */
-    if (0 > (dsid = H5Dcreate(fid, "compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
-    if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+    if (0 > (dsid = H5Dcreate(fid, "compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+    if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
+    if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
     if (doint)
     {
-        if (0 > (idsid = H5Dcreate(fid, "int_compressed", H5T_NATIVE_INT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite(idsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf)) ERROR(H5Dwrite);
-        if (0 > H5Dclose(idsid)) ERROR(H5Dclose);
+        if (0 > (idsid = H5Dcreate(fid, "int_compressed", H5T_NATIVE_INT, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite(idsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf)) SET_ERROR(H5Dwrite);
+        if (0 > H5Dclose(idsid)) SET_ERROR(H5Dclose);
     }
 
     /* clean up from simple tests */
-    if (0 > H5Sclose(sid)) ERROR(H5Sclose);
-    if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+    if (0 > H5Sclose(sid)) SET_ERROR(H5Sclose);
+    if (0 > H5Pclose(cpid)) SET_ERROR(H5Pclose);
     free(buf);
     if (ibuf) free(ibuf);
 
@@ -431,21 +431,21 @@ int main(int argc, char **argv)
 
         cpid = setup_filter(4, hchunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
-        if (0 > (sid = H5Screate_simple(4, hdims, 0))) ERROR(H5Screate_simple);
+        if (0 > (sid = H5Screate_simple(4, hdims, 0))) SET_ERROR(H5Screate_simple);
 
         /* write the data WITHOUT compression */
-        if (0 > (dsid = H5Dcreate(fid, "highD_original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
-        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        if (0 > (dsid = H5Dcreate(fid, "highD_original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
         /* write the data with compression */
-        if (0 > (dsid = H5Dcreate(fid, "highD_compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
-        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        if (0 > (dsid = H5Dcreate(fid, "highD_compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
         /* clean up from high dimensional test */
-        if (0 > H5Sclose(sid)) ERROR(H5Sclose);
-        if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+        if (0 > H5Sclose(sid)) SET_ERROR(H5Sclose);
+        if (0 > H5Pclose(cpid)) SET_ERROR(H5Pclose);
         free(buf);
     }
     /* End of high dimensional test */
@@ -469,10 +469,10 @@ int main(int argc, char **argv)
         cpid = setup_filter(6, hchunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
         /* Create the time-varying, 6D dataset */
-        if (0 > (sid = H5Screate_simple(6, hwrite, hdims))) ERROR(H5Screate_simple);
-        if (0 > (dsid = H5Dcreate(fid, "6D_extendible", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Sclose(sid)) ERROR(H5Sclose);
-        if (0 > H5Pclose(cpid)) ERROR(H5Pclose);
+        if (0 > (sid = H5Screate_simple(6, hwrite, hdims))) SET_ERROR(H5Screate_simple);
+        if (0 > (dsid = H5Dcreate(fid, "6D_extendible", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Sclose(sid)) SET_ERROR(H5Sclose);
+        if (0 > H5Pclose(cpid)) SET_ERROR(H5Pclose);
 
         /* Generate a single buffer which we'll modulate by a time-varying function
            to represent each timestep */
@@ -515,20 +515,20 @@ int main(int argc, char **argv)
                 H5Dextend(dsid, hextend);
 
             /* Create the memory dataspace */
-            if (0 > (msid = H5Screate_simple(6, hwrite, 0))) ERROR(H5Screate_simple);
+            if (0 > (msid = H5Screate_simple(6, hwrite, 0))) SET_ERROR(H5Screate_simple);
 
             /* Get the file dataspace to use for this H5Dwrite call */
-            if (0 > (fsid = H5Dget_space(dsid))) ERROR(H5Dget_space);
+            if (0 > (fsid = H5Dget_space(dsid))) SET_ERROR(H5Dget_space);
 
             /* Do a hyperslab selection on the file dataspace for this write*/
-            if (0 > H5Sselect_hyperslab(fsid, H5S_SELECT_SET, hstart, 0, hcount, 0)) ERROR(H5Sselect_hyperslab);
+            if (0 > H5Sselect_hyperslab(fsid, H5S_SELECT_SET, hstart, 0, hcount, 0)) SET_ERROR(H5Sselect_hyperslab);
 
             /* Write this iteration to the dataset */
-            if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, msid, fsid, H5P_DEFAULT, tbuf)) ERROR(H5Dwrite);
-            if (0 > H5Sclose(msid)) ERROR(H5Sclose);
-            if (0 > H5Sclose(fsid)) ERROR(H5Sclose);
+            if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, msid, fsid, H5P_DEFAULT, tbuf)) SET_ERROR(H5Dwrite);
+            if (0 > H5Sclose(msid)) SET_ERROR(H5Sclose);
+            if (0 > H5Sclose(fsid)) SET_ERROR(H5Sclose);
         }
-        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
         free(buf);
         free(tbuf);
     }
@@ -560,23 +560,23 @@ int main(int argc, char **argv)
 
         cpid = setup_filter(2, hchunk_dims, 1, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
-        if (0 > (sid = H5Screate_simple(2, hdims, 0))) ERROR(H5Screate_simple);
+        if (0 > (sid = H5Screate_simple(2, hdims, 0))) SET_ERROR(H5Screate_simple);
 
         /* write the data WITHOUT compression */
-        if (0 > (dsid = H5Dcreate(fid, "zfparr_original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
-        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        if (0 > (dsid = H5Dcreate(fid, "zfparr_original", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
         /* write the data with compression via the filter */
-        if (0 > (dsid = H5Dcreate(fid, "zfparr_compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) ERROR(H5Dwrite);
-        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        if (0 > (dsid = H5Dcreate(fid, "zfparr_compressed", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite(dsid, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) SET_ERROR(H5Dwrite);
+        if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
         /* write the data direct from compressed array using H5Dwrite_chunk calls */
-        if (0 > (dsid = H5Dcreate(fid, "zfparr_direct", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) ERROR(H5Dcreate);
-        if (0 > H5Dwrite_chunk(dsid, H5P_DEFAULT, 0, hchunk_off, cfp.array2d.compressed_size(origarr), cfp.array2d.compressed_data(origarr))) ERROR(H5Dwrite_chunk);
+        if (0 > (dsid = H5Dcreate(fid, "zfparr_direct", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, cpid, H5P_DEFAULT))) SET_ERROR(H5Dcreate);
+        if (0 > H5Dwrite_chunk(dsid, H5P_DEFAULT, 0, hchunk_off, cfp.array2d.compressed_size(origarr), cfp.array2d.compressed_data(origarr))) SET_ERROR(H5Dwrite_chunk);
 
-        if (0 > H5Dclose(dsid)) ERROR(H5Dclose);
+        if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
         free(buf);
         cfp.array2d.dtor(origarr);
@@ -584,7 +584,7 @@ int main(int argc, char **argv)
     /* End of ZFP Array Example */
 #endif
 
-    if (0 > H5Fclose(fid)) ERROR(H5Fclose);
+    if (0 > H5Fclose(fid)) SET_ERROR(H5Fclose);
 
     free(ifile);
     free(ofile);
