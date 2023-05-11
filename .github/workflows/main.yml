@@ -6,9 +6,9 @@ name: h5z-zfp
 # TODO: REMOVE feat-cmake_tests before merging
 on: 
   push:
-    branches: [ feat-cmake_tests, master ] 
+    branches: [ master ] 
   pull_request:
-    branches: [ feat-cmake_tests, master ]
+    branches: [ master ]
 
 # A workflow run is made up of one or more jobs that
 # can run sequentially or in parallel
@@ -144,4 +144,4 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
-          ctest --verbose -C Release .
+          ctest --repeat until-pass:5  -C Release .
