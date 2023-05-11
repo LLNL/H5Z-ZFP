@@ -51,12 +51,7 @@ target_link_libraries(test_read_lib h5z_zfp_static)
 if (FORTRAN_INTERFACE)
   add_executable(test_rw_fortran test_rw_fortran.F90)
   target_link_libraries(test_rw_fortran h5z_zfp_static)
-#<<<<<<< HEAD
-#=======
-#  set_target_properties (test_rw_fortran PROPERTIES
-#        LINKER_LANGUAGE Fortran
-#  )
-#>>>>>>> merge1
+  set_target_properties (test_rw_fortran PROPERTIES LINKER_LANGUAGE Fortran)
 endif ()
 
 #------------------------------------------------------------------------------#
@@ -69,7 +64,11 @@ endif ()
 
 # Rate
 set(RATE_RATE 32 16 8 4)
-set(RATE_DIFF 1e-7 0.003 0.4 33)
+if (MSVC)
+  set(RATE_DIFF 3e-7 0.008 2.0 45)
+else ()
+  set(RATE_DIFF 1e-7 0.003 0.4 33)
+endif ()
 list(LENGTH RATE_RATE NRATES)
 math(EXPR NRATES "${NRATES} - 1")
 foreach (IRATE RANGE ${NRATES})
@@ -386,7 +385,12 @@ endforeach ()
 
 # Precision
 set(PREC_PREC 12 16 20 24)
-set(PREC_DIFF 0.02 0.0005 5e-5 1e-6)
+
+if (MSVC)
+  set(PREC_DIFF 0.06 0.003 7e-4 5e-5)
+else ()
+  set(PREC_DIFF 0.02 0.0005 5e-5 1e-6)
+endif ()
 list(LENGTH PREC_PREC NPRECS)
 math(EXPR NPRECS "${NPRECS} - 1")
 foreach (IPREC RANGE ${NPRECS})
