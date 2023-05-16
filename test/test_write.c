@@ -252,7 +252,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
         cd_nelmts = 0; /* causes default behavior of ZFP library */
 
     /* print cd-values array used for filter */
-    printf("%d cd_values= ", (int) cd_nelmts);
+    printf("\n%d cd_values=", (int) cd_nelmts);
     for (int i = 0; i < (int) cd_nelmts; i++)
         printf("%u,", cd_values[i]);
     printf("\n");
