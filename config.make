@@ -50,7 +50,7 @@ ifeq ($(ZFP_LIB_VERSION),)
     ZFP_LIB_VERSION := $(shell grep '^\#define ZFP_VERSION_[MRPT]' $(ZFP_HOME)/inc/zfp.h 2>/dev/null | tr ' ' '\n' | grep '[0-9]' | tr -d '\n' 2>/dev/null)
 endif
 ifeq ($(ZFP_LIB_VERSION),)
-    $(warning WARNING: ZFP lib version not detected by make -- some tests may run)
+    $(warning WARNING: ZFP lib version not detected by make -- some tests may be skipped)
 endif
 
 # Detect system type
@@ -161,7 +161,7 @@ else ifneq ($(wildcard $(ZFP_HOME)/inc),)
 ZFP_INC = $(ZFP_HOME)/inc
 endif
 ifeq ($(wildcard $(ZFP_INC)/zfp.h),) # no header file
-$(error "zfp.h not found")
+$(warning "zfp.h not found")
 endif
 
 ifeq ($(wildcard $(ZFP_HOME)/lib),)
