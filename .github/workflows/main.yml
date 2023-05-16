@@ -79,7 +79,7 @@ jobs:
         mkdir build; cd build
         cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
         sudo cmake --build . --target install
-        ctest --verbose -C Release .
+        ctest -C Release .
       shell: bash
 
     
