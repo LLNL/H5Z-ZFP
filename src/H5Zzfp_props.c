@@ -2,6 +2,7 @@
 #include "H5Zzfp_props_private.h"
 
 #include "hdf5.h"
+#include "zfp.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -111,7 +112,27 @@ done:
     return retval;
 }
 
-herr_t H5Pget_zfp(hid_t plist, int mode, ...)
+static int zfp_mode_to_h5z_zfp_mode(zfp_mode zm)
+{
+    switch (zm)
+    {
+        case zfp_mode_fixed_rate:
+            return H5Z_ZFP_MODE_RATE;
+        case zfp_mode_fixed_accuracy:
+            return H5Z_ZFP_MODE_ACCURACY;
+        case zfp_mode_fixed_precision:
+            return H5Z_ZFP_MODE_PRECISION;
+        case zfp_mode_expert:
+            return H5Z_ZFP_MODE_EXPERT;
+        case zfp_mode_reversible:
+            return H5Z_ZFP_MODE_REVERSIBLE;
+        default:
+            return 0;
+    }
+    return 0;
+}
+
+herr_t H5Pget_zfp(hid_t plist, int *mode, ...)
 {
     static char const *_funcname_ = "H5Pget_zfp";
     static size_t ctrls_sz = sizeof(h5z_zfp_controls_t);
@@ -123,6 +144,9 @@ herr_t H5Pget_zfp(hid_t plist, int mode, ...)
     va_list ap;
     herr_t retval = SUCCESS;
 
+    if (!mode)
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, FAIL, "mode argument must be non-NULL");
+
     if (0 >= H5Pisa_class(plist, H5P_DATASET_CREATE))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset creation property list class");
 
@@ -132,7 +156,17 @@ herr_t H5Pget_zfp(hid_t plist, int mode, ...)
     {
         H5Pget(plist, "zfp_controls", &ctrls); /* should always succeed */
 
-        switch (mode)
+        if (!*mode)
+        {
+            *mode = ctrls.mode;
+            goto done;
+        }
+        else if (*mode != ctrls.mode)
+        {
+            H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, FAIL, "ZFP mode query mismatch");
+        }
+ 
+        switch (*mode)
         {
             case H5Z_ZFP_MODE_RATE:
             {
@@ -166,6 +200,8 @@ herr_t H5Pget_zfp(hid_t plist, int mode, ...)
             }
             case H5Z_ZFP_MODE_REVERSIBLE:
             {
+                int *is_rev = va_arg(ap, int*);
+                *is_rev = 1;
                 break;
             }
             default:
@@ -180,7 +216,17 @@ herr_t H5Pget_zfp(hid_t plist, int mode, ...)
         /* is this property list pre- or post- modification from having been used in the filter */
         if (cd_nelmts > 0 && cd_vals[0] <= H5Z_ZFP_MODE_REVERSIBLE)
         {
-            switch (mode)
+            if (!*mode)
+            {
+                *mode = cd_vals[0];
+                goto done;
+            }
+            else if (*mode != cd_vals[0])
+            {
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, FAIL, "ZFP mode query mismatch");
+            }
+ 
+            switch (*mode)
             {
                 case H5Z_ZFP_MODE_RATE:
                 {
@@ -211,6 +257,8 @@ herr_t H5Pget_zfp(hid_t plist, int mode, ...)
                 }
                 case H5Z_ZFP_MODE_REVERSIBLE:
                 {
+                    int *is_rev = va_arg(ap, int*);
+                    *is_rev = 1;
                     break;
                 }
                 default:
@@ -222,23 +270,70 @@ herr_t H5Pget_zfp(hid_t plist, int mode, ...)
         }
         else /* cd_vals for post-modified by filter */
         {
-            if (cd_nelmts != H5Z_ZFP_CD_NELMTS_MAX)
-                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_CANTGET, FAIL, "ZFP filter cd-vals incorrect length");
+            zfp_mode zm;
+            bitstream *dummy_bstr = stream_open(&cd_vals[1], cd_nelmts-1);
+            zfp_stream *dummy_zstr = zfp_stream_open(dummy_bstr);
+            zfp_field *zfld = zfp_field_alloc();
+            zfp_read_header(dummy_zstr, zfld, ZFP_HEADER_FULL);
 
-#if 0
-// cd_vals contains, starting at entry index 1, the ZFP stream header. So, now, open that as a bitstream...
-bitstream *dummy_bstr = stream_open(&cd_vals[1], sizeof(cd_vals))));
-zfp_stream *dummy_zstr = zfp_stream_open(dummy_bstr);
+            /* now, query stream for info we seek... */
+            zm = zfp_stream_compression_mode(dummy_zstr);
 
-// now, query stream for info you seek...
-zfp_mode zm = zfp_stream_compression_mode(dummy_zstr);
-double rate = zfp_stream_rate(dummy_zstr, dim);
-double accuracy = zfp_stream_accuracy(dummy_zstr);
-uint precision = zfp_stream_precision(dummy_zstr);
-zfp_stream_close(dummy_zstr);
-stream_close(dummy_bstr);
-#endif
-            
+            if (!*mode)
+            {
+                *mode = zfp_mode_to_h5z_zfp_mode(zm);
+                goto done;
+            }
+            else if (*mode != zfp_mode_to_h5z_zfp_mode(zm))
+            {
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADVALUE, FAIL, "ZFP mode query mismatch");
+            }
+
+            switch (*mode)
+            {
+                case H5Z_ZFP_MODE_RATE:
+                {
+                    double *rate = va_arg(ap, double*);
+                    *rate = zfp_stream_rate(dummy_zstr, 1);
+                    break;
+                }
+                case H5Z_ZFP_MODE_ACCURACY:
+                {
+                    double *acc = va_arg(ap, double*);
+                    *acc = zfp_stream_accuracy(dummy_zstr);
+                    break;
+                }
+                case H5Z_ZFP_MODE_PRECISION:
+                {
+                    unsigned int *prec = va_arg(ap, unsigned int*);
+                    *prec = zfp_stream_precision(dummy_zstr);
+                    break;
+                }
+                case H5Z_ZFP_MODE_EXPERT:
+                {
+                    unsigned int *minbits = va_arg(ap, unsigned int*);
+                    unsigned int *maxbits = va_arg(ap, unsigned int*);
+                    unsigned int *maxprec = va_arg(ap, unsigned int*);
+                             int *minexp  = va_arg(ap, int*);
+                    zfp_stream_params(dummy_zstr, minbits, maxbits, maxprec, minexp);
+                    break;
+                }
+                case H5Z_ZFP_MODE_REVERSIBLE:
+                {
+                    int *is_rev = va_arg(ap, int*);
+                    *is_rev = 1;
+                    break;
+                }
+                default:
+                {
+                    H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_BADVALUE, FAIL, "bad ZFP mode.");
+                    break;
+                }
+            }
+
+            zfp_stream_close(dummy_zstr);
+            stream_close(dummy_bstr);
+
         }
     }
     else
@@ -246,38 +341,44 @@ stream_close(dummy_bstr);
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLIST, H5E_CANTGET, FAIL, "ZFP filter properties");
     }
 
-    va_end(ap);
-
 done:
+
+    va_end(ap);
 
     return retval;
 }
 
-herr_t H5Pget_zfp_rate(hid_t plist, double *rate)
+herr_t H5Pget_zfp_mode(hid_t plist, int *mode)
 {
-    return H5Pget_zfp(plist, H5Z_ZFP_MODE_RATE, rate);
+    *mode = 0;
+    return H5Pget_zfp(plist, mode);
 }
 
-herr_t H5Pget_zfp_precision(hid_t plist, unsigned int *prec)
+herr_t H5Pget_zfp_rate(hid_t plist, int *mode, double *rate)
 {
-    return H5Pget_zfp(plist, H5Z_ZFP_MODE_PRECISION, prec);
+    return H5Pget_zfp(plist, mode, rate);
 }
 
-herr_t H5Pget_zfp_accuracy(hid_t plist, double *acc)
+herr_t H5Pget_zfp_precision(hid_t plist, int *mode, unsigned int *prec)
 {
-    return H5Pget_zfp(plist, H5Z_ZFP_MODE_ACCURACY, acc);
+    return H5Pget_zfp(plist, mode, prec);
 }
 
-herr_t H5Pget_zfp_expert(hid_t plist,
+herr_t H5Pget_zfp_accuracy(hid_t plist, int *mode, double *acc)
+{
+    return H5Pget_zfp(plist, mode, acc);
+}
+
+herr_t H5Pget_zfp_expert(hid_t plist, int *mode,
     unsigned int *minbits, unsigned int *maxbits,
     unsigned int *maxprec, int *minexp)
 {
-    return H5Pget_zfp(plist, H5Z_ZFP_MODE_EXPERT, minbits, maxbits, maxprec, minexp);
+    return H5Pget_zfp(plist, mode, minbits, maxbits, maxprec, minexp);
 }
 
-herr_t H5Pget_zfp_reversible(hid_t plist)
+herr_t H5Pget_zfp_reversible(hid_t plist, int *mode, int *is_rev)
 {
-    return H5Pget_zfp(plist, H5Z_ZFP_MODE_REVERSIBLE);
+    return H5Pget_zfp(plist, mode, is_rev);
 }
 
 herr_t H5Pset_zfp_rate(hid_t plist, double rate)

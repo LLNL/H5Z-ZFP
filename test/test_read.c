@@ -73,6 +73,7 @@ purposes.
 
 #ifndef H5Z_ZFP_USE_PLUGIN
 #include "H5Zzfp_lib.h"
+#include "H5Zzfp_props.h"
 #endif
 
 #define NAME_LEN 256
@@ -117,6 +118,7 @@ int main(int argc, char **argv)
 
     /* filename variables */
     char *ifile = (char *) calloc(NAME_LEN,sizeof(char));
+    char *getds = (char *) calloc(NAME_LEN,sizeof(char));
 
     /* HDF5 dataset info */
     hid_t fid, dsid, space_id;
@@ -141,6 +143,9 @@ int main(int argc, char **argv)
     HANDLE_ARG(max_reldiff,strtod(argv[i]+len2,0),"%g",set maximum relative diff);
     HANDLE_ARG(doint,(int) strtol(argv[i]+len2,0,10),"%d",check integer datasets instead);
     HANDLE_ARG(ret,(int) strtol(argv[i]+len2,0,10),"%d",return 1 if diffs (0=all,1=abs,2=rel));
+#ifndef H5Z_ZFP_USE_PLUGIN
+    HANDLE_ARG(getds,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",get H5Z-ZFP params for named dataset);
+#endif
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message);
 
 #ifndef H5Z_ZFP_USE_PLUGIN
@@ -149,6 +154,64 @@ int main(int argc, char **argv)
 
     /* open the HDF5 file */
     if (0 > (fid = H5Fopen(ifile, H5F_ACC_RDONLY, H5P_DEFAULT))) ERROR(H5Fopen);
+
+#ifndef H5Z_ZFP_USE_PLUGIN
+    /* just interrogate h5z-zfp params, print them and exit */
+    if (strlen(getds))
+    {
+        int m = 0;
+        hid_t plid;
+
+        if (0 > (dsid = H5Dopen(fid, getds, H5P_DEFAULT))) ERROR(H5Dopen);
+        if (0 > (plid = H5Dget_create_plist(dsid))) ERROR(H5Dget_create_plist);
+        if (0 > H5Pget_zfp_mode(plid, &m)) ERROR(H5Pget_zfp_mode);
+
+        switch (m)
+        {
+            case H5Z_ZFP_MODE_RATE:
+            {
+                double rate;
+                H5Pget_zfp_rate(plid, &m, &rate);
+                printf("Dataset \"%s\", was compressed with rate mode and rate=%g\n", getds, rate);
+                return 0;
+            }
+            case H5Z_ZFP_MODE_ACCURACY:
+            {
+                double acc;
+                H5Pget_zfp_accuracy(plid, &m, &acc);
+                printf("Dataset \"%s\", was compressed with accuracy mode and accuracy=%g\n", getds, acc);
+                return 0;
+            }
+            case H5Z_ZFP_MODE_PRECISION:
+            {
+                unsigned int prec;
+                H5Pget_zfp_precision(plid, &m, &prec);
+                printf("Dataset \"%s\", was compressed with precision mode and precision=%d\n", getds, prec);
+                return 0;
+            }
+            case H5Z_ZFP_MODE_EXPERT:
+            {
+                unsigned int minbits;
+                unsigned int maxbits;
+                unsigned int maxprec;
+                         int minexp;
+                H5Pget_zfp_expert(plid, &m, &minbits, &maxbits, &maxprec, &minexp);
+                printf("Dataset \"%s\", was compressed with expert mode minbits=%u, maxbits=%u, maxprec=%u, minexp=%d\n",
+                    getds, minbits, maxbits, maxprec, minexp);
+                return 0;
+            }
+            case H5Z_ZFP_MODE_REVERSIBLE:
+            {
+                int is_rev = 0;
+                H5Pget_zfp_reversible(plid, &m, &is_rev);
+                printf("Dataset \"%s\", was compressed with reversible mode and is_rev=%d\n", getds, is_rev);
+                return 0;
+            }
+        }
+        printf("Unable to determine ZFP compression parameters for dataset \"%s\"\n", getds);
+        return 1;
+    }
+#endif
 
     /* read the original dataset */
     if (0 > (dsid = H5Dopen(fid, doint?"int_original":"original", H5P_DEFAULT))) ERROR(H5Dopen);

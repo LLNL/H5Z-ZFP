@@ -9,12 +9,26 @@
    generic interface are NOT THE SAME AS the cd_vals[] that
    ultimately get stored to the file for the filter "header" data. 
 
+   **NOTE**: Mode values here are, unfortunately, different than
+   ZFP Library's mode. For example here in H5Z-ZFP, a mode value
+   of 2 is for precision mode whereas in ZFP Library, a mode value
+   of 2 is for rate mode.
+                         
+             H5Z-ZFP mode values ZFP Library
+             ------------+------------------
+rate:          1         /        2 
+precision:     2         /        3
+accuracy:      3         /        4
+expert:        4         /        1
+reversible:    5         /        5
+
 cd_vals    0       1        2         3         4         5    
 ----------------------------------------------------------------
 rate:      1    unused    rateA     rateB     unused    unused
 precision: 2    unused    prec      unused    unused    unused
 accuracy:  3    unused    accA      accB      unused    unused
 expert:    4    unused    minbits   maxbits   maxprec   minexp
+reversible:5    unused    unused    unused    unused    unused
 
 A/B are high/low words of a double.
 */
