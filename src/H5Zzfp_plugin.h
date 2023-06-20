@@ -47,7 +47,7 @@ CD[0]=H5Z_ZFP_MODE_PRECISION;                 \
 CD[2]=P; N=3;}} while(0)
 
 #define H5Pget_zfp_precision_cdata(N, CD) \
-((double)(((N>=3)&&(CD[0]==H5Z_ZFP_MODE_ACCURACY))?CD[2]:-1))
+((double)(((N>=3)&&(CD[0]==H5Z_ZFP_MODE_PRECISION))?CD[2]:-1))
 
 #define H5Pset_zfp_accuracy_cdata(A, N, CD)      \
 do { if (N>=4) {double *p = (double *) &CD[2];   \
