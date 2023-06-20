@@ -20,11 +20,11 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 
 #include "hdf5.h"
 
+#include "H5Zzfp_props.h"
 #ifdef H5Z_ZFP_USE_PLUGIN
 #include "H5Zzfp_plugin.h"
 #else
 #include "H5Zzfp_lib.h"
-#include "H5Zzfp_props.h"
 #endif
 
 #if ZFP_HAS_CFP
@@ -77,7 +77,8 @@ do {                                                              \
     int _errno = errno;                                           \
     fprintf(stderr, #FNAME " failed at line %d, errno=%d (%s)\n", \
         __LINE__, _errno, _errno?strerror(_errno):"ok");          \
-    return 1;                                                     \
+    errno = 0;                                                    \
+    exit(1);                                                      \
 } while(0)
 
 /* Generate a simple, 1D sinusioidal data array with some noise */
@@ -306,6 +307,61 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
     return 0;
 }
 
+/* test quering the filter's H5Z-ZFP parameters */
+static int check_filter(hid_t cpid, int mode, 
+    double rate, double acc, unsigned int prec,
+    unsigned int minbits, unsigned int maxbits, unsigned int maxprec, int minexp)
+{
+    int qm;
+
+    qm = 0; /* queried mode must be zero or match actual mode */
+    if ((0 > H5Pget_zfp_mode(cpid, &qm)) || (qm != mode)) ERROR(H5Pget_zfp_mode);
+
+    /* Based on mode, query other param(s) */
+    switch (qm)
+    {
+        case H5Z_ZFP_MODE_RATE:
+        {
+            double qrate;
+            if ((0 > H5Pget_zfp_rate(cpid, &qm, &qrate)) || (qrate != rate)) ERROR(H5Pget_zfp_rate);
+            return 0;
+        }
+        case H5Z_ZFP_MODE_ACCURACY:
+        {
+            double qacc;
+            if ((0 > H5Pget_zfp_accuracy(cpid, &qm, &qacc)) || (qacc != acc)) ERROR(H5Pget_zfp_accuracy);
+            return 0;
+        }
+        case H5Z_ZFP_MODE_PRECISION:
+        {
+            unsigned int qprec;
+            if ((0 > H5Pget_zfp_precision(cpid, &qm, &qprec)) || (qprec != prec)) ERROR(H5Pget_zfp_precision);
+            printf("qprec = %u, prec = %u\n", qprec, prec);
+            return 0;
+        }
+        case H5Z_ZFP_MODE_EXPERT:
+        {
+            int qminexp;
+            unsigned int qminbits, qmaxbits, qmaxprec;
+            if ((0 > H5Pget_zfp_expert(cpid, &qm, &qminbits, &qmaxbits, &qmaxprec, &qminexp)) ||
+                    (qminbits != minbits) || (qmaxbits != maxbits) ||
+                    (qmaxprec != maxprec) || (qminexp != minexp)) ERROR(H5Pget_zfp_expert);
+            return 0;
+        }
+        case H5Z_ZFP_MODE_REVERSIBLE:
+        {
+            int qis_rev;
+            if ((0 > H5Pget_zfp_reversible(cpid, &qm, &qis_rev)) || (qis_rev != 1)) ERROR(H5Pget_zfp_reversible);
+            return 0;
+        }
+        default:
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
     double rate, double acc, unsigned int prec,
     unsigned int minbits, unsigned int maxbits, unsigned int maxprec, int minexp)
@@ -363,6 +419,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
         H5Pset_zfp_reversible(cpid);
 
 #endif
+
+    check_filter(cpid, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
     return cpid;
 }
