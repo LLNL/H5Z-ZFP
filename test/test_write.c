@@ -308,7 +308,7 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
 }
 
 /* test quering the filter's H5Z-ZFP parameters */
-static int check_filter(hid_t cpid, int mode, 
+static void check_filter(hid_t cpid, int mode, 
     double rate, double acc, unsigned int prec,
     unsigned int minbits, unsigned int maxbits, unsigned int maxprec, int minexp)
 {
@@ -324,20 +324,20 @@ static int check_filter(hid_t cpid, int mode,
         {
             double qrate;
             if ((0 > H5Pget_zfp_rate(cpid, &qm, &qrate)) || (qrate != rate)) ERROR(H5Pget_zfp_rate);
-            return 0;
+            break;
         }
         case H5Z_ZFP_MODE_ACCURACY:
         {
             double qacc;
             if ((0 > H5Pget_zfp_accuracy(cpid, &qm, &qacc)) || (qacc != acc)) ERROR(H5Pget_zfp_accuracy);
-            return 0;
+            break;
         }
         case H5Z_ZFP_MODE_PRECISION:
         {
             unsigned int qprec;
             if ((0 > H5Pget_zfp_precision(cpid, &qm, &qprec)) || (qprec != prec)) ERROR(H5Pget_zfp_precision);
             printf("qprec = %u, prec = %u\n", qprec, prec);
-            return 0;
+            break;
         }
         case H5Z_ZFP_MODE_EXPERT:
         {
@@ -346,20 +346,20 @@ static int check_filter(hid_t cpid, int mode,
             if ((0 > H5Pget_zfp_expert(cpid, &qm, &qminbits, &qmaxbits, &qmaxprec, &qminexp)) ||
                     (qminbits != minbits) || (qmaxbits != maxbits) ||
                     (qmaxprec != maxprec) || (qminexp != minexp)) ERROR(H5Pget_zfp_expert);
-            return 0;
+            break;
         }
         case H5Z_ZFP_MODE_REVERSIBLE:
         {
             int qis_rev;
             if ((0 > H5Pget_zfp_reversible(cpid, &qm, &qis_rev)) || (qis_rev != 1)) ERROR(H5Pget_zfp_reversible);
-            return 0;
+            break;
         }
         default:
         {
-            return 0;
+            ERROR(ZFP mode not supported in switch statement);
+            break;
         }
     }
-    return 1;
 }
 
 static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,

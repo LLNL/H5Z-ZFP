@@ -15,7 +15,6 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 typedef unsigned int uint;
 
 #include "H5Zzfp_lib.h"
-#include "hdf5.h"
 #include "zfp.h"
 
 static int version_lt(
@@ -66,12 +65,30 @@ int main(int argc, char **argv)
     unsigned int cd_val0;
     unsigned int cd_vals[10];
 
-    if (argc<=2) return 1;
+    if (argc <= 1) /* read from stdin */
+    {
+        scanf("%u ", &cd_val0);
 
-    cd_val0 = strtol(argv[1],0,10);
+        i = 0;
+        while (scanf("%u ", &cd_vals[i]))
+            i++;
+    }
+    else
+    {
+        cd_val0 = strtol(argv[1],0,10);
 
-    for (i = 2; i < argc; i++)
-        cd_vals[i-2] = (unsigned int) strtol(argv[i],0,10);
+        for (i = 2; i < argc; i++)
+            cd_vals[i-2] = (unsigned int) strtol(argv[i],0,10);
+        i -= 2;
+    }
+
+{
+    int q;
+    printf("cd_val0 = %u\n", cd_val0);
+    for (q = 0; q < i; q++)
+        printf("cd_vals[%d] = %u\n", q, cd_vals[q]);
+    exit(0);
+}
 
     unsigned int zfpdig1 = (cd_val0>>(16+12))&0xF;
     unsigned int zfpdig2 = (cd_val0>>(16+ 8))&0xF;
@@ -117,25 +134,6 @@ int main(int argc, char **argv)
     printf("ZFP library version %s (codec = %d%s)\n", zfpvstr, zfpcodec, guess?" guess":"");
 
 {
-
-#if 0
-hid_t fid = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT);
-hid_t dsid = H5Dopen(fid, argv[2], H5P_DEFAULT);
-hid_t plid = H5Dget_create_plist(dsid); 
-char fname[100];
-unsigned int flags, fconfig;
-size_t cd_nelmts=10;
-H5Pget_filter_by_id2(plid, H5Z_FILTER_ZFP, &flags, &cd_nelmts, cd_vals, sizeof(fname), fname, &fconfig);
-
-printf("cd_nelmts = %d\n", (int) cd_nelmts);
-printf("cd_vals[0] = %d\n", cd_vals[0]);
-printf("cd_vals[1] = %d\n", cd_vals[1]);
-printf("cd_vals[2] = %d\n", cd_vals[2]);
-printf("cd_vals[3] = %d\n", cd_vals[3]);
-printf("cd_vals[4] = %d\n", cd_vals[4]);
-printf("cd_vals[5] = %d\n", cd_vals[5]);
-printf("cd_vals[6] = %d\n", cd_vals[6]);
-#endif
 
 zfp_mode zm;
 bitstream *dummy_bstr = stream_open(&cd_vals[0], argc-2);
