@@ -6,8 +6,8 @@ Three ways to install H5Z-ZFP_ are provided.
 These are
 
 * With generic (GNU) :ref:`make <gnumake>`__
-* With :ref:`CMake <cmake>`__
-* With :ref:`Spack <spack>`__
+* With :ref:`CMake <ceemake>`
+* With :ref:`Spack <spack2>`
 
 For both generic make and CMake_, you are responsible for also installing (or knowing where the installations are) the dependencies, ZFP_ and HDF5_.
 For Spack_ installations, Spack_ will handle installation of dependencies as well.
@@ -18,7 +18,7 @@ For Spack_ installations, Spack_ will handle installation of dependencies as wel
 Generic (GNU) Make Installation
 -------------------------------
 
-H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <cmake>`__.
+H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <ceemake>`.
 
 ^^^^^^^^^^^^^
 Prerequisites
@@ -100,7 +100,7 @@ where ``$(PREFIX)`` resolves to whatever the full path of the installation is.
 To use the installed filter as an HDF5_ *plugin*, you would specify, for example,
 ``setenv HDF5_PLUGIN_PATH $(PREFIX)/plugin``
 
-.. _cmake:
+.. _ceemake:
 
 ----------------------
 Installing Using CMake
@@ -188,13 +188,13 @@ Next, you need to make sure that the filter can be found by CMake_, followed by 
    make install
 
 The ``cmake`` command itself could be different depending on the CMake_ project you have created.
-If you want to make use of the H5Z_ZFP_ *library* instead of the plugin, change cmake variable ``H5Z_ZFP_USE_STATIC_LIBS`` to ``ON`` and build the project.
+If you want to make use of the H5Z-ZFP_ *library* instead of the plugin, change cmake variable ``H5Z_ZFP_USE_STATIC_LIBS`` to ``ON`` and build the project.
 
-.. _spack:
+.. _spack2:
 
-------------------------------------------
-Installing via `Spack <https://spack.io>`_
-------------------------------------------
+---------------------
+Installing via Spack_
+---------------------
 If you already have experience with Spack_, one way to install H5Z-ZFP_ is to use the command ``spack install h5z-zfp``.
 If you do not have Spack_ installed, it is easy to install.
 Assuming you are working in a Bash shell...::
@@ -209,7 +209,7 @@ For example, to *pin* the version of the ZFP_ library to 0.5.5, the Spack_ comma
 
     spack install h5z-zfp ^zfp@0.5.5
 
-To use the ``develop`` version of H5Z_ZFP_ with version 1.10.6 of HDF5_ ::
+To use the ``develop`` version of H5Z-ZFP_ with version 1.10.6 of HDF5_ ::
 
     spack install h5z-zfp@develop ^hdf5@1.10.6
 
