@@ -2,9 +2,21 @@
 Installation
 ============
 
------------------------------
-GNU Make (gmake) Installation
------------------------------
+Three ways to install H5Z-ZFP_ are provided.
+These are
+
+* With generic (GNU) :ref:`make <gnumake>`
+* With :ref:`CMake <cmake>`
+* With :ref:`Spack <spack>`
+
+For both generic make and CMake_, you are responsible for also installing (or knowing where the installations are) the dependencies, ZFP_ and HDF5_.
+For Spack_ installations, Spack_ will handle installation of dependencies as well.
+
+.. _gnumake:
+
+-------------------------------
+Generic (GNU) Make Installation
+-------------------------------
 
 H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <cmake>`.
 
@@ -178,33 +190,42 @@ Next, you need to make sure that the filter can be found by CMake_, followed by 
 The ``cmake`` command itself could be different depending on the CMake_ project you have created.
 If you want to make use of the H5Z_ZFP_ *library* instead of the plugin, change cmake variable ``H5Z_ZFP_USE_STATIC_LIBS`` to ``ON`` and build the project.
 
+.. _spack:
+
 ------------------------------------------
 Installing via `Spack <https://spack.io>`_
 ------------------------------------------
-The HDF5_ and ZFP_ libraries and the H5Z-ZFP_ plugin are all now part of the Spack_ package manager.
-If you already have experience with Spack_, one way to install H5Z-ZFP_ is to simply use the Spack_ command ``spack install h5z-zfp``.
-If you do not have Spack_ installed, it is very easy to install.
+If you already have experience with Spack_, one way to install H5Z-ZFP_ is to use the command ``spack install h5z-zfp``.
+If you do not have Spack_ installed, it is easy to install.
 Assuming you are working in a Bash shell...::
 
     git clone https://github.com/llnl/spack.git
     . spack/share/spack/setup-env.sh
     spack install h5z-zfp
 
-If you are using a version of Spack_ very much older than the release of H5Z-ZFP you intend to use, you may have to *pin* various versions of H5Z-ZFP_, ZFP_ and/or HDF5_.
+If you are using a version of Spack_ very much older than the release of H5Z-ZFP_ you intend to use, you may have to *pin* various versions of H5Z-ZFP_, ZFP_ and/or HDF5_.
 This is done by using Spack_'s ``@`` modifier to specify versions.
 For example, to *pin* the version of the ZFP_ library to 0.5.5, the Spack_ command would look like::
 
     spack install h5z-zfp ^zfp@0.5.5
 
+To use the ``develop`` version of H5Z_ZFP_ with version 1.10.6 of HDF5_ ::
+
+    spack install h5z-zfp@develop ^hdf5@1.10.6
+
 By default, H5Z-ZFP_ will attempt to build with Fortran support which requires a Fortran compiler.
 If you wish to exclude support for Fortran, use the command::
 
-    spack install h5z-zfp~fortran
+    spack install h5z-zfp ~fortran
 
-Note that these commands will build H5Z-ZFP_ **and** all of its dependencies including the HDF5_ library (as well as a number of other dependencies you may not initially expect).
-Be patient and let the build complete.
-In addition, by default, Spack_ installs packages to directory *hashes* *within* the cloned Spack_ repository's directory tree, ``$spack/opt/spack``.
-You can find the resulting installed HDF5_ library with the command ``spack find -vp hdf5`` and your resulting H5Z-ZFP plugin installation with the command ``spack find -vp h5z-zfp``.
+.. note::
+
+   These commands will build H5Z-ZFP_ **and** all of its dependencies including the HDF5_ library *as well as a number of other dependencies you may not initially expect*.
+   Be patient and let the build complete.
+   It may take more than an hour.
+
+In addition, by default, Spack_ installs packages to directory *hashes within* the cloned Spack_ repository's directory tree, ``$spack/opt/spack``.
+You can find the resulting installed HDF5_ library with the command ``spack find -vp hdf5`` and the resulting H5Z-ZFP_ plugin installation with the command ``spack find -vp h5z-zfp``.
 If you wish to exercise more control over where Spack_ installs things, have a look at
 `configuring Spack <https://spack.readthedocs.io/en/latest/config_yaml.html#install-tree>`_
 
@@ -216,21 +237,14 @@ The source code is in two separate directories
 
     * ``src`` includes the ZFP_ filter and a few header files
 
-        * ``H5Zzfp_plugin.h`` is an optional header file applications *may* wish
-          to include because it contains several convenient macros for easily
-          controlling various compression modes of the ZFP_ library (*rate*,
-          *precision*, *accuracy*, *expert*) via the :ref:`generic-interface`. 
-        * ``H5Zzfp_props.h`` is a header file that contains functions to control the
-          filter using *temporary* :ref:`properties-interface`. Fortran callers are
-          *required* to use this interface.
-        * ``H5Zzfp_lib.h`` is a header file for applications that wish to use the filter
-          explicitly as a library rather than a plugin.
-        * ``H5Zzfp.h`` is an *all-of-the-above* header file for applications that don't
-          care too much about separating out the above functionalities.
+        * ``H5Zzfp_plugin.h`` is an optional header file applications *may* wish to include because it contains several convenient macros for easily controlling various compression modes of the ZFP_ library (*rate*, *precision*, *accuracy*, *expert*) via the :ref:`generic-interface`. 
+        * ``H5Zzfp_props.h`` is a header file that contains functions to control the filter using *temporary* :ref:`properties-interface`.
+          Fortran callers are *required* to use this interface.
+        * ``H5Zzfp_lib.h`` is a header file for applications that wish to use the filter explicitly as a library rather than a plugin.
+        * ``H5Zzfp.h`` is an *all-of-the-above* header file for applications that don't care too much about separating out the above functionalities.
 
-    * ``test`` includes various tests. In particular ``test_write.c`` includes examples
-      of using both the :ref:`generic-interface` and :ref:`properties-interface`. In 
-      addition, there is an example of how to use the filter from Fortran in ``test_rw_fortran.F90``.
+    * ``test`` includes various tests. In particular ``test_write.c`` includes examples of using both the :ref:`generic-interface` and :ref:`properties-interface`.
+      In addition, there is an example of how to use the filter from Fortran in ``test_rw_fortran.F90``.
 
 ----------------
 Silo Integration

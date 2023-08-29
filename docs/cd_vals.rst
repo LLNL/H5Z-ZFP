@@ -2,6 +2,10 @@
 H5Z-ZFP and the HDF5 filter's cd_values
 =======================================
 
+.. note::
+   The details described here are likely relevant only to *developers* of the H5Z_ZFP_ filter.
+   If you just want to *use* the filter, you can ignore this material.
+
 The HDF5_ library uses an array of values, named ``cd_values`` in formal arguments documenting various API functions, for managing *auxiliary data* for a filter.
 Instances of this ``cd_values`` array are used in two subtly different ways within HDF5.
 
