@@ -51,6 +51,7 @@ rst_epilog = """
 .. _HDF5: https://docs.hdfgroup.org/hdf5/develop/
 .. _H5Z-ZFP: https://github.com/LLNL/H5Z-ZFP
 .. _Spack: https://spack.io
+.. _CMake: https://cmake.org/cmake/help/latest/
 """
 
 # The version info for the project you're documenting, acts as replacement for
