@@ -5,7 +5,7 @@ Installation
 Three ways to install H5Z-ZFP_ are provided.
 These are
 
-* With generic (GNU) :ref:`make <gnumake>`__
+* With generic (GNU) :ref:`make <gnumake>`
 * With :ref:`CMake <ceemake>`
 * With :ref:`Spack <spack2>`
 
