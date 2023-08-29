@@ -5,9 +5,9 @@ Installation
 Three ways to install H5Z-ZFP_ are provided.
 These are
 
-* With generic (GNU) :ref:`make <gnumake>`
-* With :ref:`CMake <cmake>`
-* With :ref:`Spack <spack>`
+* With generic (GNU) :ref:`make <gnumake>`__
+* With :ref:`CMake <cmake>`__
+* With :ref:`Spack <spack>`__
 
 For both generic make and CMake_, you are responsible for also installing (or knowing where the installations are) the dependencies, ZFP_ and HDF5_.
 For Spack_ installations, Spack_ will handle installation of dependencies as well.
@@ -18,7 +18,7 @@ For Spack_ installations, Spack_ will handle installation of dependencies as wel
 Generic (GNU) Make Installation
 -------------------------------
 
-H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <cmake>`.
+H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <cmake>`__.
 
 ^^^^^^^^^^^^^
 Prerequisites
