@@ -14,9 +14,9 @@ For Spack_ installations, Spack_ will handle installation of dependencies as wel
 
 .. _gnumake:
 
--------------------------------
-Generic (GNU) Make Installation
--------------------------------
+----------------------------------
+Installiang via Generic (GNU) Make
+----------------------------------
 
 H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <ceemake>`.
 
@@ -27,6 +27,8 @@ Prerequisites
 * `ZFP Library <https://github.com/LLNL/zfp/releases>`_ (or from `Github <https://github.com/LLNL/zfp>`_)
 * `HDF5 Library <https://portal.hdfgroup.org/display/support/Downloads>`_
 * `H5Z-ZFP filter plugin <https://github.com/LLNL/H5Z-ZFP>`_
+
+.. _zfp-config:
 
 ^^^^^^^^^^^^^^
 Compiling ZFP_
@@ -102,9 +104,9 @@ To use the installed filter as an HDF5_ *plugin*, you would specify, for example
 
 .. _ceemake:
 
-----------------------
-Installing Using CMake
-----------------------
+--------------------
+Installing via CMake
+--------------------
 
 It is possible to build the H5Z-ZFP_ filter using the CMake_ build system.
 To use CMake_ for H5Z-ZFP_, it is necessary to have also built ZFP_ with CMake.
@@ -113,6 +115,7 @@ For example, it is possible to build ZFP_ with OpenMP support.
 The resulting CMake_ config files of ZFP_ build will make sure that this OpenMP dependency is correctly propagated to the build of H5Z-ZFP_ filter.
 However, for HDF5_ it is not necessary to build it with its CMake_ build system but it is strongly recommended.
 
+ZFP_ must have been :ref:`configured <zfp-config>` with ``BIT_STREAM_WORD_TYPE`` of ``uint8`` as described above.
 
 Similar as for the Makefile installation, the CMake_ build system is designed such it compiles both the standalone HDF5_ *plugin* and a separate *library* an application can explicitly link. See :ref:`plugin-vs-library`
 
