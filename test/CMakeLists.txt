@@ -16,6 +16,8 @@ if (EXISTS ${HDF5_BIN_DIR}/h5repack-shared)
   set(HDF5_REPACK_EXECUTABLE ${HDF5_BIN_DIR}/h5repack-shared)
 endif ()
 set(HDF5_DUMP_EXECUTABLE ${HDF5_BIN_DIR}/h5dump)
+
+# HDF5 docs say H5Dwrite_chunk was introduced in 1.10.2
 set(HDF5_HAS_WRITE_CHUNK 0)
 if ("${HDF5_VERSION}" VERSION_GREATER_EQUAL "1.10.2")
     set(HDF5_HAS_WRITE_CHUNK 1)
