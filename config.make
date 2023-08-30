@@ -35,7 +35,6 @@ else ifeq ($(findstring H5Z-ZFP, $(PWD_BASE)), H5Z-ZFP)
 endif
 
 H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
-H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_version.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
 ZFP_HAS_REVERSIBLE :=
 ifneq ($(ZFP_HOME),)
     ZFP_HAS_REVERSIBLE := $(shell grep zfp_stream_set_reversible $(ZFP_HOME)/include/zfp.h 2>/dev/null)

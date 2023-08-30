@@ -32,12 +32,13 @@ help:
 	@echo "Optionally, add FC=<fortran-compiler> to include Fortran support and tests."
 	@echo ""
 	@echo "Available make targets are..."
-	@echo "    all - build everything needed for H5Z-ZFP plugin/lib"
-	@echo "    check - all + run tests"
-	@echo "    tools - build tools (currently just print_h5repack_farg)"
+	@echo "    all     - build everything needed for H5Z-ZFP plugin/lib"
+	@echo "    check   - all + run tests"
+	@echo "    tools   - build tools (currently just print_h5repack_farg)"
 	@echo "    install - install plugin/lib"
-	@echo "    clean - clean away all derived targets"
-	@echo "    dist - create distribution tarfile"
+	@echo "    clean   - clean away all derived targets"
+	@echo "    dist    - create distribution tarfile"
+	@echo "    help    - this help message"
 
 all:
 	cd src; $(MAKE) $(MAKEVARS) $@
