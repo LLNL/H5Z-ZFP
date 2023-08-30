@@ -21,4 +21,3 @@ Contents:
    h5repack
    endian_issues
    tests
-   cmake

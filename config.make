@@ -30,12 +30,12 @@ ifeq ($(PWD_BASE),src)
     H5Z_ZFP_BASE := .
 else ifeq ($(PWD_BASE),test)
     H5Z_ZFP_BASE := ../src
-else ifeq ($(PWD_BASE),H5Z-ZFP)
+else ifeq ($(findstring H5Z-ZFP, $(PWD_BASE)), H5Z-ZFP)
     H5Z_ZFP_BASE := ./src
 endif
 
 H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
-H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_plugin.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
+H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_version.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
 ZFP_HAS_REVERSIBLE :=
 ifneq ($(ZFP_HOME),)
     ZFP_HAS_REVERSIBLE := $(shell grep zfp_stream_set_reversible $(ZFP_HOME)/include/zfp.h 2>/dev/null)
@@ -67,6 +67,7 @@ HAS_ICC := $(shell basename $$(which icc 2>/dev/null) 2>/dev/null)
 HAS_PGCC := $(shell basename $$(which pgcc 2>/dev/null) 2>/dev/null)
 HAS_XLCR := $(shell basename $$(which xlc_r 2>/dev/null) 2>/dev/null)
 HAS_BGXLCR := $(shell basename $$(which bgxlc_r 2>/dev/null) 2>/dev/null)
+HAS_CC := $(shell basename $$(which cc 2>/dev/null) 2>/dev/null)
 
 # Common Fortran compilers
 HAS_GFORTRAN := $(shell basename $$(which gfortran 2>/dev/null) 2>/dev/null)
@@ -81,6 +82,8 @@ ifeq ($(CC),)
             CC = $(HAS_CLANG)
 	else ifneq ($(strip $(HAS_GCC)),)
             CC = $(HAS_GCC)
+	else ifneq ($(strip $(HAS_CC)),)
+            CC = $(HAS_CC)
         endif
     else ifneq ($(findstring ppc, $(PROCESSOR),),)
         ifneq ($(strip $(HAS_BGXLCR)),)
@@ -93,6 +96,8 @@ ifeq ($(CC),)
     else
 	ifneq ($(strip $(HAS_GCC)),)
             CC = $(HAS_GCC)
+	else ifneq ($(strip $(HAS_CLANG)),)
+            CC = $(HAS_CLANG)
 	else ifneq ($(strip $(HAS_ICC)),)
             CC = $(HAS_ICC)
 	else ifneq ($(strip $(HAS_PGCC)),)
@@ -117,7 +122,7 @@ ifneq ($(findstring gcc, $(CC)),)
 else ifneq ($(findstring clang, $(CC)),)
     SOEXT ?= dylib
     SHFLAG ?= -dynamiclib
-    PREPATH = -L
+    PREPATH = -Wl,-rpath,
 else ifneq ($(findstring icc, $(CC)),)
     CFLAGS += -fpic
     SOEXT ?= so
@@ -125,6 +130,11 @@ else ifneq ($(findstring icc, $(CC)),)
     PREPATH = -Wl,-rpath,
 else ifneq ($(findstring pgcc, $(CC)),)
     CFLAGS += -fpic
+    SOEXT ?= so
+    SHFLAG ?= -shared
+    PREPATH = -Wl,-rpath,
+else ifneq ($(findstring cc, $(CC)),)
+    CFLAGS += -fPIC
     SOEXT ?= so
     SHFLAG ?= -shared
     PREPATH = -Wl,-rpath,
