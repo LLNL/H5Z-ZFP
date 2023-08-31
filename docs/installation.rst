@@ -235,7 +235,7 @@ Spack_ packages can sometimes favor the use of dependencies you may not need.
 For example, the HDF5_ package favors the use of MPI.
 Since H5Z-ZFP_ depends on HDF5_, this behavior will then create a dependency on MPI.
 To avoid this, you can force Spack_ to use a version of HDF5_ *without* MPI using.
-In the example command below, we do force Spack_ to not use MPI with HDF5_ and to not use OpenMP with ZFP_.
+In the example command below, we do force Spack_ to not use MPI with HDF5_ and to not use OpenMP with ZFP_::
 
     spack install h5z-zfp~fortran ^hdf5~mpi~fortran ^zfp~openmp
 
