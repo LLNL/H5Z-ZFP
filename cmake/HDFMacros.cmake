@@ -16,7 +16,6 @@ macro (DEFAULT_FOLDERS)
     set (CMAKE_Fortran_MODULE_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
     )
-    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(_isMultiConfig)
       set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
@@ -36,7 +35,7 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (HDF5_SUPPORT)
-  if (NOT HDF5_HDF5_HEADER)
+  if (NOT H5Z-ZFP_HDF5_HEADER)
     set (FIND_HDF_COMPONENTS C shared)
     message(STATUS "HDF5 FORTRAN_INTERFACE ${FORTRAN_INTERFACE}" )
     if (FORTRAN_INTERFACE)
@@ -64,9 +63,26 @@ macro (HDF5_SUPPORT)
           add_executable (${HDF5_NAMESPACE}h5repack-shared IMPORTED)
         endif ()
         set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack-shared>)
+        message (STATUS "HDF5 shared Tools found - ${HDF5_DUMP_EXECUTABLE}")
+      else ()
+        if (NOT TARGET ${HDF5_NAMESPACE}h5dump)
+          add_executable (${HDF5_NAMESPACE}h5dump IMPORTED)
+        endif ()
+        set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump>)
+
+        if (NOT TARGET ${HDF5_NAMESPACE}h5diff)
+          add_executable (${HDF5_NAMESPACE}h5diff IMPORTED)
+        endif ()
+        set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
+
+        if (NOT TARGET ${HDF5_NAMESPACE}h5repack)
+          add_executable (${HDF5_NAMESPACE}h5repack IMPORTED)
+        endif ()
+        set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
+        message (STATUS "HDF5 static Tools found - ${HDF5_DUMP_EXECUTABLE}")
       endif()
 
-      if (NOT HDF5_shared_C_FOUND)
+      if (NOT HDF5_static_C_FOUND AND NOT HDF5_shared_C_FOUND)
         #find library from non-dual-binary package
         set (FIND_HDF_COMPONENTS C)
         if (FORTRAN_INTERFACE)
@@ -96,8 +112,9 @@ macro (HDF5_SUPPORT)
           set_property (TARGET ${HDF5_NAMESPACE}h5repack PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5repackdll")
         endif ()
         set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump>)
-        set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
-        set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
+        set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
+        set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
+        message (STATUS "HDF5 windows Tools found - ${HDF5_DUMP_EXECUTABLE}")
       else ()
         if (HDF5_shared_C_FOUND)
           set (HDF5_LIBRARIES ${HDF5_C_SHARED_LIBRARY})
@@ -120,6 +137,7 @@ macro (HDF5_SUPPORT)
           set (FORTRAN_INTERFACE OFF CACHE BOOL "Build FORTRAN support" FORCE)
           message (STATUS "HDF5 Fortran libs not found - disable build of Fortran support")
         endif ()
+        message (STATUS "HDF5 Tools imported location - ${HDF5_TOOLS_DIR}")
       endif ()
     else ()
      if (FORTRAN_INTERFACE)
@@ -133,23 +151,24 @@ macro (HDF5_SUPPORT)
       #Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
       get_filename_component(HDF5_BIN_DIR ${HDF5_DIFF_EXECUTABLE} DIRECTORY)
       set(HDF5_TOOLS_DIR ${HDF5_BIN_DIR})
-      if (HDF5_DUMP_EXECUTABLE AND NOT TARGET hdf5::h5dump)
+      if (NOT TARGET hdf5::h5dump)
         add_executable (${HDF5_NAMESPACE}h5dump IMPORTED)
         set_property (TARGET ${HDF5_NAMESPACE}h5dump PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump")
         set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump>)
       endif ()
 
-      if (HDF5_DIFF_EXECUTABLE AND NOT TARGET hdf5::h5diff)
+      if (NOT TARGET hdf5::h5diff)
         add_executable (${HDF5_NAMESPACE}h5diff IMPORTED)
         set_property (TARGET ${HDF5_NAMESPACE}h5diff PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5diff")
         set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
       endif ()
 
-      if (HDF5_REPACK_EXECUTABLE AND NOT TARGET hdf5::h5repack)
+      if (NOT TARGET hdf5::h5repack)
         add_executable (${HDF5_NAMESPACE}h5repack IMPORTED)
         set_property (TARGET ${HDF5_NAMESPACE}h5repack PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5repack")
         set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
       endif ()
+      message (STATUS "HDF5 legacy Tools found - ${HDF5_DUMP_EXECUTABLE}")
     endif ()
 
     set (HDF5_PACKAGE_NAME ${SEARCH_PACKAGE_NAME})
@@ -157,7 +176,7 @@ macro (HDF5_SUPPORT)
     if (HDF5_FOUND)
       set (HDF5_HAVE_H5PUBCONF_H 1)
       set (HDF5_HAVE_HDF5 1)
-      set (HDF5_HDF5_HEADER "h5pubconf.h")
+      set (H5Z-ZFP_HDF5_HEADER "h5pubconf.h")
       set (HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
       message (STATUS "HDF5-${HDF5_VERSION_STRING} found: INC=${HDF5_INCLUDE_DIR} TOOLS=${HDF5_TOOLS_DIR}")
     else ()
@@ -175,4 +194,56 @@ macro (HDF5_SUPPORT)
     message (STATUS "HDF5 Fortran libs: include:${HDF5_FORTRAN_INCLUDE_DIRS} and shared:${HDF5_FORTRAN_LIBRARIES}")
   endif ()
   message (STATUS "HDF5 link libs: ${HDF5_LIBRARIES} Includes: ${HDF5_INCLUDE_DIRS}")
+endmacro ()
+
+#-------------------------------------------------------------------------------
+macro (SET_HDF_BUILD_TYPE)
+  if (_isMultiConfig)
+    # HDF_CFG_BUILD_TYPE is used in the Fortran install commands for the build location of the .mod files
+    set (HDF_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
+    if (CMAKE_BUILD_TYPE)
+      # set the default to the specified command line define
+      set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
+    else ()
+      # set the default to the MultiConfig variable
+      set (HDF_CFG_NAME "$<CONFIG>")
+    endif ()
+  else ()
+    set (HDF_CFG_BUILD_TYPE ".")
+    if (CMAKE_BUILD_TYPE)
+      set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
+    else ()
+      set (HDF_CFG_NAME "Release")
+    endif ()
+  endif ()
+  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Setting build type to 'RelWithDebInfo' as none was specified.")
+    endif()
+    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+      "MinSizeRel" "RelWithDebInfo")
+  endif()
+endmacro ()
+
+#-------------------------------------------------------------------------------
+macro (TARGET_C_PROPERTIES wintarget libtype)
+  target_compile_options(${wintarget} PRIVATE
+      "$<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
+      "$<$<CXX_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
+  )
+  if(MSVC)
+    set_property(TARGET ${wintarget} APPEND PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
+  endif()
+endmacro ()
+
+macro (HDFTEST_COPY_FILE src dest target)
+    add_custom_command(
+        OUTPUT  "${dest}"
+        COMMAND "${CMAKE_COMMAND}"
+        ARGS     -E copy_if_different "${src}" "${dest}"
+        DEPENDS "${src}"
+    )
+    list (APPEND ${target}_list "${dest}")
 endmacro ()
