@@ -203,8 +203,18 @@ If you do not have Spack_ installed, it is easy to install.
 Assuming you are working in a Bash shell...::
 
     git clone https://github.com/llnl/spack.git
-    . spack/share/spack/setup-env.sh
+    cd spack
+    git checkout releases/v0.20
+    . ./share/spack/setup-env.sh
     spack install h5z-zfp
+
+.. note::
+
+   It is important to work from a *released* branch of Spack_.
+   The command ``git checkout releases/v0.20`` ensures this.
+   If a newer release of Spack_ is available, by all means feel free to use it.
+   Just change the ``v0.20`` to indicate the release of the Spack_ you want.
+   The command ``git branch -r | grep releases`` will produce a list of the available release branches.
 
 If you are using a version of Spack_ very much older than the release of H5Z-ZFP_ you intend to use, you may have to *pin* various versions of H5Z-ZFP_, ZFP_ and/or HDF5_.
 This is done by using Spack_'s ``@`` modifier to specify versions.
@@ -221,9 +231,19 @@ If you wish to exclude support for Fortran, use the command::
 
     spack install h5z-zfp ~fortran
 
+Spack_ packages can sometimes favor the use of dependencies you may not need.
+For example, the HDF5_ package favors the use of MPI.
+Since H5Z-ZFP_ depends on HDF5_, this behavior will then create a dependency on MPI.
+To avoid this, you can force Spack_ to use a version of HDF5_ *without* MPI using.
+In the example command below, we do force Spack_ to not use MPI with HDF5_ and to not use OpenMP with ZFP_::
+
+    spack install h5z-zfp~fortran ^hdf5~mpi~fortran ^zfp~openmp
+
+This can have the effect of substantially reducing the number of dependencies Spack_ winds up having to build in order to install H5Z_ZFP_.
+
 .. note::
 
-   These commands will build H5Z-ZFP_ **and** all of its dependencies including the HDF5_ library *as well as a number of other dependencies you may not initially expect*.
+   Spack_ will build H5Z-ZFP_ **and** all of its dependencies including the HDF5_ library *as well as a number of other dependencies you may not initially expect*.
    Be patient and let the build complete.
    It may take more than an hour.
 

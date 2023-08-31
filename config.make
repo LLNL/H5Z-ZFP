@@ -1,12 +1,12 @@
 export SHELL = /bin/bash
 
-ifeq ($(HDF5_HOME),)
-    $(warning WARNING: HDF5_HOME not specified)
-endif
-
-ifeq ($(ZFP_HOME),)
-    $(warning WARNING: ZFP_HOME not specified)
-endif
+#ifeq ($(HDF5_HOME),)
+#    $(warning WARNING: HDF5_HOME not specified)
+#endif
+#
+#ifeq ($(ZFP_HOME),)
+#    $(warning WARNING: ZFP_HOME not specified)
+#endif
 
 # disallow relative paths in HOME variables
 HOME_WORDS := $(subst /, ,$(HDF5_HOME))
@@ -24,18 +24,17 @@ else ifeq ($(FIRST_WORD),..)
     $(error Please use absolute path for ZFP_HOME)
 endif
 
-# Construct version variable depending on what dir we're in
+# Construct H5Z_ZFP_BASE variable depending on what dir this config.cmake is being included from
 PWD_BASE = $(shell basename $$(pwd))
-ifeq ($(PWD_BASE),src)
-    H5Z_ZFP_BASE := .
-else ifeq ($(PWD_BASE),test)
-    H5Z_ZFP_BASE := ../src
-else ifeq ($(findstring H5Z-ZFP, $(PWD_BASE)), H5Z-ZFP)
+ifneq ($(wildcard config.make),) # we're in top-level dir
     H5Z_ZFP_BASE := ./src
+else ifneq ($(wildcard test_write.c),) # we're in test dir
+    H5Z_ZFP_BASE := ../src
+else ifneq ($(wildcard H5Zzfp.c),) # we're in src dir
+    H5Z_ZFP_BASE := .
 endif
 
 H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
-H5Z_ZFP_VERSINFO := $(shell grep '^\#define H5Z_FILTER_ZFP_VERSION_[MP]' $(H5Z_ZFP_BASE)/H5Zzfp_version.h | cut -d' ' -f3 | tr '\n' '.' | cut -d'.' -f-3 2>/dev/null)
 ZFP_HAS_REVERSIBLE :=
 ifneq ($(ZFP_HOME),)
     ZFP_HAS_REVERSIBLE := $(shell grep zfp_stream_set_reversible $(ZFP_HOME)/include/zfp.h 2>/dev/null)
@@ -212,6 +211,11 @@ else
   endif
   HDF5_BIN = $(HDF5_HOME)/bin
   MAKEVARS = HDF5_HOME=$(HDF5_HOME)
+endif
+
+HDF5_HAS_WRITE_CHUNK = 1
+ifeq ($(shell grep H5Dwrite_chunk $(HDF5_INC)/*.h),)
+    HDF5_HAS_WRITE_CHUNK = 0
 endif
 
 ifeq ($(PREFIX),)

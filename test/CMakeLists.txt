@@ -17,6 +17,12 @@ if (EXISTS ${HDF5_BIN_DIR}/h5repack-shared)
 endif ()
 set(HDF5_DUMP_EXECUTABLE ${HDF5_BIN_DIR}/h5dump)
 
+# HDF5 docs say H5Dwrite_chunk was introduced in 1.10.2
+set(HDF5_HAS_WRITE_CHUNK 0)
+if ("${HDF5_VERSION}" VERSION_GREATER_EQUAL "1.10.2")
+    set(HDF5_HAS_WRITE_CHUNK 1)
+endif()
+
 #------------------------------------------------------------------------------#
 # Setup HDF5_PLUGIN_PATH
 #------------------------------------------------------------------------------#
@@ -39,6 +45,7 @@ target_link_libraries(test_read_plugin h5z_zfp_shared)
 
 add_executable(test_write_lib test_write.c)
 target_compile_definitions(test_write_lib PRIVATE ZFP_LIB_VERSION=0x${ZFP_LIB_VERSION})
+target_compile_definitions(test_write_lib PRIVATE HDF5_HAS_WRITE_CHUNK=${HDF5_HAS_WRITE_CHUNK})
 target_compile_definitions(test_write_lib PRIVATE ZFP_HAS_CFP=${ZFP_HAS_CFP})
 target_link_libraries(test_write_lib h5z_zfp_static)
 if (ZFP_CFP_ENABLED)
