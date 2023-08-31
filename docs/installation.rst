@@ -210,8 +210,8 @@ Assuming you are working in a Bash shell...::
 
 .. note::
 
-   It is important to work for a *released* version of Spack_.
-   This is the reason for the ``git checkout releases/v0.20`` command in the above list of commands.
+   It is important to work from a *released* branch of Spack_.
+   The command ``git checkout releases/v0.20`` ensures this.
    If a newer release of Spack_ is available, by all means feel free to use it.
    Just change the ``v0.20`` to indicate the release of the Spack_ you want.
    The command ``git branch -r | grep releases`` will produce a list of the available release branches.
