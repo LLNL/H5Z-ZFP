@@ -19,7 +19,7 @@ There is an endianness test in the Makefile and two ZFP_ compressed example data
 
 Again, because most CPUs are now little-endian and because ZFP_ became available only after the industry mostly moved away from big-endian, it is highly unlikely that this inefficiency will be triggered.
 
-Finally, *endian-targetting*, which is setting the file datatype for an endianness that is possibly different than the native endianness of the writer, is explicitly disallowed.
+Finally, *endian-targeting*, which is setting the file datatype for an endianness that is possibly different than the native endianness of the writer, is explicitly disallowed.
 For example, data may be produced on a big-endian system, but most consumers will be little-endian.
 Therefore, to alleviate downstream consumers from having to always byte-swap, it is desirable to byte-swap to little-endian when the data is written.
 However, the juxtaposition of HDF5_'s type conversion and filter operations in a pipeline makes this impractical for the H5Z-ZFP_ filter.
