@@ -24,14 +24,14 @@ else ifeq ($(FIRST_WORD),..)
     $(error Please use absolute path for ZFP_HOME)
 endif
 
-# Construct version variable depending on what dir we're in
+# Construct H5Z_ZFP_BASE variable depending on what dir this config.cmake is being included from
 PWD_BASE = $(shell basename $$(pwd))
-ifeq ($(PWD_BASE),src)
-    H5Z_ZFP_BASE := .
-else ifeq ($(PWD_BASE),test)
-    H5Z_ZFP_BASE := ../src
-else ifeq ($(findstring H5Z-ZFP, $(PWD_BASE)), H5Z-ZFP)
+ifneq ($(wildcard config.make),) # we're in top-level dir
     H5Z_ZFP_BASE := ./src
+else ifneq ($(wildcard test_write.c),) # we're in test dir
+    H5Z_ZFP_BASE := ../src
+else ifneq ($(wildcard H5Zzfp.c),) # we're in src dir
+    H5Z_ZFP_BASE := .
 endif
 
 H5Z_ZFP_PLUGIN := $(H5Z_ZFP_BASE)/plugin
