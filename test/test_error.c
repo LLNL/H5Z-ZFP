@@ -91,7 +91,7 @@ int main(int argc, char **argv)
     int minexp = -1074;
 
     /* ZFP filter arguments */
-    HANDLE_SEP(ZFP compression paramaters)
+    HANDLE_SEP(ZFP compression parameters)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible));
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);

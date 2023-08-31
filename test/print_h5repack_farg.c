@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     int help = 0;
 
     /* ZFP filter arguments */
-    HANDLE_SEP(Print cdvals for set of ZFP compression paramaters)
+    HANDLE_SEP(Print cdvals for set of ZFP compression parameters)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d",set zfp mode (1=rate,2=prec,3=acc,4=expert,5=rev)); 
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode of filter);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode of filter);

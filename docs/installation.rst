@@ -14,9 +14,9 @@ For Spack_ installations, Spack_ will handle installation of dependencies as wel
 
 .. _gnumake:
 
-----------------------------------
-Installiang via Generic (GNU) Make
-----------------------------------
+---------------------------------
+Installing via Generic (GNU) Make
+---------------------------------
 
 H5Z-ZFP_ installation supports both vanilla (`GNU <https://www.gnu.org/software/make/>`__) Make (described below) as well as :ref:`CMake <ceemake>`.
 
@@ -74,7 +74,7 @@ where ``<path-to-zfp>`` is a directory containing ZFP_ ``inc[lude]`` and ``lib``
 If you don't specify a C compiler, it will try to guess one from your path.
 Fortran compilation is optional.
 If you do not specify a Fortran compiler, it will not attempt to build the Fortran interface.
-However, if the variable ``FC`` is already defined in your enviornment (as in Spack_ for example), then H5Z-ZFP_ will attempt to build Fortran.
+However, if the variable ``FC`` is already defined in your environment (as in Spack_ for example), then H5Z-ZFP_ will attempt to build Fortran.
 If this is not desired, the solution is to pass an *empty* ``FC`` on the make command line as in...
 
 ::
@@ -229,27 +229,27 @@ To use the ``develop`` version of H5Z-ZFP_ with version 1.10.6 of HDF5_ ::
 By default, H5Z-ZFP_ will attempt to build with Fortran support which requires a Fortran compiler.
 If you wish to exclude support for Fortran, use the command::
 
-    spack install h5z-zfp ~fortran
+    spack install h5z-zfp~fortran
 
 Spack_ packages can sometimes favor the use of dependencies you may not need.
 For example, the HDF5_ package favors the use of MPI.
-Since H5Z-ZFP_ depends on HDF5_, this behavior will then create a dependency on MPI.
-To avoid this, you can force Spack_ to use a version of HDF5_ *without* MPI using.
-In the example command below, we do force Spack_ to not use MPI with HDF5_ and to not use OpenMP with ZFP_::
+Since H5Z-ZFP_ depends on HDF5_, this behavior will then create a dependency of H5Z-ZFP_ on MPI.
+To avoid this, you can force Spack_ to use a version of HDF5_ *without* MPI.
+In the example command below, we force Spack_ to not use MPI with HDF5_ and to not use OpenMP with ZFP_::
 
     spack install h5z-zfp~fortran ^hdf5~mpi~fortran ^zfp~openmp
 
-This can have the effect of substantially reducing the number of dependencies Spack_ winds up having to build in order to install H5Z_ZFP_.
+This can have the effect of substantially reducing the number of dependencies Spack_ winds up having to build (from 35 in one case to 10) in order to install H5Z-ZFP_ which, in turn, speeds up the install process.
 
 .. note::
 
    Spack_ will build H5Z-ZFP_ **and** all of its dependencies including the HDF5_ library *as well as a number of other dependencies you may not initially expect*.
    Be patient and let the build complete.
-   It may take more than an hour.
+   It may take as much as an hour.
 
 In addition, by default, Spack_ installs packages to directory *hashes within* the cloned Spack_ repository's directory tree, ``$spack/opt/spack``.
 You can find the resulting installed HDF5_ library with the command ``spack find -vp hdf5`` and the resulting H5Z-ZFP_ plugin installation with the command ``spack find -vp h5z-zfp``.
-If you wish to exercise more control over where Spack_ installs things, have a look at
+If you wish to exercise more control over how and where Spack_ installs, have a look at
 `configuring Spack <https://spack.readthedocs.io/en/latest/config_yaml.html#install-tree>`_
 
 --------------------------------
@@ -286,6 +286,6 @@ In the source code for H5Z-ZFP_ this manifests as something like what is shown i
    
 In the code snippet above, note the funny ``Z`` in front of calls to various methods in the ZFP_ library.
 When compiling H5Z-ZFP_ normally, that ``Z`` normally resolves to the empty string.
-But, when the code is compiled with ``-DAS_SILO_BUILTIN`` (which is supported and should be done *only* when ``H5Zzfp.c`` is being compiled *within* the Silo library and *next to* a version of ZFP_ that is embedded in Silo) that ``Z`` resolves to the name of a struct and struct-member dereferncing operator as in ``zfp.``.
+But, when the code is compiled with ``-DAS_SILO_BUILTIN`` (which is supported and should be done *only* when ``H5Zzfp.c`` is being compiled *within* the Silo library and *next to* a version of ZFP_ that is embedded in Silo) that ``Z`` resolves to the name of a struct and struct-member dereferencing operator as in ``zfp.``.
 There is a similar ``B`` used for a similar purpose ahead of calls to ZFP_'s bitstream library.
 This is something to be aware of and to adhere to if you plan to contribute any code changes here.

@@ -49,7 +49,7 @@ To use ZFP_ filter in *rate* mode with a rate of ``4.5`` bits per value, first, 
 
     % ./print_h5repack_farg zfpmode=1 rate=4.5
     
-    Print cdvals for set of ZFP compression paramaters...
+    Print cdvals for set of ZFP compression parameters...
         zfpmode=1  set zfp mode (1=rate,2=prec,3=acc,4=expert,5=rev)
         rate=4.5                    set rate for rate mode of filter
         acc=0               set accuracy for accuracy mode of filter
@@ -79,7 +79,7 @@ To use ZFP_ filter in *accuracy* mode with an accuracy of ``0.075``, first, use 
 
     % ./print_h5repack_farg zfpmode=3 acc=0.075
     
-    Print cdvals for set of ZFP compression paramaters...
+    Print cdvals for set of ZFP compression parameters...
         zfpmode=3  set zfp mode (1=rate,2=prec,3=acc,4=expert,5=rev)
         rate=3.5                    set rate for rate mode of filter
         acc=0.075           set accuracy for accuracy mode of filter
