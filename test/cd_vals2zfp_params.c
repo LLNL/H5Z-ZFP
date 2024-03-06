@@ -87,7 +87,6 @@ int main(int argc, char **argv)
     printf("cd_val0 = %u\n", cd_val0);
     for (q = 0; q < i; q++)
         printf("cd_vals[%d] = %u\n", q, cd_vals[q]);
-    exit(0);
 }
 
     unsigned int zfpdig1 = (cd_val0>>(16+12))&0xF;
@@ -141,6 +140,10 @@ zfp_stream *dummy_zstr = zfp_stream_open(dummy_bstr);
 zfp_field *zfld = zfp_field_alloc();
 zfp_read_header(dummy_zstr, zfld, ZFP_HEADER_FULL);
 
+size_t dims[4];
+zfp_field_size(zfld, dims);
+int ndims = (int) zfp_field_dimensionality(zfld);
+
 // now, query stream for info you seek...
 zm = zfp_stream_compression_mode(dummy_zstr);
 #warning FIXME
@@ -154,6 +157,10 @@ zfp_stream_close(dummy_zstr);
 stream_close(dummy_bstr);
 printf("argc=%d, mode=%u, rate=%g, acc=%g, prec=%u\n", argc, (int)zm, rate, accuracy, precision);
 printf("minbits=%u, maxbits=%u, maxprec=%u, minexp=%d\n", minbits, maxbits, maxprec, minexp);
+printf("ndims = %d", ndims);
+for (int i = 0; i < ndims; i++)
+    printf(", dims[%d] = %d", i, (int) dims[i]);
+printf("\n");
 }
 
     return 0;
