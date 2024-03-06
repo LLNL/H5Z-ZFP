@@ -133,34 +133,35 @@ int main(int argc, char **argv)
     printf("ZFP library version %s (codec = %d%s)\n", zfpvstr, zfpcodec, guess?" guess":"");
 
 {
+    zfp_mode zm;
 
-zfp_mode zm;
-bitstream *dummy_bstr = stream_open(&cd_vals[0], argc-2);
-zfp_stream *dummy_zstr = zfp_stream_open(dummy_bstr);
-zfp_field *zfld = zfp_field_alloc();
-zfp_read_header(dummy_zstr, zfld, ZFP_HEADER_FULL);
+    // argc-2: one for program name and one for for first cd_val value
+    bitstream *dummy_bstr = stream_open(&cd_vals[0], argc-2);
+    zfp_stream *dummy_zstr = zfp_stream_open(dummy_bstr);
+    zfp_field *zfld = zfp_field_alloc();
+    zfp_read_header(dummy_zstr, zfld, ZFP_HEADER_FULL);
 
-size_t dims[4];
-zfp_field_size(zfld, dims);
-int ndims = (int) zfp_field_dimensionality(zfld);
+    size_t dims[4];
+    zfp_field_size(zfld, dims);
+    int ndims = (int) zfp_field_dimensionality(zfld);
 
-// now, query stream for info you seek...
-zm = zfp_stream_compression_mode(dummy_zstr);
-#warning FIXME
-double rate = zfp_stream_rate(dummy_zstr, 1);
-double accuracy = zfp_stream_accuracy(dummy_zstr);
-uint precision = zfp_stream_precision(dummy_zstr);
-unsigned int minbits, maxbits, maxprec;
-int minexp;
-zfp_stream_params(dummy_zstr, &minbits, &maxbits, &maxprec, &minexp);
-zfp_stream_close(dummy_zstr);
-stream_close(dummy_bstr);
-printf("argc=%d, mode=%u, rate=%g, acc=%g, prec=%u\n", argc, (int)zm, rate, accuracy, precision);
-printf("minbits=%u, maxbits=%u, maxprec=%u, minexp=%d\n", minbits, maxbits, maxprec, minexp);
-printf("ndims = %d", ndims);
-for (int i = 0; i < ndims; i++)
-    printf(", dims[%d] = %d", i, (int) dims[i]);
-printf("\n");
+    // now, query stream for info you seek...
+    zm = zfp_stream_compression_mode(dummy_zstr);
+    double rate = zfp_stream_rate(dummy_zstr, 1);
+    double accuracy = zfp_stream_accuracy(dummy_zstr);
+    uint precision = zfp_stream_precision(dummy_zstr);
+    unsigned int minbits, maxbits, maxprec;
+    int minexp;
+    zfp_stream_params(dummy_zstr, &minbits, &maxbits, &maxprec, &minexp);
+    zfp_stream_close(dummy_zstr);
+    stream_close(dummy_bstr);
+    printf("argc=%d, mode=%d, rate=%g, acc=%g, prec=%u\n", argc, (int)zm, rate, accuracy, precision);
+    printf("minbits=%u, maxbits=%u, maxprec=%u, minexp=%d\n", minbits, maxbits, maxprec, minexp);
+    printf("ndims = %d", ndims);
+    for (int i = 0; i < ndims; i++)
+        printf(", dims[%d] = %d", i, (int) dims[i]);
+    printf("\n");
+    zfp_field_free(zfld);
 }
 
     return 0;
