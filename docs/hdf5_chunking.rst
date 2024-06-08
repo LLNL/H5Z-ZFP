@@ -93,7 +93,7 @@ competing interests. One is optimizing the chunk_ size and shape for access
 patterns anticipated by downstream consumers. The other is optimizing the chunk_
 size and shape for compression. These two interests may not be compatible
 and you may have to compromise between them. We illustrate the issues and
-tradeoffs using an example.
+trade-offs using an example.
 
 ---------------------------------------------------
 Compression *Along* the *State Iteration* Dimension 
@@ -114,7 +114,7 @@ along those dimensions *before* H5Dwrite_'s can be issued.
 For example, suppose you have a tensor-valued field (e.g. a 3x3 matrix
 at every *point*) over a 4D (3 spatial dimensions and 1 time dimension),
 regularly sampled domain? Conceptually, this is a 6 dimensional dataset
-in HDF5_ with one of the dimensions (the *time* dimension) *extendible*.
+in HDF5_ with one of the dimensions (the *time* dimension) *extendable*.
 So, you are free to define this as a 6 dimensional dataset in HDF5_. But, you
 will also have to chunk_ the dataset. You can select any chunk_ shape
 you want, except that no more than 3 (or 4 for ZFP_ versions 0.5.4 and
@@ -131,7 +131,7 @@ can issue an H5Dwrite_ call doing
 `hyperslab <https://docs.hdfgroup.org/hdf5/develop/_h5_d__u_g.html#subsubsec_dataset_transfer_partial>`__
 can issue an H5Dwrite_
 call doing `hyperslab <https://docs.hdfgroup.org/hdf5/develop/_h5_d__u_g.html#subsubsec_dataset_transfer_partial>`__
-partial I/O on the 6D, `extendible <https://docs.hdfgroup.org/hdf5/develop/_l_b_ext_dset.html>`__
+partial I/O on the 6D, `extendable <https://docs.hdfgroup.org/hdf5/develop/_l_b_ext_dset.html>`__
 dataset. But, notice that the chunk_ dimensions (line 10) are such that only 4 of the
 6 dimensions are non-unity. This means ZFP_ will only ever see something to
 compress that is essentially 4D.
