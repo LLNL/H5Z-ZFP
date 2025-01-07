@@ -93,7 +93,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
@@ -143,7 +143,7 @@ jobs:
           mkdir build
           cd build
           cmake .. \
-            -G "Visual Studio 16 2019" -A "x64" \
+            -G "Visual Studio 17 2022" -A "x64" \
             -DCMAKE_CONFIGURATION_TYPES=Release \
             -DBUILD_TESTING=ON \
             -DFORTRAN_INTERFACE=OFF \
