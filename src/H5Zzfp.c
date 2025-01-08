@@ -152,6 +152,8 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     H5T_class_t dclass;
     hid_t native_type_id;
 
+    (void)dcpl_id; /* currently not used */
+
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
     if ((int) B stream_word_bits != 8)
@@ -184,7 +186,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
             "requires datatype size of 4 or 8");
 
     /* check for *USED* dimensions of the chunk */
-    for (i = 0; i < ndims; i++)
+    for (i = 0; i < (size_t) ndims; i++)
     {
         if (dims[i] <= 1) continue;
         ndims_used++;
@@ -569,6 +571,8 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     bitstream *bstr = 0;
     zfp_stream *zstr = 0;
     zfp_field *zfld = 0;
+
+    (void)nbytes; /* currently not used */
 
     /* Pass &cd_values[1] here to strip off first entry holding version info */
     if (0 == get_zfp_info_from_cd_values(cd_nelmts-1, &cd_values[1], &zfp_mode, &zfp_meta, &swap))

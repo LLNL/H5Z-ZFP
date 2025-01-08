@@ -27,6 +27,7 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #endif
 #endif
 
+#if 0
 /* Populate the hyper-dimensional array with samples of a radially symmetric
    sinc() function but where certain sub-spaces are randomized through dimindx arrays */
 static void
@@ -64,6 +65,7 @@ hyper_smooth_radial(void *b, int typ, int n, int ndims, int const *dims, int con
         *pd = val;
     }
 }
+#endif
 
 static double func(int i, double arg)
 {
@@ -217,7 +219,7 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
 
     if (0 > (fd = open(fname, O_RDONLY))) SET_ERROR(open);
     if (0 == (*_buf = (double *) malloc(nbytes))) SET_ERROR(malloc);
-    if (nbytes != read(fd, *_buf, nbytes)) SET_ERROR(read);
+    if (nbytes != (size_t) read(fd, *_buf, nbytes)) SET_ERROR(read);
     if (0 != close(fd)) SET_ERROR(close);
     return 0;
 }
@@ -539,8 +541,6 @@ int main(int argc, char **argv)
     if (zfparr>0 && zfpmode==1 && rate>0)
     {
         int            dims[] = {38, 128};
-       /*int      chunk_dims[] = {19, 34};*/
-        int      chunk_dims[] = {38, 128};
         hsize_t       hdims[] = {38, 128};
        /*hsize_t hchunk_dims[] = {19, 34};*/
         hsize_t hchunk_dims[] = {38, 128};
