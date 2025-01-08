@@ -152,4 +152,4 @@ jobs:
           ctest -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
           ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
           ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -j1 --output-on-failure -VV -C Release .
