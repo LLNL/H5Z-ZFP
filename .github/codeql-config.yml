@@ -2,13 +2,14 @@ query-filters:
   - exclude:
       # See: https://codeql.github.com/codeql-query-help/cpp/cpp-guarded-free/
       id: cpp/guarded-free
+  - exclude:
       # See: https://codeql.github.com/codeql-query-help/cpp/cpp-unused-static-function/
       id: cpp/unused-static-function
 
 # Directories to scan for vulnerabilities
 paths:
-  - src  # Main source directory
+  - 'src/**'  # Main source directory
 
 # Directories and files to ignore during the scan
 paths-ignore:
-  - test # Test directory
+  - '**/test/**' # Test directory
