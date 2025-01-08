@@ -37,8 +37,8 @@ char *strndup( const char *s1, size_t n)
     size_t len = strlen(s1);
     size_t copy_len = len < n ? len : n;
     char *copy = (char*)malloc(copy_len + 1);
-    memcpy(copy, s1, copy_len);
-    copy[copy_len] = 0;
+     memcpy(copy, s1, copy_len);
+     copy[copy_len] = 0;
     return copy;
 };
 #else
