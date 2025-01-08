@@ -149,7 +149,7 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
-          ctest -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -j1 --output-on-failure -VV -C Release .
+          ctest -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -C Release .
