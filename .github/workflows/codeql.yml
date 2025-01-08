@@ -97,7 +97,7 @@ jobs:
           #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
           queries: +security-extended,security-and-quality
 
-      - name: test
+      - name: build and test
         run: |
           cd build
           sudo cmake --build . --target install

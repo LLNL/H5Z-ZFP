@@ -63,8 +63,6 @@ macro (HDF5_SUPPORT)
           add_executable (${HDF5_NAMESPACE}h5repack-shared IMPORTED)
         endif ()
         set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack-shared>)
-
-        message (STATUS "DEBUG###### HDF5 shared Tools found - ${HDF5_NAMESPACE}")
         message (STATUS "HDF5 shared Tools found - ${HDF5_DUMP_EXECUTABLE}")
       else ()
         if (NOT TARGET ${HDF5_NAMESPACE}h5dump)
