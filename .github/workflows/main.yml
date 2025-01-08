@@ -132,10 +132,10 @@ jobs:
           echo "C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_PATH
           echo "C:/Program Files/ZFP/bin" >> $GITHUB_PATH
           echo "C:/Program Files/ZFP/lib" >> $GITHUB_PATH
-          echo "C:/Program Files/HDF_Group/HDF5/1.14.1/bin" >> $GITHUB_PATH
+          echo "C:/Program Files/HDF_Group/HDF5/1.14.5/bin" >> $GITHUB_PATH
           echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
-          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
-          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
+          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.5" >> $GITHUB_ENV
+          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.5" >> $GITHUB_ENV
           echo "ZFP_DIR=C:/Program Files/ZFP" >> $GITHUB_ENV
       - name: Build H5Z-ZFP (CMake) and test
         run: |
@@ -148,7 +148,4 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
-          ctest -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -C Release . || echo "Failed but retrying"
           ctest --rerun-failed -C Release .
