@@ -149,4 +149,5 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
+          ls ../test
           ctest -j1 --output-on-failure -VV -C Release .
