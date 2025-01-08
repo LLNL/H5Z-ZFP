@@ -77,12 +77,6 @@ jobs:
 #  BUILD AND TEST H5Z-ZFP
 ##################################
 
-      - name: build (cmake) and test
-        run: |
-          mkdir build; cd build
-          cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
-        shell: bash
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
@@ -97,10 +91,16 @@ jobs:
           #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
           queries: +security-extended,security-and-quality
 
+      - name: configure h5z-zfp
+        run: |
+          mkdir build; cd build
+          cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
+        shell: bash
+
       - name: build and test
         run: |
           cd build
-          sudo cmake --build . --target install
+          cmake --build .
           ctest -C Release .
         shell: bash
 
