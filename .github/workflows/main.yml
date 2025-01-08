@@ -107,10 +107,9 @@ jobs:
       - name: download HDF5 for Windows
         run: |
           wget --quiet \
-            https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_1/downloads/hdf5-1.14.1-2-Std-win10_64-vs17-clang.zip
-          unzip hdf5-1.14.1-2-Std-win10_64-vs17-clang.zip
+            https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/downloads/hdf5-1.14.5-win-vs2022_cl.msi
       - name: Install HDF5 for Windows
-        run: msiexec /i "hdf\HDF5-1.14.1-win64.msi" /qn
+        run: msiexec /i "hdf5-1.14.5-win-vs2022_cl.msi" /qn
         shell: cmd
       - name: Download and install ZFP
         run: |
