@@ -1,0 +1,96 @@
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: "16 7 * * 0"
+
+jobs:
+  analyze:
+    name: Analyze
+    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+    #   - https://gh.io/supported-runners-and-hardware-resources
+    #   - https://gh.io/using-larger-runners (GitHub.com only)
+    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
+    runs-on: ubuntu-latest
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ cpp ]
+        build-mode: manual
+
+    steps:
+      - name: Install Dependencies (Linux)
+        run: |
+          sudo gem install apt-spy2
+          sudo apt-spy2 check
+          sudo apt-spy2 fix --commit
+          sudo apt update
+          sudo apt upgrade
+          sudo apt-get install -qq libhdf5-dev
+          sudo apt-get install -qq hdf5-tools
+          echo "HDF5_HOME=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial,/usr/bin" >> $GITHUB_ENV
+          # Set env vars
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "FC=gfortran" >> $GITHUB_ENV
+          echo "CXX=g++"  >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+##################################
+# CONFIGURE ZFP
+##################################
+                 
+      - name: configure ZFP
+        run: |
+          git clone https://github.com/LLNL/zfp.git
+          export HOME_DIR=$(echo ~)
+          cd zfp
+          mkdir build;cd build
+          cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 -D BUILD_CFP=ON -D CMAKE_INSTALL_PREFIX=$PWD/zfp -D BUILD_TESTING=OFF -D BUILD_UTILITIES=OFF ..
+          make install
+          echo "ZFP_HOME=$PWD/zfp" >> $GITHUB_ENV
+          echo "ZFP_DIR=$PWD/zfp" >> $GITHUB_ENV
+        shell: bash
+
+##################################
+# BUILD ZFP
+##################################
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          build-mode: manual
+          config-file: ./.github/codeql-config.yml
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+
+          # For more details on CodeQL's query packs, refer to:
+          #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          queries: +security-extended,security-and-quality
+
+      - name: Build
+        run: |
+          cd cbuild
+          cmake --build . --config Release
+          ctest -C Release .
+        shell: bash
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:c-cpp"
