@@ -4,7 +4,7 @@
 /*
 This code was based heavily on one of the HDF5 library's internal
 filter, H5Zszip.c. The intention in so doing wasn't so much to 
-plagerize HDF5 developers as it was to produce a code that, if
+plagiarize HDF5 developers as it was to produce a code that, if
 The HDF Group ever decided to in the future, could be easily
 integrated with the existing HDF5 library code base.
 
@@ -201,11 +201,11 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
             "chunk must have only 1...4 non-unity dimensions");
 #endif
 
-    /* if caller is doing "endian targetting", disallow that */
+    /* if caller is doing "endian targeting", disallow that */
     native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
     if (H5Tget_order(type_id) != H5Tget_order(native_type_id))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0,
-            "endian targetting non-sensical in conjunction with ZFP filter");
+            "endian targeting non-sensical in conjunction with ZFP filter");
 
     retval = 1;
 
@@ -304,7 +304,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     /* Handle default case when no cd_values are passed by using ZFP library defaults. */
     if (mem_cd_nelmts == 0)
     {
-        /* check for filter controls in the properites */
+        /* check for filter controls in the properties */
         if (0 < H5Pexist(dcpl_id, "zfp_controls"))
         {
             if (0 > H5Pget(dcpl_id, "zfp_controls", &ctrls))

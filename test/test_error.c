@@ -104,7 +104,7 @@ int main(int argc, char **argv)
     cpid = setup_filter(1, chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
     /* Put this after setup_filter to permit printing of otherwise hard to
-       construct cd_values to facilitate manual invokation of h5repack */
+       construct cd_values to facilitate manual invocation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
     gen_data(DSIZE, 0.01, 10, (void**)&buf, TYPDBL);

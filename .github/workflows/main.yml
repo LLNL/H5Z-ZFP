@@ -107,10 +107,9 @@ jobs:
       - name: download HDF5 for Windows
         run: |
           wget --quiet \
-            https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_1/downloads/hdf5-1.14.1-2-Std-win10_64-vs17-clang.zip
-          unzip hdf5-1.14.1-2-Std-win10_64-vs17-clang.zip
+            https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/downloads/hdf5-1.14.5-win-vs2022_cl.msi
       - name: Install HDF5 for Windows
-        run: msiexec /i "hdf\HDF5-1.14.1-win64.msi" /qn
+        run: msiexec /i "hdf5-1.14.5-win-vs2022_cl.msi" /qn
         shell: cmd
       - name: Download and install ZFP
         run: |
@@ -133,10 +132,10 @@ jobs:
           echo "C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_PATH
           echo "C:/Program Files/ZFP/bin" >> $GITHUB_PATH
           echo "C:/Program Files/ZFP/lib" >> $GITHUB_PATH
-          echo "C:/Program Files/HDF_Group/HDF5/1.14.1/bin" >> $GITHUB_PATH
+          echo "C:/Program Files/HDF_Group/HDF5/1.14.5/bin" >> $GITHUB_PATH
           echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
-          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
-          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
+          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.5" >> $GITHUB_ENV
+          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.5" >> $GITHUB_ENV
           echo "ZFP_DIR=C:/Program Files/ZFP" >> $GITHUB_ENV
       - name: Build H5Z-ZFP (CMake) and test
         run: |
@@ -149,7 +148,4 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
-          ctest -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -C Release . || echo "Failed but retrying"
-          ctest --rerun-failed -C Release .
+          ctest -C Release .

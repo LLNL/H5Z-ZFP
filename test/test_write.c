@@ -75,7 +75,7 @@ static double func(int i, double arg)
     return funcs[i%nfuncs](arg);
 }
 
-/* Populate the hyper-dimensional array with samples of set of seperable functions
+/* Populate the hyper-dimensional array with samples of set of separable functions
    but where certain sub-spaces are randomized through dimindx arrays */
 static void
 hyper_smooth_separable(void *b, int typ, int n, int ndims, int const *dims, int const *m,
@@ -131,7 +131,7 @@ gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, in
     buf0 = buf = (unsigned char*) malloc(n * nbyt);
 
     /* set up dimension identity indexing (e.g. Idx[i]==i) so that
-       we can randomize those dimenions we wish to have UNcorrelated */
+       we can randomize those dimensions we wish to have UNcorrelated */
     for (i = 0; i < ndims; i++)
     {
         int j;
@@ -372,7 +372,7 @@ int main(int argc, char **argv)
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
     /* Put this after setup_filter to permit printing of otherwise hard to
-       construct cd_values to facilitate manual invokation of h5repack */
+       construct cd_values to facilitate manual invocation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
     /* create double data to write if we're not reading from an existing file */
