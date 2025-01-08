@@ -93,7 +93,7 @@ jobs:
 
       - name: Build
         run: |
-          cd build
+          cd zfp/build
           cmake --build . --config Release
           ctest -C Release .
         shell: bash
