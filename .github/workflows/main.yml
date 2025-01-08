@@ -114,7 +114,6 @@ jobs:
         run: |
           git clone https://github.com/LLNL/zfp.git
           cd zfp
-          git checkout 1.0.0
           mkdir -p build
           cd build
           cmake .. \
