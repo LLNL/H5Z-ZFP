@@ -4,7 +4,7 @@
 /*
 This code was based heavily on one of the HDF5 library's internal
 filter, H5Zszip.c. The intention in so doing wasn't so much to 
-plagerize HDF5 developers as it was to produce a code that, if
+plagiarize HDF5 developers as it was to produce a code that, if
 The HDF Group ever decided to in the future, could be easily
 integrated with the existing HDF5 library code base.
 
