@@ -148,4 +148,4 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
-          ctest --rerun-failed -C Release .
+          ctest -C Release .
