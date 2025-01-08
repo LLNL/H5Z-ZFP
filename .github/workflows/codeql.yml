@@ -58,10 +58,10 @@ jobs:
         uses: actions/checkout@v3
 
 ##################################
-# CONFIGURE ZFP
+# INSTALL ZFP
 ##################################
                  
-      - name: configure ZFP
+      - name: install ZFP
         run: |
           git clone https://github.com/LLNL/zfp.git
           export HOME_DIR=$(echo ~)
@@ -74,8 +74,14 @@ jobs:
         shell: bash
 
 ##################################
-# BUILD ZFP
+#  BUILD AND TEST H5Z-ZFP
 ##################################
+
+      - name: build (cmake) and test
+        run: |
+          mkdir build; cd build
+          cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
+        shell: bash
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -91,10 +97,10 @@ jobs:
           #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
           queries: +security-extended,security-and-quality
 
-      - name: Build
+      - name: test
         run: |
-          cd zfp/build
-          cmake --build . --config Release
+          cd build
+          sudo cmake --build . --target install
           ctest -C Release .
         shell: bash
 
