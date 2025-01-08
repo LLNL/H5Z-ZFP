@@ -61,6 +61,7 @@ jobs:
         git clone https://github.com/LLNL/zfp.git
         export HOME_DIR=$(echo ~)
         cd zfp
+        git checkout 1.0.0
         mkdir build;cd build
         cmake -D ZFP_BIT_STREAM_WORD_SIZE=8 -D BUILD_CFP=ON -D CMAKE_INSTALL_PREFIX=$PWD/zfp -D BUILD_TESTING=OFF -D BUILD_UTILITIES=OFF ..
         make install
@@ -112,9 +113,9 @@ jobs:
         shell: cmd
       - name: Download and install ZFP
         run: |
-          dir "C:/Program Files/HDF_Group/HDF5/1.14.5/bin/"
           git clone https://github.com/LLNL/zfp.git
           cd zfp
+          git checkout 1.0.0
           mkdir -p build
           cd build
           cmake .. \
@@ -143,7 +144,6 @@ jobs:
           cmake .. \
             -G "Visual Studio 17 2022" -A "x64" \
             -DCMAKE_CONFIGURATION_TYPES=Release \
-            -DHDF5_NAMESPACE:STRING=hdf5::" \
             -DBUILD_TESTING=ON \
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
