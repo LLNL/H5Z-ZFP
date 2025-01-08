@@ -94,14 +94,14 @@ jobs:
       - name: configure h5z-zfp
         run: |
           mkdir build; cd build
-          cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON ..
+          cmake -D FORTRAN_INTERFACE=ON -D CMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON ..
         shell: bash
 
       - name: build and test
         run: |
           cd build
           cmake --build .
-          ctest -C Release .
+          ctest -C Debug .
         shell: bash
 
       - name: Perform CodeQL Analysis
