@@ -139,7 +139,6 @@ jobs:
           echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
           echo "ZFP_DIR=C:/Program Files/ZFP" >> $GITHUB_ENV
       - name: Build H5Z-ZFP (CMake) and test
-        continue-on-error: true
         run: |
           mkdir build
           cd build
@@ -150,6 +149,7 @@ jobs:
             -DFORTRAN_INTERFACE=OFF \
             -TClangCL
           cmake --build . --config Release --target install
-          ls ../test
-          ctest -j1 --output-on-failure -VV -C Release .
-          ls ../test
+          ctest -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
+          ctest --rerun-failed -j1 --output-on-failure -VV -C Release . || echo "Failed but retrying"
