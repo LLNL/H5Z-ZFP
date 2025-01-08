@@ -112,7 +112,7 @@ jobs:
         shell: cmd
       - name: Download and install ZFP
         run: |
-          dir C:/Program Files/HDF_Group/HDF5/1.14.5/bin/
+          dir "C:/Program Files/HDF_Group/HDF5/1.14.5/bin/"
           git clone https://github.com/LLNL/zfp.git
           cd zfp
           mkdir -p build
