@@ -82,19 +82,21 @@ jobs:
         with:
           languages: c-cpp
           build-mode: manual
-          config-file: ./.github/codeql-config.yml
+          # config-file: ./.github/codeql-config.yml
           # If you wish to specify custom queries, you can do so here or in a config file.
           # By default, queries listed here will override any specified in a config file.
           # Prefix the list here with "+" to use these queries and those in the config file.
 
           # For more details on CodeQL's query packs, refer to:
           #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          query-filters:
+            - exclude:
+                # See: https://codeql.github.com/codeql-query-help/cpp/cpp-guarded-free/
+                id: cpp/guarded-free
+            - exclude:
+                # See: https://codeql.github.com/codeql-query-help/cpp/cpp-unused-static-function/
+                id: cpp/unused-static-function
           queries: +security-extended,security-and-quality
-          config: |   
-            paths:
-              - ./src
-            paths-ignore:
-              - '**/test/**'
 
       - name: configure h5z-zfp
         run: |
