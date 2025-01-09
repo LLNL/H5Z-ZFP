@@ -90,6 +90,11 @@ jobs:
           # For more details on CodeQL's query packs, refer to:
           #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
           queries: +security-extended,security-and-quality
+          config: |   
+            paths:
+              - ./src
+            paths-ignore:
+              - '**/test/**'
 
       - name: configure h5z-zfp
         run: |
@@ -104,7 +109,36 @@ jobs:
           ctest -C Debug .
         shell: bash
 
+# NOTE: C/C++ does not support path-based filtering when using the manual build mode.
+# The "paths" and "paths-ignore" configuration properties will have no effect for this
+# language. If desired, you can use the advanced-security/filter-sarif Action to rewrite
+# the SARIF file to exclude alerts from these paths. For more information,
+# see https://github.com/advanced-security/filter-sarif
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:c-cpp"
+          output: sarif-results
+          upload: failure-only
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@main
+        with:
+          patterns: |
+            -**/*
+            src/**/*
+          input: sarif-results/cpp.sarif
+          output: sarif-results/cpp.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sarif-results/cpp.sarif
+
+      - name: Upload loc as a Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sarif-results
+          path: sarif-results
+          retention-days: 1
