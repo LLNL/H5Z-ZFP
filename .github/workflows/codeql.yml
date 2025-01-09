@@ -89,13 +89,16 @@ jobs:
 
           # For more details on CodeQL's query packs, refer to:
           #https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
-          query-filters:
-            - exclude:
-                # See: https://codeql.github.com/codeql-query-help/cpp/cpp-guarded-free/
-                id: cpp/guarded-free
-            - exclude:
-                # See: https://codeql.github.com/codeql-query-help/cpp/cpp-unused-static-function/
-                id: cpp/unused-static-function
+
+          config: |
+             query-filters:
+               - exclude:
+                   # See: https://codeql.github.com/codeql-query-help/cpp/cpp-guarded-free/
+                   id: cpp/guarded-free
+               - exclude:
+                   # See: https://codeql.github.com/codeql-query-help/cpp/cpp-unused-static-function/
+                   id: cpp/unused-static-function
+
           queries: +security-extended,security-and-quality
 
       - name: configure h5z-zfp
