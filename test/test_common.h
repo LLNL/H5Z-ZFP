@@ -34,9 +34,11 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 // strndup() is not available on Windows
 char *strndup( const char *s1, size_t n)
 {
-    char *copy= (char*)malloc( n+1 );
-    memcpy( copy, s1, n );
-    copy[n] = 0;
+    size_t len = strlen(s1);
+    size_t copy_len = len < n ? len : n;
+    char *copy = (char*)malloc(copy_len + 1);
+    memcpy(copy, s1, copy_len);
+    copy[copy_len] = 0;
     return copy;
 };
 #else

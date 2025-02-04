@@ -7,16 +7,6 @@ if (ZFP_CFP_ENABLED)
   set(ZFP_HAS_CFP 1)
 endif()
 
-#------------------------------------------------------------------------------#
-# Custom defined HDF5 variables
-#------------------------------------------------------------------------------#
-get_filename_component(HDF5_BIN_DIR ${HDF5_DIFF_EXECUTABLE} DIRECTORY)
-set(HDF5_REPACK_EXECUTABLE ${HDF5_BIN_DIR}/h5repack)
-if (EXISTS ${HDF5_BIN_DIR}/h5repack-shared)
-  set(HDF5_REPACK_EXECUTABLE ${HDF5_BIN_DIR}/h5repack-shared)
-endif ()
-set(HDF5_DUMP_EXECUTABLE ${HDF5_BIN_DIR}/h5dump)
-
 # HDF5 docs say H5Dwrite_chunk was introduced in 1.10.2
 set(HDF5_HAS_WRITE_CHUNK 0)
 if ("${HDF5_VERSION}" VERSION_GREATER_EQUAL "1.10.2")
@@ -28,7 +18,7 @@ endif()
 #------------------------------------------------------------------------------#
 get_target_property(HDF5_PLUGIN_PATH h5z_zfp_shared RUNTIME_OUTPUT_DIRECTORY)
 if (_isMultiConfig)
-  set(HDF5_PLUGIN_PATH "${HDF5_PLUGIN_PATH}/$<CONFIG>")
+  set(HDF5_PLUGIN_PATH "${HDF5_PLUGIN_PATH}/${HDF_CFG_NAME}")
 endif ()
 
 #------------------------------------------------------------------------------#
@@ -128,6 +118,7 @@ foreach (IRATE RANGE ${NRATES})
         ENVIRONMENT "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
     )
   endif ()
+  set_tests_properties (test-rate-read-${RATE} PROPERTIES DEPENDS test-rate-write-${RATE})
 
   add_test(
     NAME
@@ -135,6 +126,7 @@ foreach (IRATE RANGE ${NRATES})
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp-rate-${RATE}.h5
   )
+  set_tests_properties (test-rate-cleanup-${RATE} PROPERTIES DEPENDS test-rate-read-${RATE})
 
   set_tests_properties(test-rate-write-${RATE}   PROPERTIES FIXTURES_SETUP    "rate-read-${RATE};rate-cleanup-${RATE}")
   set_tests_properties(test-rate-write-${RATE}   PROPERTIES FIXTURES_REQUIRED "rate-write-${RATE}")
@@ -155,6 +147,7 @@ foreach (IRATE RANGE ${NRATES})
     COMMAND
       $<TARGET_FILE:test_read_lib> max_absdiff=${DIFF} max_reldiff=${DIFF} ifile=test_zfp-lib-rate-${RATE}.h5
   )
+  set_tests_properties (test-lib-rate-read-${RATE} PROPERTIES DEPENDS test-lib-rate-write-${RATE})
 
   add_test(
     NAME
@@ -162,6 +155,7 @@ foreach (IRATE RANGE ${NRATES})
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp-lib-rate-${RATE}.h5
   )
+  set_tests_properties (test-lib-rate-cleanup-${RATE} PROPERTIES DEPENDS test-lib-rate-read-${RATE})
 
   set_tests_properties(test-lib-rate-write-${RATE}   PROPERTIES FIXTURES_SETUP    "lib-rate-read-${RATE};lib-rate-cleanup-${RATE}")
   set_tests_properties(test-lib-rate-write-${RATE}   PROPERTIES FIXTURES_REQUIRED "lib-rate-write-${RATE}")
@@ -189,6 +183,7 @@ foreach (IRATE RANGE ${NRATES})
         -D "RATE_START=64"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/h5dump-rate.cmake"
     )
+    set_tests_properties (test-rate-info1-${RATE}-f PROPERTIES DEPENDS test-rate-write-${RATE}-f)
 
     add_test(
       NAME
@@ -202,6 +197,7 @@ foreach (IRATE RANGE ${NRATES})
         -D "RATE_START=64"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/h5dump-rate.cmake"
     )
+    set_tests_properties (test-rate-info2-${RATE}-f PROPERTIES DEPENDS test-rate-info1-${RATE}-f)
 
     add_test(
       NAME
@@ -209,6 +205,7 @@ foreach (IRATE RANGE ${NRATES})
       COMMAND
         "${CMAKE_COMMAND}" -E remove test_zfp_fortran-rate-${RATE}.h5
     )
+    set_tests_properties (test-rate-cleanup-${RATE}-f PROPERTIES DEPENDS test-rate-info2-${RATE}-f)
 
     set_tests_properties(test-rate-write-${RATE}-f   PROPERTIES FIXTURES_SETUP    "rate-info1-${RATE}-f;rate-info1-${RATE}-f;rate-cleanup-${RATE}-f")
     set_tests_properties(test-rate-write-${RATE}-f   PROPERTIES FIXTURES_REQUIRED "rate-write-${RATE}-f")
@@ -277,6 +274,7 @@ foreach (IACC RANGE ${NACCS})
           "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
     )
   endif ()
+  set_tests_properties (test-accuracy-read-${NUMBER} PROPERTIES DEPENDS test-accuracy-write-${NUMBER})
 
   add_test(
     NAME
@@ -284,6 +282,7 @@ foreach (IACC RANGE ${NACCS})
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp-acc-${NUMBER}.h5
   )
+  set_tests_properties (test-accuracy-cleanup-${NUMBER} PROPERTIES DEPENDS test-accuracy-read-${NUMBER})
 
   set_tests_properties(test-accuracy-write-${NUMBER}   PROPERTIES FIXTURES_SETUP    "accuracy-read-${NUMBER};accuracy-cleanup-${NUMBER}")
   set_tests_properties(test-accuracy-write-${NUMBER}   PROPERTIES FIXTURES_REQUIRED "accuracy-write-${NUMBER}")
@@ -304,6 +303,7 @@ foreach (IACC RANGE ${NACCS})
     COMMAND
       $<TARGET_FILE:test_read_lib> ret=1 max_absdiff=${DIFF} ifile=test_zfp-lib-acc-${NUMBER}.h5
   )
+  set_tests_properties (test-lib-accuracy-read-${NUMBER} PROPERTIES DEPENDS test-lib-accuracy-write-${NUMBER})
 
   add_test(
     NAME
@@ -311,6 +311,7 @@ foreach (IACC RANGE ${NACCS})
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp-lib-acc-${NUMBER}.h5
   )
+  set_tests_properties (test-lib-accuracy-cleanup-${NUMBER} PROPERTIES DEPENDS test-lib-accuracy-read-${NUMBER})
 
   set_tests_properties(test-lib-accuracy-write-${NUMBER}   PROPERTIES FIXTURES_SETUP    "lib-accuracy-read-${NUMBER};lib-accuracy-cleanup-${NUMBER}")
   set_tests_properties(test-lib-accuracy-write-${NUMBER}   PROPERTIES FIXTURES_REQUIRED "lib-accuracy-write-${NUMBER}")
@@ -349,6 +350,7 @@ foreach (IACC RANGE ${NACCS})
             "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
       )
     endif ()
+    set_tests_properties (test-accuracy-diff1-${NUMBER}-f PROPERTIES DEPENDS test-accuracy-write-${NUMBER}-f)
 
     add_test(
       NAME
@@ -373,6 +375,7 @@ foreach (IACC RANGE ${NACCS})
             "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
       )
     endif ()
+    set_tests_properties (test-accuracy-diff2-${NUMBER}-f PROPERTIES DEPENDS test-accuracy-diff1-${NUMBER}-f)
 
     add_test(
       NAME
@@ -380,6 +383,7 @@ foreach (IACC RANGE ${NACCS})
       COMMAND
         "${CMAKE_COMMAND}" -E remove test_zfp_fortran-acc-${NUMBER}.h5
     )
+    set_tests_properties (test-accuracy-cleanup-${NUMBER}-f PROPERTIES DEPENDS test-accuracy-diff2-${NUMBER}-f)
 
     set_tests_properties(test-accuracy-write-${NUMBER}-f   PROPERTIES FIXTURES_SETUP    "accuracy-diff1-${NUMBER}-f;accuracy-diff2-${NUMBER}-f;accuracy-cleanup-${NUMBER}-f")
     set_tests_properties(test-accuracy-write-${NUMBER}-f   PROPERTIES FIXTURES_REQUIRED "accuracy-write-${NUMBER}-f")
@@ -451,6 +455,7 @@ foreach (IPREC RANGE ${NPRECS})
           "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
     )
   endif ()
+  set_tests_properties (test-precision-read-${PREC} PROPERTIES DEPENDS test-precision-write-${PREC})
 
   add_test(
     NAME
@@ -458,6 +463,7 @@ foreach (IPREC RANGE ${NPRECS})
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp-prec-${PREC}.h5
   )
+  set_tests_properties (test-precision-cleanup-${PREC} PROPERTIES DEPENDS test-precision-read-${PREC})
 
   set_tests_properties(test-precision-write-${PREC}   PROPERTIES FIXTURES_SETUP    "precision-read-${PREC};precision-cleanup-${PREC}")
   set_tests_properties(test-precision-write-${PREC}   PROPERTIES FIXTURES_REQUIRED "precision-write-${PREC}")
@@ -478,6 +484,7 @@ foreach (IPREC RANGE ${NPRECS})
     COMMAND
       $<TARGET_FILE:test_read_lib> ret=2 max_reldiff=${DIFF} ifile=test_zfp-lib-prec-${PREC}.h5
   )
+  set_tests_properties (test-lib-precision-read-${PREC} PROPERTIES DEPENDS test-lib-precision-write-${PREC})
 
   add_test(
     NAME
@@ -485,6 +492,7 @@ foreach (IPREC RANGE ${NPRECS})
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp-lib-prec-${PREC}.h5
   )
+  set_tests_properties (test-lib-precision-cleanup-${PREC} PROPERTIES DEPENDS test-lib-precision-read-${PREC})
 
   set_tests_properties(test-lib-precision-write-${PREC}   PROPERTIES FIXTURES_SETUP    "lib-precision-read-${PREC};lib-precision-cleanup-${PREC}")
   set_tests_properties(test-lib-precision-write-${PREC}   PROPERTIES FIXTURES_REQUIRED "lib-precision-write-${PREC}")
@@ -524,6 +532,7 @@ foreach (IPREC RANGE ${NPRECS})
             "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
       )
     endif ()
+    set_tests_properties (test-precision-diff1-${PREC}-f PROPERTIES DEPENDS test-precision-write-${PREC}-f)
 
     add_test(
       NAME
@@ -548,6 +557,7 @@ foreach (IPREC RANGE ${NPRECS})
             "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
       )
     endif ()
+    set_tests_properties (test-precision-diff2-${PREC}-f PROPERTIES DEPENDS test-precision-diff1-${PREC}-f)
 
     add_test(
       NAME
@@ -555,6 +565,7 @@ foreach (IPREC RANGE ${NPRECS})
       COMMAND
         "${CMAKE_COMMAND}" -E remove test_zfp_fortran-prec-${PREC}.h5
     )
+    set_tests_properties (test-precision-cleanup-${PREC}-f PROPERTIES DEPENDS test-precision-diff2-${PREC}-f)
 
     set_tests_properties(test-precision-write-${PREC}-f   PROPERTIES FIXTURES_SETUP    "precision-diff1-${PREC}-f;precision-diff2-${PREC}-f;precision-cleanup-${PREC}-f")
     set_tests_properties(test-precision-write-${PREC}-f   PROPERTIES FIXTURES_REQUIRED "precision-write-${PREC}-f")
@@ -613,6 +624,7 @@ if (MSVC)
         "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
   )
 endif ()
+set_tests_properties (test-reversible-diff PROPERTIES DEPENDS test-reversible)
 
 add_test(
   NAME
@@ -620,6 +632,7 @@ add_test(
   COMMAND
     "${CMAKE_COMMAND}" -E remove test_zfp-reversible.h5
 )
+set_tests_properties (test-reversible-cleanup PROPERTIES DEPENDS test-reversible-diff)
 
 set_tests_properties(test-reversible         PROPERTIES FIXTURES_SETUP    "reversible-diff;reversible-cleanup")
 set_tests_properties(test-reversible         PROPERTIES FIXTURES_REQUIRED "reversible")
@@ -640,6 +653,7 @@ add_test(
   COMMAND
     $<TARGET_FILE:test_read_lib> ret=1 max_absdiff=0 ifile=test_zfp-lib-reversible.h5
 )
+set_tests_properties (test-lib-reversible-diff PROPERTIES DEPENDS test-lib-reversible)
 
 add_test(
   NAME
@@ -647,6 +661,7 @@ add_test(
   COMMAND
     "${CMAKE_COMMAND}" -E remove test_zfp-lib-reversible.h5
 )
+set_tests_properties (test-lib-reversible-cleanup PROPERTIES DEPENDS test-lib-reversible-diff)
 
 set_tests_properties(test-lib-reversible         PROPERTIES FIXTURES_SETUP    "lib-reversible-diff;lib-reversible-cleanup")
 set_tests_properties(test-lib-reversible         PROPERTIES FIXTURES_REQUIRED "lib-reversible")
@@ -685,6 +700,7 @@ if (FORTRAN_INTERFACE)
           "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
     )
   endif ()
+    set_tests_properties (test-reversible-diff1-f PROPERTIES DEPENDS test-reversible-write-f)
 
   add_test(
     NAME
@@ -709,6 +725,7 @@ if (FORTRAN_INTERFACE)
           "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
     )
   endif ()
+  set_tests_properties (test-reversible-diff2-f PROPERTIES DEPENDS test-reversible-diff1-f)
 
   add_test(
     NAME
@@ -716,6 +733,7 @@ if (FORTRAN_INTERFACE)
     COMMAND
       "${CMAKE_COMMAND}" -E remove test_zfp_fortran-reversible.h5
   )
+  set_tests_properties (test-reversible-cleanup-f PROPERTIES DEPENDS test-reversible-diff2-f)
 
   set_tests_properties(test-reversible-write-f   PROPERTIES FIXTURES_SETUP    "reversible-diff1-f;reversible-diff2-f;reversible-cleanup-f")
   set_tests_properties(test-reversible-write-f   PROPERTIES FIXTURES_REQUIRED "reversible-write-f")
@@ -731,7 +749,10 @@ endif ()
 # Integer
 add_test(NAME test-lib-int-write   COMMAND $<TARGET_FILE:test_write_lib> zfpmode=3 doint=1 ofile=test_zfp-int.h5)
 add_test(NAME test-lib-int-read    COMMAND $<TARGET_FILE:test_read_lib> ret=1 max_absdiff=2 ifile=test_zfp-int.h5)
+set_tests_properties (test-lib-int-read PROPERTIES DEPENDS test-lib-int-write)
 add_test(NAME test-lib-int-cleanup COMMAND "${CMAKE_COMMAND}" -E remove test_zfp-int.h5)
+set_tests_properties (test-lib-int-cleanup PROPERTIES DEPENDS test-lib-int-read)
+
 set_tests_properties(test-lib-int-write   PROPERTIES FIXTURES_SETUP    "lib-int-read;lib-int-cleanup")
 set_tests_properties(test-lib-int-write   PROPERTIES FIXTURES_REQUIRED "lib-int-write")
 set_tests_properties(test-lib-int-read    PROPERTIES FIXTURES_REQUIRED "lib-int-read")
@@ -741,6 +762,8 @@ set_tests_properties(test-lib-int-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-int-
 # Highd
 add_test(NAME test-lib-highd         COMMAND $<TARGET_FILE:test_write_lib> highd=1 ofile=test_zfp-highd.h5)
 add_test(NAME test-lib-highd-cleanup COMMAND "${CMAKE_COMMAND}" -E remove test_zfp-highd.h5)
+set_tests_properties (test-lib-highd-cleanup PROPERTIES DEPENDS test-lib-highd)
+
 set_tests_properties(test-lib-highd         PROPERTIES FIXTURES_SETUP    "lib-highd-cleanup")
 set_tests_properties(test-lib-highd         PROPERTIES FIXTURES_REQUIRED "lib-highd")
 set_tests_properties(test-lib-highd-cleanup PROPERTIES FIXTURES_REQUIRED "lib-highd-cleanup")
@@ -749,6 +772,8 @@ set_tests_properties(test-lib-highd-cleanup PROPERTIES FIXTURES_CLEANUP  "lib-hi
 # Sixd
 add_test(NAME test-lib-sixd         COMMAND $<TARGET_FILE:test_write_lib> sixd=1 ofile=test_zfp-sixd.h5)
 add_test(NAME test-lib-sixd-cleanup COMMAND "${CMAKE_COMMAND}" -E remove test_zfp-sixd.h5)
+set_tests_properties (test-lib-sixd-cleanup PROPERTIES DEPENDS test-lib-sixd)
+
 set_tests_properties(test-lib-sixd         PROPERTIES FIXTURES_SETUP    "lib-sixd-cleanup")
 set_tests_properties(test-lib-sixd         PROPERTIES FIXTURES_REQUIRED "lib-sixd")
 set_tests_properties(test-lib-sixd-cleanup PROPERTIES FIXTURES_REQUIRED "lib-sixd-cleanup")
@@ -786,6 +811,7 @@ if (ZFP_CFP_ENABLED)
           "PATH=${ESCAPED_PATH}\\;${HDF5_PLUGIN_PATH}"
     )
   endif ()
+  set_tests_properties (test-zfparr-diff PROPERTIES DEPENDS test-zfparr)
 
   set_tests_properties(test-zfparr      PROPERTIES FIXTURES_SETUP    "zfparr-diff")
   set_tests_properties(test-zfparr-diff PROPERTIES FIXTURES_REQUIRED "zfparr-diff")
@@ -826,6 +852,8 @@ target_link_libraries(test_error h5z_zfp_static)
 
 add_test(NAME test-error         COMMAND $<TARGET_FILE:test_error>)
 add_test(NAME test-error-cleanup COMMAND "${CMAKE_COMMAND}" -E remove test_zfp_errors.h5)
+set_tests_properties (test-error-cleanup PROPERTIES DEPENDS test-error)
+
 set_tests_properties(test-error         PROPERTIES FIXTURES_SETUP    "error-cleanup")
 set_tests_properties(test-error         PROPERTIES FIXTURES_REQUIRED "error")
 set_tests_properties(test-error-cleanup PROPERTIES FIXTURES_REQUIRED "error-cleanup")
@@ -844,16 +872,16 @@ if (NOT MSVC)
     COMMAND
       ${HDF5_REPACK_EXECUTABLE} -f UD=32013,0,4,3,0,3539053052,1062232653
                                 -l X,Y,Z,Indexes:CHUNK=217
-  	                            -l Indexes2:CHUNK=1517
-  	                            -l Pressure,Pressure2,Pressure3:CHUNK=10x20x5
-  	                            -l Pressure_2D:CHUNK=10x20
-  	                            -l Stress,Velocity,Stress2,Velocity2,Stress3,Velocity3,VelocityZ,VelocityZ2,VelocityZ3:CHUNK=11x21x1x1
-  	                            -l VelocityX_2D:CHUNK=21x31
-  	                            -l XY:CHUNK=651x1
-  	                            -l XYZ:CHUNK=217x1
-  	                            -l XYZ2:CHUNK=1617x1
-  	                            -l XYZ3:CHUNK=33x1
-  	                            ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h5 mesh_repack.h5
+                                -l Indexes2:CHUNK=1517
+                                -l Pressure,Pressure2,Pressure3:CHUNK=10x20x5
+                                -l Pressure_2D:CHUNK=10x20
+                                -l Stress,Velocity,Stress2,Velocity2,Stress3,Velocity3,VelocityZ,VelocityZ2,VelocityZ3:CHUNK=11x21x1x1
+                                -l VelocityX_2D:CHUNK=21x31
+                                -l XY:CHUNK=651x1
+                                -l XYZ:CHUNK=217x1
+                                -l XYZ2:CHUNK=1617x1
+                                -l XYZ3:CHUNK=33x1
+                                ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h5 mesh_repack.h5
   )
   set_property(
     TEST
@@ -883,6 +911,7 @@ if (NOT MSVC)
       -D "RATIO_LIMIT=200"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/h5repack-filesizes.cmake"
   )
+  set_tests_properties (test-h5repack-filesizes PROPERTIES DEPENDS test-h5repack)
 
   add_test(
     NAME
@@ -890,6 +919,7 @@ if (NOT MSVC)
     COMMAND
       "${CMAKE_COMMAND}" -E rm mesh_repack.h5
   )
+  set_tests_properties (test-h5repack-cleanup PROPERTIES DEPENDS test-h5repack-filesizes)
 
   set_tests_properties(test-h5repack           PROPERTIES FIXTURES_SETUP    "h5repack-filesizes;h5repack-cleanup")
   set_tests_properties(test-h5repack           PROPERTIES FIXTURES_REQUIRED "h5repack")

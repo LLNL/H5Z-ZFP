@@ -56,7 +56,7 @@ endif
 PROCESSOR := $(shell uname -p | tr '[:upper:]' '[:lower:]')
 OSNAME := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 OSTYPE := $(shell env | grep OSTYPE | cut -d'=' -f2- | tr '[:upper:]' '[:lower:]')
-# LLNL specific enviornment variable
+# LLNL specific environment variable
 SYS_TYPE := $(shell env | grep SYS_TYPE | cut -d'=' -f2- | tr '[:upper:]' '[:lower:]')
 
 # Common C compilers

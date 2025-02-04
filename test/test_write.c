@@ -27,6 +27,7 @@ https://raw.githubusercontent.com/LLNL/H5Z-ZFP/master/LICENSE
 #endif
 #endif
 
+#if 0
 /* Populate the hyper-dimensional array with samples of a radially symmetric
    sinc() function but where certain sub-spaces are randomized through dimindx arrays */
 static void
@@ -64,6 +65,7 @@ hyper_smooth_radial(void *b, int typ, int n, int ndims, int const *dims, int con
         *pd = val;
     }
 }
+#endif
 
 static double func(int i, double arg)
 {
@@ -73,7 +75,7 @@ static double func(int i, double arg)
     return funcs[i%nfuncs](arg);
 }
 
-/* Populate the hyper-dimensional array with samples of set of seperable functions
+/* Populate the hyper-dimensional array with samples of set of separable functions
    but where certain sub-spaces are randomized through dimindx arrays */
 static void
 hyper_smooth_separable(void *b, int typ, int n, int ndims, int const *dims, int const *m,
@@ -129,7 +131,7 @@ gen_random_correlated_array(int typ, int ndims, int const *dims, int nucdims, in
     buf0 = buf = (unsigned char*) malloc(n * nbyt);
 
     /* set up dimension identity indexing (e.g. Idx[i]==i) so that
-       we can randomize those dimenions we wish to have UNcorrelated */
+       we can randomize those dimensions we wish to have UNcorrelated */
     for (i = 0; i < ndims; i++)
     {
         int j;
@@ -217,7 +219,7 @@ static int read_data(char const *fname, size_t npoints, double **_buf)
 
     if (0 > (fd = open(fname, O_RDONLY))) SET_ERROR(open);
     if (0 == (*_buf = (double *) malloc(nbytes))) SET_ERROR(malloc);
-    if (nbytes != read(fd, *_buf, nbytes)) SET_ERROR(read);
+    if (nbytes != (size_t) read(fd, *_buf, nbytes)) SET_ERROR(read);
     if (0 != close(fd)) SET_ERROR(close);
     return 0;
 }
@@ -326,7 +328,7 @@ int main(int argc, char **argv)
     HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
 
     /* ZFP filter arguments */
-    HANDLE_SEP(ZFP compression paramaters)
+    HANDLE_SEP(ZFP compression parameters)
     HANDLE_ARG(zfpmode,(int) strtol(argv[i]+len2,0,10),"%d", (1=rate,2=prec,3=acc,4=expert,5=reversible));
     HANDLE_ARG(rate,(double) strtod(argv[i]+len2,0),"%g",set rate for rate mode);
     HANDLE_ARG(acc,(double) strtod(argv[i]+len2,0),"%g",set accuracy for accuracy mode);
@@ -372,7 +374,7 @@ int main(int argc, char **argv)
     cpid = setup_filter(1, &chunk, zfpmode, rate, acc, prec, minbits, maxbits, maxprec, minexp);
 
     /* Put this after setup_filter to permit printing of otherwise hard to
-       construct cd_values to facilitate manual invokation of h5repack */
+       construct cd_values to facilitate manual invocation of h5repack */
     HANDLE_ARG(help,(int)strtol(argv[i]+len2,0,10),"%d",this help message); /* must be last for help to work */
 
     /* create double data to write if we're not reading from an existing file */
@@ -541,8 +543,6 @@ int main(int argc, char **argv)
     if (zfparr>0 && zfpmode==1 && rate>0)
     {
         int            dims[] = {38, 128};
-       /*int      chunk_dims[] = {19, 34};*/
-        int      chunk_dims[] = {38, 128};
         hsize_t       hdims[] = {38, 128};
        /*hsize_t hchunk_dims[] = {19, 34};*/
         hsize_t hchunk_dims[] = {38, 128};

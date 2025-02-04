@@ -26,6 +26,7 @@ execute_process (
       OUTPUT_VARIABLE TEST_OUT
       ERROR_VARIABLE TEST_ERROR
 )
+message (STATUS "dump: ${TEST_OUT}")
 
 #      SIZE [0-9]* ([.0-9]*:1 COMPRESSION)
 string (REGEX MATCH "SIZE [0-9]* \\(([0-9]*).[0-9]*:1 COMPRESSION\\)" ACTUAL_COMPRESS ${TEST_OUT})

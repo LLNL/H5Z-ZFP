@@ -128,7 +128,7 @@ int main(int argc, char **argv)
     if (0 > H5Fclose(fid)) SET_ERROR(H5Fclose);
 
     /* compare original to compressed */
-    for (i = 0; i < npoints; i++)
+    for (i = 0; i < (int) npoints; i++)
     {
         double absdiff = obuf[i] - cbuf[i];
         if (absdiff < 0) absdiff = -absdiff;

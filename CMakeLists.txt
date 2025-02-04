@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 
 # Fail immediately if not using an out-of-source build
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
@@ -40,6 +40,7 @@ project(H5Z_ZFP VERSION ${H5Z_ZFP_VERSION} LANGUAGES C)
 
 # setup common output folders
 include (cmake/HDFMacros.cmake)
+SET_HDF_BUILD_TYPE()
 DEFAULT_FOLDERS()
 
 #------------------------------------------------------------------------------#
@@ -52,6 +53,8 @@ endif ()
 #------------------------------------------------------------------------------#
 # Some boilerplate to setup nice output directories
 #------------------------------------------------------------------------------#
+set(CMAKE_INSTALL_BINDIR bin)
+set(CMAKE_INSTALL_LIBDIR lib)
 set(CMAKE_INSTALL_INCLUDEDIR include)
 set(CMAKE_INSTALL_CMAKEDIR lib/cmake/h5z_zfp)
 

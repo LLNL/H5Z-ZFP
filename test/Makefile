@@ -351,7 +351,7 @@ test-reversible: plugin test_write_plugin
 #
 # Uses h5repack to test ZFP filter on float and int datasets in
 # 1,2,3 and 4 dimensions. Note: need to specify raw cd_values on
-# command-line to h5repack. We can get these from an invokation
+# command-line to h5repack. We can get these from an invocation
 # of print_h5repack_farg. The values here are for accuracy mode
 # and tolerance of 0.001.
 # 

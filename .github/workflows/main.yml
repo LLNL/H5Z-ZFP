@@ -93,7 +93,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
@@ -107,10 +107,9 @@ jobs:
       - name: download HDF5 for Windows
         run: |
           wget --quiet \
-            https://support.hdfgroup.org//ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.1/bin/windows/hdf5-1.14.1-2-Std-win10_64-vs16-clang.zip
-          unzip hdf5-1.14.1-2-Std-win10_64-vs16-clang.zip
+            https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/downloads/hdf5-1.14.5-win-vs2022_cl.msi
       - name: Install HDF5 for Windows
-        run: msiexec /i "hdf\HDF5-1.14.1-win64.msi" /qn
+        run: msiexec /i "hdf5-1.14.5-win-vs2022_cl.msi" /qn
         shell: cmd
       - name: Download and install ZFP
         run: |
@@ -120,7 +119,7 @@ jobs:
           mkdir -p build
           cd build
           cmake .. \
-            -G "Visual Studio 16 2019" -A "x64" \
+            -G "Visual Studio 17 2022" -A "x64" \
             -DCMAKE_CONFIGURATION_TYPES=Release \
             -DBUILD_UTILITIES=OFF \
             -DBUILD_TESTING=OFF \
@@ -133,17 +132,17 @@ jobs:
           echo "C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_PATH
           echo "C:/Program Files/ZFP/bin" >> $GITHUB_PATH
           echo "C:/Program Files/ZFP/lib" >> $GITHUB_PATH
-          echo "C:/Program Files/HDF_Group/HDF5/1.14.1/bin" >> $GITHUB_PATH
+          echo "C:/Program Files/HDF_Group/HDF5/1.14.5/bin" >> $GITHUB_PATH
           echo "HDF5_PLUGIN_PATH=C:/Program Files/H5Z_ZFP/plugin" >> $GITHUB_ENV
-          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
-          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.1" >> $GITHUB_ENV
+          echo "HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.14.5" >> $GITHUB_ENV
+          echo "HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.5" >> $GITHUB_ENV
           echo "ZFP_DIR=C:/Program Files/ZFP" >> $GITHUB_ENV
       - name: Build H5Z-ZFP (CMake) and test
         run: |
           mkdir build
           cd build
           cmake .. \
-            -G "Visual Studio 16 2019" -A "x64" \
+            -G "Visual Studio 17 2022" -A "x64" \
             -DCMAKE_CONFIGURATION_TYPES=Release \
             -DBUILD_TESTING=ON \
             -DFORTRAN_INTERFACE=OFF \

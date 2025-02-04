@@ -30,6 +30,12 @@ import os
 # ones.
 extensions = []
 
+if os.environ.get('READTHEDOCS'):
+    from subprocess import call
+    call(['pip3', 'install', 'sphinx_rtd_theme'])
+    extensions.append('sphinx_rtd_theme')
+import sphinx_rtd_theme
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

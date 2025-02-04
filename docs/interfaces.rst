@@ -62,14 +62,14 @@ For reference,  the ``cd_values``  array for  this ZFP_  filter is defined like 
 +-----------+--------+--------+---------+---------+---------+---------+
 | expert    |     4  | unused |  minbits|  maxbits|  maxprec|  minexp |
 +-----------+--------+--------+---------+---------+---------+---------+
-| reversible|     5  | unused |  unused |  unused |  unused |  unsued |
+| reversible|     5  | unused |  unused |  unused |  unused |  unused |
 +-----------+--------+--------+---------+---------+---------+---------+
 
 A/B are high/low 32-bit words of a double.
 
 Note that  the cd_values  used in the generic interface to  ``H5Pset_filter()`` are **not the same** cd_values ultimately stored  to the HDF5_ dataset header for a compressed dataset.
 The  values are transformed in the set_local method to use ZFP_'s internal routines for 'meta' and 'mode' data.
-So, don't make the mistake of examining  the values you find in a file and think you can use those same  values, for example, in an invokation of h5repack.
+So, don't make the mistake of examining  the values you find in a file and think you can use those same  values, for example, in an invocation of h5repack.
 
 .. _properties-interface:
 
@@ -125,12 +125,12 @@ The filter is designed to be compiled for use as both a standalone HDF5_ `dynami
 When it is used as a plugin, it is a best practice to link the ZFP_ library into the plugin dynamic/shared object as a *static* library.
 Why? In so doing, we ensure that all ZFP_ public namespace symbols remain *confined* to the plugin so as not to interfere with any application that may be directly explicitly linking to the ZFP_ library for other reasons.
 
-All HDF5_ applications are *required* to *find* the plugin dynamic library (named ``lib*.{so,dylib}``) in a directory specified by the enviornment variable, ``HDF5_PLUGIN_PATH``.
+All HDF5_ applications are *required* to *find* the plugin dynamic library (named ``lib*.{so,dylib}``) in a directory specified by the environment variable, ``HDF5_PLUGIN_PATH``.
 Currently, the HDF5 library offers no mechanism for applications themselves to have pre-programmed paths in which to search for a plugin.
 Applications are then always vulnerable to an incorrectly specified or unspecified ``HDF5_PLUGIN_PATH`` environment variable.
 
 However, the plugin can also be used explicitly as a *library*.
-In this case, **do** **not** specify the ``HDF5_PLUGIN_PATH`` enviornment variable and instead have the application link to ``libH5Zzfp.a`` in the ``lib`` dir of the installation.
+In this case, **do** **not** specify the ``HDF5_PLUGIN_PATH`` environment variable and instead have the application link to ``libH5Zzfp.a`` in the ``lib`` dir of the installation.
 Instead two initialization and finalization routines are defined::
 
     int H5Z_zfp_initialize(void);
