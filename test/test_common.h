@@ -72,14 +72,14 @@ char *strndup( const char *s1, size_t n)
     int len2 = strlen(#A)+1;                                    \
     for (i = 0; i < argc; i++)                                  \
     {                                                           \
-        if (!strncmp(argv[i], #A"=", len2))                     \
+        if (!strncasecmp(#A,"help",4) && strstr(argv[i],"help"))\
+        {                                                       \
+            return 0;                                           \
+        }                                                       \
+        else if (!strncmp(argv[i], #A"=", len2))                \
         {                                                       \
             A = PARSEA;                                         \
             break;                                              \
-        }                                                       \
-        else if (!strncasecmp(argv[i], "help", 4))              \
-        {                                                       \
-            return 0;                                           \
         }                                                       \
     }                                                           \
     len = snprintf(tmpstr, sizeof(tmpstr), "%s=" PRINTA, #A, A);\

@@ -94,6 +94,7 @@ int main(int argc, char **argv)
 
     /* file arguments */
     strcpy(ifile, "test_zfp.h5");
+    HANDLE_SEP(Usage: test_read [opt1=value1 opt2=value2])
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
     HANDLE_ARG(max_absdiff,strtod(argv[i]+len2,0),"%g",set maximum absolute diff);
     HANDLE_ARG(max_reldiff,strtod(argv[i]+len2,0),"%g",set maximum relative diff);

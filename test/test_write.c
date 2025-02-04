@@ -236,6 +236,7 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 
 #ifdef H5Z_ZFP_USE_PLUGIN
 
+    int i;
     unsigned int cd_values[10];
     size_t cd_nelmts = 10;
 
@@ -255,8 +256,8 @@ static hid_t setup_filter(int n, hsize_t *chunk, int zfpmode,
 
     /* print cd-values array used for filter */
     printf("\n%d cd_values=", (int) cd_nelmts);
-    for (int i = 0; i < (int) cd_nelmts; i++)
-        printf("%u,", cd_values[i]);
+    for (i = 0; i < (int) cd_nelmts; i++)
+        printf("%u%c", cd_values[i],((i==cd_nelmts-1)?'\0':','));
     printf("\n");
 
     /* Add filter to the pipeline via generic interface */
@@ -322,6 +323,7 @@ int main(int argc, char **argv)
 
     /* file arguments */
     strcpy(ofile, "test_zfp.h5");
+    HANDLE_SEP(Usage: test_write [opt1=value1 opt2=value2])
     HANDLE_ARG(ifile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set input filename);
     HANDLE_ARG(ofile,strndup(argv[i]+len2,NAME_LEN), "\"%s\"",set output filename);
 
