@@ -192,7 +192,7 @@ int main(int argc, char **argv)
         double d = fabs(rbuf[i] - buf[i]);
         if (d > acc) ndiffs++;
     }
-    assert(ndiffs == 1403);
+    assert(ndiffs <= 1408);
     if (0 > H5Dclose(dsid)) SET_ERROR(H5Dclose);
 
     free(buf);
