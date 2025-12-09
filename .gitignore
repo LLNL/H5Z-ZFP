@@ -31,7 +31,3 @@
 # Debug files
 *.dSYM/
 *.su
-
-
-#Ignore vscode AI rules
-.github/instructions/codacy.instructions.md
