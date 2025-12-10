@@ -91,14 +91,14 @@ jobs:
   linux-hdf5-versions:
     strategy:
       matrix:
-        hdf5_version: ["develop", "hdf5_1_14_0"]
+        hdf5_version: ["develop", "hdf5_1_14_3"]
         include:
           - hdf5_version: "develop"
             hdf5_branch: "develop"
-            hdf5_name: "HDF5 develop (standard tool naming)"
-          - hdf5_version: "hdf5_1_14_0"
-            hdf5_branch: "hdf5-1_14_0"
-            hdf5_name: "HDF5 1.14.0 (older -shared tool naming)"
+            hdf5_name: "HDF5 develop"
+          - hdf5_version: "hdf5_1_14_3"
+            hdf5_branch: "hdf5-1_14_3"
+            hdf5_name: "HDF5 1.14.3"
 
     name: Ubuntu Latest GCC with ${{ matrix.hdf5_name }}
     runs-on: ubuntu-latest
