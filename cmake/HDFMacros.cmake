@@ -58,9 +58,10 @@ macro (HDF5_SUPPORT)
         elseif (TARGET ${HDF5_NAMESPACE}h5dump)
           set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump>)
         else ()
-          if (NOT TARGET ${HDF5_NAMESPACE}h5dump-shared)
-            add_executable (${HDF5_NAMESPACE}h5dump-shared IMPORTED)
-          endif ()
+          # No target exists, create imported target and set its location
+          # Prefer h5dump-shared for older HDF5, but will set actual path later
+          add_executable (${HDF5_NAMESPACE}h5dump-shared IMPORTED)
+          set_property (TARGET ${HDF5_NAMESPACE}h5dump-shared PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump-shared")
           set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump-shared>)
         endif ()
 
@@ -69,9 +70,9 @@ macro (HDF5_SUPPORT)
         elseif (TARGET ${HDF5_NAMESPACE}h5diff)
           set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff>)
         else ()
-          if (NOT TARGET ${HDF5_NAMESPACE}h5diff-shared)
-            add_executable (${HDF5_NAMESPACE}h5diff-shared IMPORTED)
-          endif ()
+          # No target exists, create imported target and set its location
+          add_executable (${HDF5_NAMESPACE}h5diff-shared IMPORTED)
+          set_property (TARGET ${HDF5_NAMESPACE}h5diff-shared PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5diff-shared")
           set (HDF5_DIFF_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5diff-shared>)
         endif ()
 
@@ -80,9 +81,9 @@ macro (HDF5_SUPPORT)
         elseif (TARGET ${HDF5_NAMESPACE}h5repack)
           set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack>)
         else ()
-          if (NOT TARGET ${HDF5_NAMESPACE}h5repack-shared)
-            add_executable (${HDF5_NAMESPACE}h5repack-shared IMPORTED)
-          endif ()
+          # No target exists, create imported target and set its location
+          add_executable (${HDF5_NAMESPACE}h5repack-shared IMPORTED)
+          set_property (TARGET ${HDF5_NAMESPACE}h5repack-shared PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5repack-shared")
           set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack-shared>)
         endif ()
 
@@ -142,9 +143,6 @@ macro (HDF5_SUPPORT)
         if (HDF5_shared_C_FOUND)
           set (HDF5_LIBRARIES ${HDF5_C_SHARED_LIBRARY})
           set (HDF5_LIBRARY_PATH ${PACKAGE_PREFIX_DIR}/lib)
-          # This else block handles the case where HDF5 was found but targets weren't created
-          # by find_package. Since we already created and set targets above (lines 51-89),
-          # we only need to set library paths here, not modify tool targets.
         else ()
           set (HDF5_FOUND 0)
         endif ()
