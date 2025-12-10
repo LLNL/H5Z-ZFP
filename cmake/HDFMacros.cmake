@@ -79,14 +79,17 @@ macro (HDF5_SUPPORT)
 
         if (TARGET ${HDF5_NAMESPACE}h5dump-shared)
           set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump-shared>)
+          set (_HDF5_TOOL_SUFFIX "-shared")
         elseif (TARGET ${HDF5_NAMESPACE}h5dump)
           set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump>)
+          set (_HDF5_TOOL_SUFFIX "")
         else ()
           # No target exists, create imported target and set its location
           # Prefer h5dump-shared for older HDF5, but will set actual path later
           add_executable (${HDF5_NAMESPACE}h5dump-shared IMPORTED)
           set_property (TARGET ${HDF5_NAMESPACE}h5dump-shared PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump-shared")
           set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump-shared>)
+          set (_HDF5_TOOL_SUFFIX "-shared")
         endif ()
 
         if (TARGET ${HDF5_NAMESPACE}h5diff-shared)
@@ -111,7 +114,7 @@ macro (HDF5_SUPPORT)
           set (HDF5_REPACK_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5repack-shared>)
         endif ()
 
-        message (STATUS "HDF5 Tools configured (h5dump, h5diff, h5repack)")
+        message (STATUS "HDF5 Tools configured (h5dump${_HDF5_TOOL_SUFFIX}, h5diff${_HDF5_TOOL_SUFFIX}, h5repack${_HDF5_TOOL_SUFFIX})")
       else ()
         if (NOT TARGET ${HDF5_NAMESPACE}h5dump)
           add_executable (${HDF5_NAMESPACE}h5dump IMPORTED)
