@@ -50,8 +50,8 @@ macro (HDF5_SUPPORT)
     if (HDF5_FOUND)
       if (HDF5_shared_C_FOUND)
         # Determine which tool naming convention to use by checking if targets exist
-        # Newer HDF5 (1.14+) uses h5dump, h5diff, h5repack
-        # Older HDF5 uses h5dump-shared, h5diff-shared, h5repack-shared
+        # Newer HDF5 (develop, 1.14.5+) uses h5dump, h5diff, h5repack (without -shared suffix)
+        # Older HDF5 versions used h5dump-shared, h5diff-shared, h5repack-shared
 
         if (TARGET ${HDF5_NAMESPACE}h5dump-shared)
           set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:${HDF5_NAMESPACE}h5dump-shared>)

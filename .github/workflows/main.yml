@@ -88,6 +88,91 @@ jobs:
       shell: bash
 
     
+  linux-hdf5-versions:
+    strategy:
+      matrix:
+        hdf5_version: ["develop", "hdf5_1_14_0"]
+        include:
+          - hdf5_version: "develop"
+            hdf5_branch: "develop"
+            hdf5_name: "HDF5 develop (standard tool naming)"
+          - hdf5_version: "hdf5_1_14_0"
+            hdf5_branch: "hdf5-1_14_0"
+            hdf5_name: "HDF5 1.14.0 (older -shared tool naming)"
+
+    name: Ubuntu Latest GCC with ${{ matrix.hdf5_name }}
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    steps:
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qq cmake gfortran
+        # Set env vars
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+        echo "CXX=g++"  >> $GITHUB_ENV
+
+    - name: Get Sources
+      uses: actions/checkout@v3
+
+    - name: Build HDF5 from source
+      run: |
+        git clone --depth 1 --branch ${{ matrix.hdf5_branch }} https://github.com/HDFGroup/hdf5.git
+        cd hdf5
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Release \
+              -DHDF5_BUILD_FORTRAN=ON \
+              -DHDF5_BUILD_TOOLS=ON \
+              -DHDF5_TEST_TOOLS=OFF \
+              -DHDF5_BUILD_EXAMPLES=OFF \
+              -DHDF5_BUILD_HL_LIB=OFF \
+              -DBUILD_TESTING=OFF \
+              -DHDF5_BUILD_DOC=OFF \
+              -DBUILD_SHARED_LIBS=ON \
+              -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_INSTALL_PREFIX=$HOME/hdf5-install \
+              ..
+        make -j$(nproc)
+        make install
+        echo "HDF5_ROOT=$HOME/hdf5-install" >> $GITHUB_ENV
+        echo "HDF5_DIR=$HOME/hdf5-install/share/cmake" >> $GITHUB_ENV
+        echo "$HOME/hdf5-install/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Install ZFP
+      run: |
+        git clone https://github.com/LLNL/zfp.git
+        cd zfp
+        git checkout 1.0.0
+        mkdir build
+        cd build
+        cmake -DZFP_BIT_STREAM_WORD_SIZE=8 \
+              -DBUILD_CFP=ON \
+              -DCMAKE_INSTALL_PREFIX=$HOME/zfp-install \
+              -DBUILD_TESTING=OFF \
+              -DBUILD_UTILITIES=OFF \
+              ..
+        make -j$(nproc)
+        make install
+        echo "ZFP_HOME=$HOME/zfp-install" >> $GITHUB_ENV
+        echo "ZFP_DIR=$HOME/zfp-install" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Build H5Z-ZFP (CMake) and test
+      run: |
+        mkdir build
+        cd build
+        cmake -DFORTRAN_INTERFACE=ON \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_TESTING=ON \
+              ..
+        make -j$(nproc)
+        ctest -C Release . --output-on-failure
+      shell: bash
+
   windows-build:
     name: 'Windows MSVC/Clang'
     defaults:
