@@ -55,7 +55,7 @@ jobs:
           echo "CXX=g++"  >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
 ##################################
 # INSTALL ZFP
@@ -78,7 +78,7 @@ jobs:
 ##################################
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: c-cpp
           build-mode: manual
@@ -120,7 +120,7 @@ jobs:
 # see https://github.com/advanced-security/filter-sarif
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:c-cpp"
           output: sarif-results
@@ -136,12 +136,12 @@ jobs:
           output: sarif-results/cpp.sarif
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: sarif-results/cpp.sarif
 
       - name: Upload loc as a Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sarif-results
           path: sarif-results
