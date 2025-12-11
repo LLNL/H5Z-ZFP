@@ -55,7 +55,7 @@ jobs:
           echo "CXX=g++"  >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
 ##################################
 # INSTALL ZFP
@@ -127,7 +127,7 @@ jobs:
           upload: failure-only
 
       - name: filter-sarif
-        uses: advanced-security/filter-sarif@main
+        uses: advanced-security/filter-sarif@v1
         with:
           patterns: |
             -**/*
